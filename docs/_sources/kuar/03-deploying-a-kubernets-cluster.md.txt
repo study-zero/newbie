@@ -1,12 +1,14 @@
 # 3장. 쿠버네티스 클러스터 배포
 ## 쿠버네티스 설치
-<img src="_static/images/kuar/ch03/nav_logo.svg" width="240px"/>
+<img src="/newbie/_static/images/kuar/ch03/nav_logo.svg" width="240px"/>
 
+<!-- 
 ```{image} images/kuar/ch03/nav_logo.svg
 :alt: Select Parameters
 :width: 240px
 :align: center
 ```
+-->
 <!-- https://stackoverflow.com/a/73306746 -->
 
 이전 장에서 앱 컨테이너를 성공적으로 구축했다.
@@ -25,7 +27,7 @@
 
 ### 퍼블릭 클라우드
 #### 구글 클라우드 플랫폼(GCP)
-<img src="_static/images/kuar/ch03/google-cloud-logo.svg" width="240px" style="background: white; padding: 1rem;"/>
+<img src="/newbie/_static/images/kuar/ch03/google-cloud-logo.svg" width="240px" style="background: white; padding: 1rem;"/>
 
 GKE(Google Kubernetes Engine)을 사용한다.
 - [https://cloud.google.com/sdk/docs/install-sdk?hl=ko](https://cloud.google.com/sdk/docs/install-sdk?hl=ko)
@@ -93,7 +95,7 @@ eksctl create cluster
 
 ### 로컬 환경
 #### 미니큐브
-<img src="_static/images/kuar/ch03/minikube-logo-full.png" width="240px" style="background: white; padding: 0.5rem;"/>
+<img src="/newbie/_static/images/kuar/ch03/minikube-logo-full.png" width="240px" style="background: white; padding: 0.5rem;"/>
 
 간단한 단일 노드 클러스트를 구출할 수 있다.
 
@@ -119,7 +121,7 @@ $ minikube delete
 <br/>
 
 #### Kind(도커 환경)
-<img src="_static/images/kuar/ch03/kind-logo.png" width="240px" style="background: white; padding: 0.5rem;"/>
+<img src="/newbie/_static/images/kuar/ch03/kind-logo.png" width="240px" style="background: white; padding: 0.5rem;"/>
 
 여러 쿠버네티스 클러스터 노드를 시뮬레이션하고자 가상머신 대신 도커 컨테이너를 이용한다.
 
