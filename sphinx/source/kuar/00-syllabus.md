@@ -2,7 +2,7 @@
 쿠버네티스의 단순한 사용을 넘어서 쿠버네티스의 개념 학습과 심화 활용을 목적으로 함.
 
 ## 교재
-- [Kubernets Up and Running 3/e](https://www.oreilly.com/library/view/kubernetes-up-and/9781491935668/)
+- [Kubernetes Up and Running 3/e](https://www.oreilly.com/library/view/kubernetes-up-and/9781491935668/)
 
 ## 방식
 매주 2개 쳅터를 읽고 2명의 스터디원이 내용을 정리하여 발표함.
