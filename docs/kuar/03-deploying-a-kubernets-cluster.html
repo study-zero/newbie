@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ko" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3장. 쿠버네티스 클러스터 배포 &mdash; newbie v0.0.1 문서</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=f8b18680"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/translations.js?v=e33e7ba0"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="색인" href="../genindex.html" />
+    <link rel="search" title="검색" href="../search.html" />
+    <link rel="prev" title="2장. 컨테이너 생성과 실행" href="02-creating-and-running-containers.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            newbie
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">쿠버네티스 시작하기 3/e</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="00-syllabus.html">0장. 스터디 개요</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01-introduction.html">1장. 쿠버네티스 소개</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02-creating-and-running-containers.html">2장. 컨테이너 생성과 실행</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">3장. 쿠버네티스 클러스터 배포</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">쿠버네티스 설치</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id3">퍼블릭 클라우드</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gcp">구글 클라우드 플랫폼(GCP)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#az">애저(AZ)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">로컬 환경</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id5">미니큐브</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#kind">Kind(도커 환경)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">쿠버네티스 클라이언트</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id7">클러스터 상태 확인</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id8">쿠버네티스 노드 조회</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id9">쿠버네티스 컴포넌트</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id10">쿠버네티스 프록시</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dns">쿠버네티스 DNS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ui">쿠버네티스 UI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id11">요약</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">newbie</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">3장. 쿠버네티스 클러스터 배포</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/kuar/03-deploying-a-kubernets-cluster.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>3장. 쿠버네티스 클러스터 배포<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
+<section id="id2">
+<h2>쿠버네티스 설치<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<img src="_static/images/kuar/ch03/nav_logo.svg" width="240px"/>
+<a class="reference internal image-reference" href="kuar/images/kuar/ch03/nav_logo.svg"><img alt="Select Parameters" class="align-center" src="kuar/images/kuar/ch03/nav_logo.svg" style="width: 240px;" /></a>
+<p>이전 장에서 앱 컨테이너를 성공적으로 구축했다.</p>
+<p>이번 장에서는 분산 시스템에 컨테이너를 배포하기 위한 클러스터 배포를 알아본다.</p>
+<p>쿠버네티스 클러스터 관리는 복잡해서 퍼블릭 클라우드에서 제공하는 관리형 솔루션을 사용하면 좋다.</p>
+<p>대신 비용을 지불해야하고 클라우드에 연결되어있어야 한다.</p>
+<p>로컬 개발도 가능하며, 미니큐브나 docker-in-docker 기반 Kind를 사용할 수 있다.</p>
+<p>미니큐브는 단일 노드만 실행 가능하며, Kind는 다중 노드 클러스터를 구축할 수 있다.</p>
+<br/>
+<section id="id3">
+<h3>퍼블릭 클라우드<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<section id="gcp">
+<h4>구글 클라우드 플랫폼(GCP)<a class="headerlink" href="#gcp" title="Link to this heading"></a></h4>
+<img src="_static/images/kuar/ch03/google-cloud-logo.svg" width="240px" style="background: white; padding: 1rem;"/>
+<p>GKE(Google Kubernetes Engine)을 사용한다.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://cloud.google.com/sdk/docs/install-sdk?hl=ko">https://cloud.google.com/sdk/docs/install-sdk?hl=ko</a></p></li>
+</ul>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>gcloud<span class="w"> </span>auth<span class="w"> </span>login
+<span class="c1"># project number 쓰지 않도록 주의</span>
+$<span class="w"> </span>gcloud<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>project<span class="w"> </span>PROJECT_ID
+$<span class="w"> </span>gcloud<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>compute/zone<span class="w"> </span>us-west1-a
+$<span class="w"> </span>gcloud<span class="w"> </span>components<span class="w"> </span>install<span class="w"> </span>gke-gcloud-auth-plugin
+$<span class="w"> </span>gcloud<span class="w"> </span>container<span class="w"> </span>clusters<span class="w"> </span>create<span class="w"> </span>kuar-cluster<span class="w"> </span>--num-nodes<span class="o">=</span><span class="m">3</span>
+$<span class="w"> </span>gcloud<span class="w"> </span>container<span class="w"> </span>clusters<span class="w"> </span>list
+$<span class="w"> </span>gcloud<span class="w"> </span>container<span class="w"> </span>clusters<span class="w"> </span>get-credentials<span class="w"> </span>kuar-cluster<span class="w"> </span>--region<span class="o">=</span>us-west1-a
+</pre></div>
+</div>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>k<span class="w"> </span>get<span class="w"> </span>namespaces
+NAME<span class="w">                 </span>STATUS<span class="w">   </span>AGE
+default<span class="w">              </span>Active<span class="w">   </span>3h53m
+gke-managed-cim<span class="w">      </span>Active<span class="w">   </span>3h52m
+gke-managed-system<span class="w">   </span>Active<span class="w">   </span>3h52m
+gmp-public<span class="w">           </span>Active<span class="w">   </span>3h52m
+gmp-system<span class="w">           </span>Active<span class="w">   </span>3h52m
+kube-node-lease<span class="w">      </span>Active<span class="w">   </span>3h53m
+kube-public<span class="w">          </span>Active<span class="w">   </span>3h53m
+kube-system<span class="w">          </span>Active<span class="w">   </span>3h53m
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Troubleshooting</p></li>
+</ul>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># .bashrc 등에 환경변수 설정하지 않을 시 executable file not found in $PATH</span>
+<span class="c1"># couldn&#39;t get current server API group list 오류 발생</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;.../google-cloud-sdk/bin:</span><span class="nv">$PATH</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<!--
+```
+# export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+# gcloud components update
+```
+
+- 신뢰할 수 있는 IP 설정
+```
+gcloud container clusters update kuar-cluster \
+    --enable-master-authorized-networks \
+    --master-authorized-networks 8.8.8.8/32
+```
+-->
+<br/>
+</section>
+<section id="az">
+<h4>애저(AZ)<a class="headerlink" href="#az" title="Link to this heading"></a></h4>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>az<span class="w"> </span>group<span class="w"> </span>create<span class="w"> </span>--name<span class="o">=</span>kuar<span class="w"> </span>--location<span class="o">=</span>westus
+az<span class="w"> </span>aks<span class="w"> </span>create<span class="w"> </span>--resoure-group<span class="o">=</span>kuar<span class="w"> </span>--name<span class="o">=</span>kuar-cluster
+az<span class="w"> </span>aks<span class="w"> </span>get-credentials<span class="w"> </span>--resource-group<span class="o">=</span>kuar<span class="w"> </span>--name<span class="o">=</span>kuar-cluster
+</pre></div>
+</div>
+<br/>
+#### 아마존 웹 서비스(AWS)
+```
+eksctl create cluster
+# eksctl create cluster --help
+```
+</section>
+</section>
+<section id="id4">
+<h3>로컬 환경<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<section id="id5">
+<h4>미니큐브<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
+<img src="_static/images/kuar/ch03/minikube-logo-full.png" width="240px" style="background: white; padding: 0.5rem;"/>
+<p>간단한 단일 노드 클러스트를 구출할 수 있다.</p>
+<p>도커 데스크톱이 이미 설치돼 있는 경우 단일 머신 쿠버 네티스가 함께 제공된다.</p>
+<p>분산된 클러스터의 신뢰성은 제공하지 않는다.</p>
+<p>특정 기능은 미니큐브에서 사용할 수 없거나 제한된 방식으로 동작한다.</p>
+<p>미니큐브를 사용하려면 머신에 하이퍼바이저를 설치해야한다. ex. virtualbox</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://minikube.sigs.k8s.io/docs/start/?arch=%2Fmacos%2Farm64%2Fstable%2Fbinary+download">https://minikube.sigs.k8s.io/docs/start/?arch=%2Fmacos%2Farm64%2Fstable%2Fbinary+download</a></p></li>
+</ul>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># 시작</span>
+$<span class="w"> </span>minikube<span class="w"> </span>start
+<span class="c1"># 중지</span>
+$<span class="w"> </span>minikube<span class="w"> </span>stop
+<span class="c1"># 삭제</span>
+$<span class="w"> </span>minikube<span class="w"> </span>delete
+</pre></div>
+</div>
+<br/>
+</section>
+<section id="kind">
+<h4>Kind(도커 환경)<a class="headerlink" href="#kind" title="Link to this heading"></a></h4>
+<img src="_static/images/kuar/ch03/kind-logo.png" width="240px" style="background: white; padding: 0.5rem;"/>
+<p>여러 쿠버네티스 클러스터 노드를 시뮬레이션하고자 가상머신 대신 도커 컨테이너를 이용한다.</p>
+<p>kind는 kubernetes in docker를 의미한다.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># 생성</span>
+$<span class="w"> </span>kind<span class="w"> </span>create<span class="w"> </span>cluster<span class="w"> </span>--wait<span class="w"> </span>5m
+<span class="c1"># 확인</span>
+$<span class="w"> </span>kubectl<span class="w"> </span>cluster-info
+<span class="c1"># 삭제</span>
+$<span class="w"> </span>kind<span class="w"> </span>delete<span class="w"> </span>cluster
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><a class="reference external" href="https://kind.sigs.k8s.io/docs/user/quick-start/">https://kind.sigs.k8s.io/docs/user/quick-start/</a></p></li>
+</ul>
+<br/>
+</section>
+</section>
+</section>
+<section id="id6">
+<h2>쿠버네티스 클라이언트<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
+<p>kubectl은 공식적인 쿠버네티스 클라이언트다.</p>
+<p>kubectl은 쿠버네티스 API와 상호작용하기 위한 커맨드라인 도구다.</p>
+<p>kubectl을 사용해 파드, 레플리카셋(ReplicaSet) 및 서비스 같은 대부분의 쿠버네티스 객체를 관리할 수 있다.</p>
+<br/>
+<section id="id7">
+<h3>클러스터 상태 확인<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>kubectl<span class="w"> </span>version
+Client<span class="w"> </span>Version:<span class="w"> </span>v1.31.0
+Kustomize<span class="w"> </span>Version:<span class="w"> </span>v5.4.2
+Server<span class="w"> </span>Version:<span class="w"> </span>v1.31.0
+</pre></div>
+</div>
+<p>Server Version은 쿠버네티스 API의 버전이고,<br/>
+Client Version은 kubectl의 버전이다.<br/>
+<a class="reference external" href="https://kustomize.io/">Kustomize</a>는 <a class="reference external" href="https://kubectl.docs.kubernetes.io/guides/introduction/kustomize/">쿠버네티스 리소스를 템플릿이나 DSL을 사용하지 않고 선언형으로 사용자화하는 도구</a>이다.<br/>
+Kustomize는 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">-k</span> <span class="pre">...</span></code>로 사용할 수 있는 built-in 솔루션이고<br/>
+patch라는 방식을 통해 리소스의 특정 키/벨류를 새로운 값으로 바꿀 수 있다.</p>
+<br/>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>componentstatuses
+Warning:<span class="w"> </span>v1<span class="w"> </span>ComponentStatus<span class="w"> </span>is<span class="w"> </span>deprecated<span class="w"> </span><span class="k">in</span><span class="w"> </span>v1.19+
+NAME<span class="w">                 </span>STATUS<span class="w">    </span>MESSAGE<span class="w">   </span>ERROR
+controller-manager<span class="w">   </span>Healthy<span class="w">   </span>ok<span class="w">        </span>
+scheduler<span class="w">            </span>Healthy<span class="w">   </span>ok<span class="w">        </span>
+etcd-0<span class="w">               </span>Healthy<span class="w">   </span>ok<span class="w">  </span>
+</pre></div>
+</div>
+<p><strong>controller-manager</strong>는 클러스터의 동작을 제어하는 다양한 컨트롤러를 실행한다.<br/>
+예를 들어 서비스의 모든 복제본에 대해 사용 가능 여부와 정상 동작 여부를 확인한다.</p>
+<p><strong>scheduler</strong>는 클러스터의 다른 노드에 다른 파드를 배치하는 역할을 담당한다.</p>
+<p><strong><a class="reference external" href="https://etcd.io/">etcd</a></strong> 서버는 모든 API 객체가 저장된 클러스터의 저장소다.</p>
+<ul class="simple">
+<li><p>etcd 키를 조회해보자!</p></li>
+</ul>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>po<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>etcd
+$<span class="w"> </span>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>etcd-my-cluster-control-plane<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span>--<span class="w"> </span>/bin/sh
+<span class="c1"># https://stackoverflow.com/a/53519231</span>
+$<span class="w"> </span><span class="nv">ETCDCTL_API</span><span class="o">=</span><span class="m">3</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>etcdctl<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--endpoints<span class="w"> </span><span class="m">127</span>.0.0.1:2379<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--cacert<span class="w"> </span>/etc/kubernetes/pki/etcd/ca.crt<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--cert<span class="w"> </span>/etc/kubernetes/pki/etcd/server.crt<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--key<span class="w"> </span>/etc/kubernetes/pki/etcd/server.key<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>get<span class="w"> </span>/<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--prefix<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--keys-only
+
+...
+/registry/pods/kube-system/coredns-6f6b679f8f-4p56d
+/registry/pods/kube-system/coredns-6f6b679f8f-8qsj6
+/registry/pods/kube-system/etcd-my-cluster-control-plane
+...
+
+$<span class="w"> </span><span class="nv">ETCDCTL_API</span><span class="o">=</span><span class="m">3</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>etcdctl<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--endpoints<span class="w"> </span><span class="m">127</span>.0.0.1:2379<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--cacert<span class="w"> </span>/etc/kubernetes/pki/etcd/ca.crt<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--cert<span class="w"> </span>/etc/kubernetes/pki/etcd/server.crt<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--key<span class="w"> </span>/etc/kubernetes/pki/etcd/server.key<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>get<span class="w"> </span>/registry/deployments/kube-system/coredns<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--prefix
+k8s
+apps/v1
+Deployment
+...
+</pre></div>
+</div>
+<br/>
+</section>
+<section id="id8">
+<h3>쿠버네티스 노드 조회<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>nodes
+NAME<span class="w">                       </span>STATUS<span class="w">   </span>ROLES<span class="w">           </span>AGE<span class="w">   </span>VERSION
+Kube0<span class="w">                      </span>Ready<span class="w">    </span>control-plane<span class="w">   </span>19h<span class="w">   </span>v1.31.0
+Kube1<span class="w">                      </span>Ready<span class="w">    </span>&lt;none&gt;<span class="w">          </span>19h<span class="w">   </span>v1.31.0
+Kube2<span class="w">                      </span>Ready<span class="w">    </span>&lt;none&gt;<span class="w">          </span>19h<span class="w">   </span>v1.31.0
+Kube3<span class="w">                      </span>Ready<span class="w">    </span>&lt;none&gt;<span class="w">          </span>19h<span class="w">   </span>v1.31.0
+</pre></div>
+</div>
+<p>쿠버네티스 노드는 control-plane 노드와 worker 노드로 구분된다.</p>
+<p>control-plane 노드는 API 서버, 스케줄러 등과 같이 클러스터를 관리하는 작업이 실행된다.<br/>
+control-plane 노드에는 스케줄링을 수행하지 않는데, 사용자 워크로드(workload; 작업부하)가 클러스터 전체 운영에 영향을 주지 않기 위함이다.</p>
+<p>worker 노드는 사용자 컨테이너 등이 실행된다.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>kubectl<span class="w"> </span>describe<span class="w"> </span>nodes<span class="w"> </span>Kube0
+Name:<span class="w">               </span>my-cluster-control-plane
+Roles:<span class="w">              </span>control-plane
+Labels:<span class="w">             </span>beta.kubernetes.io/arch<span class="o">=</span>arm64
+<span class="w">                    </span>beta.kubernetes.io/os<span class="o">=</span>linux
+...
+Conditions:
+<span class="w">  </span>Type<span class="w">             </span>Status<span class="w">  </span>LastHeartbeatTime<span class="w">                 </span>LastTransitionTime<span class="w">                </span>Reason<span class="w">                       </span>Message
+<span class="w">  </span>----<span class="w">             </span>------<span class="w">  </span>-----------------<span class="w">                 </span>------------------<span class="w">                </span>------<span class="w">                       </span>-------
+<span class="w">  </span>MemoryPressure<span class="w">   </span>False<span class="w">   </span>Sun,<span class="w"> </span><span class="m">25</span><span class="w"> </span>Aug<span class="w"> </span><span class="m">2024</span><span class="w"> </span><span class="m">22</span>:04:33<span class="w"> </span>+0900<span class="w">   </span>Sun,<span class="w"> </span><span class="m">25</span><span class="w"> </span>Aug<span class="w"> </span><span class="m">2024</span><span class="w"> </span><span class="m">02</span>:13:27<span class="w"> </span>+0900<span class="w">   </span>KubeletHasSufficientMemory<span class="w">   </span>kubelet<span class="w"> </span>has<span class="w"> </span>sufficient<span class="w"> </span>memory<span class="w"> </span>available
+<span class="w">  </span>DiskPressure<span class="w">     </span>False<span class="w">   </span>Sun,<span class="w"> </span><span class="m">25</span><span class="w"> </span>Aug<span class="w"> </span><span class="m">2024</span><span class="w"> </span><span class="m">22</span>:04:33<span class="w"> </span>+0900<span class="w">   </span>Sun,<span class="w"> </span><span class="m">25</span><span class="w"> </span>Aug<span class="w"> </span><span class="m">2024</span><span class="w"> </span><span class="m">02</span>:13:27<span class="w"> </span>+0900<span class="w">   </span>KubeletHasNoDiskPressure<span class="w">     </span>kubelet<span class="w"> </span>has<span class="w"> </span>no<span class="w"> </span>disk<span class="w"> </span>pressure
+<span class="w">  </span>PIDPressure<span class="w">      </span>False<span class="w">   </span>Sun,<span class="w"> </span><span class="m">25</span><span class="w"> </span>Aug<span class="w"> </span><span class="m">2024</span><span class="w"> </span><span class="m">22</span>:04:33<span class="w"> </span>+0900<span class="w">   </span>Sun,<span class="w"> </span><span class="m">25</span><span class="w"> </span>Aug<span class="w"> </span><span class="m">2024</span><span class="w"> </span><span class="m">02</span>:13:27<span class="w"> </span>+0900<span class="w">   </span>KubeletHasSufficientPID<span class="w">      </span>kubelet<span class="w"> </span>has<span class="w"> </span>sufficient<span class="w"> </span>PID<span class="w"> </span>available
+<span class="w">  </span>Ready<span class="w">            </span>True<span class="w">    </span>Sun,<span class="w"> </span><span class="m">25</span><span class="w"> </span>Aug<span class="w"> </span><span class="m">2024</span><span class="w"> </span><span class="m">22</span>:04:33<span class="w"> </span>+0900<span class="w">   </span>Sun,<span class="w"> </span><span class="m">25</span><span class="w"> </span>Aug<span class="w"> </span><span class="m">2024</span><span class="w"> </span><span class="m">02</span>:13:51<span class="w"> </span>+0900<span class="w">   </span>KubeletReady<span class="w">                 </span>kubelet<span class="w"> </span>is<span class="w"> </span>posting<span class="w"> </span>ready<span class="w"> </span>status
+...
+Capacity:
+<span class="w">  </span>cpu:<span class="w">                </span><span class="m">2</span>
+<span class="w">  </span>ephemeral-storage:<span class="w">  </span>104266732Ki
+<span class="w">  </span>memory:<span class="w">             </span>8104728Ki
+<span class="w">  </span>pods:<span class="w">               </span><span class="m">110</span>
+Allocatable:
+<span class="w">  </span>cpu:<span class="w">                </span><span class="m">2</span>
+<span class="w">  </span>ephemeral-storage:<span class="w">  </span>104266732Ki
+<span class="w">  </span>memory:<span class="w">             </span>8104728Ki
+<span class="w">  </span>pods:<span class="w">               </span><span class="m">110</span>
+...
+System<span class="w"> </span>Info:
+<span class="w">  </span>Kernel<span class="w"> </span>Version:<span class="w">             </span><span class="m">6</span>.8.11-300.fc40.aarch64
+<span class="w">  </span>OS<span class="w"> </span>Image:<span class="w">                   </span>Debian<span class="w"> </span>GNU/Linux<span class="w"> </span><span class="m">12</span><span class="w"> </span><span class="o">(</span>bookworm<span class="o">)</span>
+<span class="w">  </span>Operating<span class="w"> </span>System:<span class="w">           </span>linux
+<span class="w">  </span>Architecture:<span class="w">               </span>arm64
+<span class="w">  </span>Container<span class="w"> </span>Runtime<span class="w"> </span>Version:<span class="w">  </span>containerd://1.7.18
+<span class="w">  </span>Kubelet<span class="w"> </span>Version:<span class="w">            </span>v1.31.0
+...
+PodCIDR:<span class="w">                      </span><span class="m">10</span>.244.0.0/24
+PodCIDRs:<span class="w">                     </span><span class="m">10</span>.244.0.0/24
+...
+Non-terminated<span class="w"> </span>Pods:<span class="w">          </span><span class="o">(</span><span class="m">10</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>total<span class="o">)</span>
+<span class="w">  </span>Namespace<span class="w">                   </span>Name<span class="w">                                                </span>CPU<span class="w"> </span>Requests<span class="w">  </span>CPU<span class="w"> </span>Limits<span class="w">  </span>Memory<span class="w"> </span>Requests<span class="w">  </span>Memory<span class="w"> </span>Limits<span class="w">  </span>Age
+<span class="w">  </span>---------<span class="w">                   </span>----<span class="w">                                                </span>------------<span class="w">  </span>----------<span class="w">  </span>---------------<span class="w">  </span>-------------<span class="w">  </span>---
+<span class="w">  </span>kube-system<span class="w">                 </span>coredns-6f6b679f8f-4p56d<span class="w">                            </span>100m<span class="w"> </span><span class="o">(</span><span class="m">5</span>%<span class="o">)</span><span class="w">     </span><span class="m">0</span><span class="w"> </span><span class="o">(</span><span class="m">0</span>%<span class="o">)</span><span class="w">      </span>70Mi<span class="w"> </span><span class="o">(</span><span class="m">0</span>%<span class="o">)</span><span class="w">        </span>170Mi<span class="w"> </span><span class="o">(</span><span class="m">2</span>%<span class="o">)</span><span class="w">     </span>20h
+<span class="w">  </span>kube-system<span class="w">                 </span>coredns-6f6b679f8f-8qsj6<span class="w">                            </span>100m<span class="w"> </span><span class="o">(</span><span class="m">5</span>%<span class="o">)</span><span class="w">     </span><span class="m">0</span><span class="w"> </span><span class="o">(</span><span class="m">0</span>%<span class="o">)</span><span class="w">      </span>70Mi<span class="w"> </span><span class="o">(</span><span class="m">0</span>%<span class="o">)</span><span class="w">        </span>170Mi<span class="w"> </span><span class="o">(</span><span class="m">2</span>%<span class="o">)</span><span class="w">     </span>20h
+<span class="w"> </span>
+</pre></div>
+</div>
+<p>쿠버네티스는 머신에서 실행 중인 파드가 요청한 리소스의 요청(reuqest)과 제한(limit)을 추적할 수 있다.</p>
+<p>파드에서 요청(reuqest)한 리소스는 노드에서 그 만큼의 사용을 보장해주지만<br/>
+제한(limit)은 파드가 사용할 수 있는 리소스의 최대량이다.<sup>5장</sup></p>
+<p>파드의 제한(limit)은 요청(request)보다 적용 우선순위가 높을 수 있고,<br/>
+이 경우 여분의 리소스가 최선 노력(best-effort) 기반으로 제공된다.</p>
+<p>하지만 이 리소스가 노드에 존재하는 것은 보장되지 않는다.</p>
+<br/>
+</section>
+</section>
+<section id="id9">
+<h2>쿠버네티스 컴포넌트<a class="headerlink" href="#id9" title="Link to this heading"></a></h2>
+<p>쿠버네티스를 구성하는 많은 컴포넌트는 실제로 쿠버네티스 자체를 통해 배포된다.
+해당 컴포넌트들은 <code class="docutils literal notranslate"><span class="pre">kube-system</span></code> 네임스페이스에서 실행된다.</p>
+<section id="id10">
+<h3>쿠버네티스 프록시<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
+<p>쿠버네티스 프록시(proxy)는 쿠버네티스 클러스터 내의 부하 분산된 서비스(load-balanced services)로 네트워크 트래픽을 라우팅하는 역할을 한다.</p>
+<p>프록시는 모든 노드에 위치한다.</p>
+<p>쿠버네티스에는 데몬셋(DaemonSet)<sup>11장</sup>이라고 하는 API 객체가 있으며, 이 객체를 통해 프록시가 배포된다.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>daemonsets<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span>kube-proxy
+NAME<span class="w">         </span>DESIRED<span class="w">   </span>CURRENT<span class="w">   </span>READY<span class="w">   </span>UP-TO-DATE<span class="w">   </span>AVAILABLE<span class="w">   </span>NODE<span class="w"> </span>SELECTOR<span class="w">            </span>AGE
+kube-proxy<span class="w">   </span><span class="m">4</span><span class="w">         </span><span class="m">4</span><span class="w">         </span><span class="m">4</span><span class="w">       </span><span class="m">4</span><span class="w">            </span><span class="m">4</span><span class="w">           </span>kubernetes.io/os<span class="o">=</span>linux<span class="w">   </span>20h
+</pre></div>
+</div>
+<br/>
+</section>
+<section id="dns">
+<h3>쿠버네티스 DNS<a class="headerlink" href="#dns" title="Link to this heading"></a></h3>
+<p>쿠버네티스는 DNS 서버를 실행해 클러스터에 정의된 서비스의 이름 지정과 검색 기능을 제공한다.</p>
+<p>쿠버네티스 DNS는 복제된 서비스(replicated servies) 형태로 실행된다.</p>
+<p>클러스터 크기에 따라 하나 이상의 DNS 서버가 실행된다.</p>
+<p>쿠버네티스 DNS는 디플로이먼트(deployment) 형태로 실행되어 복제본(replicas)이 관리된다.</p>
+<p>DNS 서버에 대한 로드밸런싱을 수행하는 쿠버네티스 서비스도 있다.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>deploy<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>dns
+coredns<span class="w">   </span><span class="m">2</span>/2<span class="w">     </span><span class="m">2</span><span class="w">            </span><span class="m">2</span><span class="w">           </span>20h
+
+$<span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>svc<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>dns
+kube-dns<span class="w">   </span>ClusterIP<span class="w">   </span><span class="m">10</span>.96.0.10<span class="w">   </span>&lt;none&gt;<span class="w">        </span><span class="m">53</span>/UDP,53/TCP,9153/TCP<span class="w">   </span>20h
+
+$<span class="w"> </span>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>...<span class="w"> </span>--<span class="w"> </span>/bin/sh
+&gt;<span class="w"> </span>$<span class="w"> </span>cat<span class="w"> </span>/etc/resolv.conf<span class="w"> </span>
+&gt;<span class="w"> </span>search<span class="w"> </span>default.svc.cluster.local<span class="w"> </span>svc.cluster.local<span class="w"> </span>cluster.local<span class="w"> </span>dns.podman
+&gt;<span class="w"> </span>nameserver<span class="w"> </span><span class="m">10</span>.96.0.10
+&gt;<span class="w"> </span>options<span class="w"> </span>ndots:5
+</pre></div>
+</div>
+<br/>
+</section>
+<section id="ui">
+<h3>쿠버네티스 UI<a class="headerlink" href="#ui" title="Link to this heading"></a></h3>
+<p>클라우드 서비스 사용 시 GUI는 보통 제공업체에서 제공된다.</p>
+<p>제공업체에서 제공하지 않거나 클러스터 내의 GUI를 선호하는 경우 Kubernetes Dashboard를 설치할 수 있다.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/">https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/</a></p></li>
+</ul>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add kubernetes-dashboard repository</span>
+helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>kubernetes-dashboard<span class="w"> </span>https://kubernetes.github.io/dashboard/
+<span class="c1"># Deploy a Helm Release named &quot;kubernetes-dashboard&quot; using the kubernetes-dashboard chart</span>
+helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class="w"> </span>kubernetes-dashboard<span class="w"> </span>kubernetes-dashboard/kubernetes-dashboard<span class="w"> </span>--create-namespace<span class="w"> </span>--namespace<span class="w"> </span>kubernetes-dashboard
+
+<span class="c1"># https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md</span>
+cat<span class="w"> </span><span class="s">&lt;&lt;EOF | kubectl apply -f -</span>
+<span class="s">apiVersion: v1</span>
+<span class="s">kind: ServiceAccount</span>
+<span class="s">metadata:</span>
+<span class="s">  name: admin-user</span>
+<span class="s">  namespace: kubernetes-dashboard</span>
+<span class="s">---</span>
+<span class="s">apiVersion: rbac.authorization.k8s.io/v1</span>
+<span class="s">kind: ClusterRoleBinding</span>
+<span class="s">metadata:</span>
+<span class="s">  name: admin-user</span>
+<span class="s">roleRef:</span>
+<span class="s">  apiGroup: rbac.authorization.k8s.io</span>
+<span class="s">  kind: ClusterRole</span>
+<span class="s">  name: cluster-admin</span>
+<span class="s">subjects:</span>
+<span class="s">- kind: ServiceAccount</span>
+<span class="s">  name: admin-user</span>
+<span class="s">  namespace: kubernetes-dashboard</span>
+<span class="s">EOF</span>
+
+kubectl<span class="w"> </span>-n<span class="w"> </span>kubernetes-dashboard<span class="w"> </span>create<span class="w"> </span>token<span class="w"> </span>admin-user
+</pre></div>
+</div>
+<br/>
+</section>
+</section>
+<section id="id11">
+<h2>요약<a class="headerlink" href="#id11" title="Link to this heading"></a></h2>
+<p>쿠버네티스 클러스터를 설치하고 생성된 클러스터를 탐색하기 위한 몇 가지 명령을 실행해봤다.</p>
+<p>4장에서는 kubectl 도구를 활용하는 방법을 살펴본다.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="02-creating-and-running-containers.html" class="btn btn-neutral float-left" title="2장. 컨테이너 생성과 실행" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, newbie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
