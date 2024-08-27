@@ -9,6 +9,7 @@
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
 
   
+    <link rel="shortcut icon" href="../_static/kitty.png"/>
     <link rel="canonical" href="/newbie/kuar/03-deploying-a-kubernets-cluster.html" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -109,15 +110,9 @@
 <h1>3장. 쿠버네티스 클러스터 배포<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
 <section id="id2">
 <h2>쿠버네티스 설치<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
-<img src="/newbie/_static/images/kuar/ch03/nav_logo.svg" width="240px" style="background: #403F4C; padding: 1rem;"/>
-<!-- 
-```{image} images/kuar/ch03/nav_logo.svg
-:alt: Select Parameters
-:width: 240px
-:align: center
-```
--->
-<!-- https://stackoverflow.com/a/73306746 -->
+<figure class="align-default">
+<a class="gray-bg reference internal image-reference" href="../_images/nav_logo.svg"><img alt="image" class="gray-bg" src="../_images/nav_logo.svg" style="width: 240px;" /></a>
+</figure>
 <p>이전 장에서 앱 컨테이너를 성공적으로 구축했다.</p>
 <p>이번 장에서는 분산 시스템에 컨테이너를 배포하기 위한 클러스터 배포를 알아본다.</p>
 <p>쿠버네티스 클러스터 관리는 복잡해서 퍼블릭 클라우드에서 제공하는 관리형 솔루션을 사용하면 좋다.</p>
@@ -129,7 +124,9 @@
 <h3>퍼블릭 클라우드<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
 <section id="gcp">
 <h4>구글 클라우드 플랫폼(GCP)<a class="headerlink" href="#gcp" title="Link to this heading"></a></h4>
-<img src="/newbie/_static/images/kuar/ch03/google_cloud_logo.svg" width="240px" style="background: white; padding: 1rem;"/>
+<figure class="align-default">
+<a class="white-bg reference internal image-reference" href="../_images/google_cloud_logo.svg"><img alt="image" class="white-bg" src="../_images/google_cloud_logo.svg" style="width: 240px;" /></a>
+</figure>
 <p>GKE(Google Kubernetes Engine)을 사용한다.</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://cloud.google.com/sdk/docs/install-sdk?hl=ko">https://cloud.google.com/sdk/docs/install-sdk?hl=ko</a></p></li>
@@ -200,8 +197,10 @@ az<span class="w"> </span>aks<span class="w"> </span>get-credentials<span class=
 <h3>로컬 환경<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
 <section id="id5">
 <h4>미니큐브<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
-<img src="/newbie/_static/images/kuar/ch03/minikube_logo_full.png" width="240px" style="background: white; padding: 0.5rem;"/>
-<p>간단한 단일 노드 클러스트를 구출할 수 있다.</p>
+<figure class="align-default">
+<a class="white-bg reference internal image-reference" href="../_images/minikube_logo_full.png"><img alt="image" class="white-bg" src="../_images/minikube_logo_full.png" style="width: 240px;" /></a>
+</figure>
+<p>간단한 단일 노드 클러스트를 구축할 수 있다.</p>
 <p>도커 데스크톱이 이미 설치돼 있는 경우 단일 머신 쿠버 네티스가 함께 제공된다.</p>
 <p>분산된 클러스터의 신뢰성은 제공하지 않는다.</p>
 <p>특정 기능은 미니큐브에서 사용할 수 없거나 제한된 방식으로 동작한다.</p>
@@ -221,7 +220,9 @@ $<span class="w"> </span>minikube<span class="w"> </span>delete
 </section>
 <section id="kind">
 <h4>Kind(도커 환경)<a class="headerlink" href="#kind" title="Link to this heading"></a></h4>
-<img src="/newbie/_static/images/kuar/ch03/kind_logo.png" width="240px" style="background: white; padding: 0.5rem;"/>
+<figure class="align-default">
+<a class="white-bg-sp reference internal image-reference" href="../_images/kind_logo.png"><img alt="image" class="white-bg-sp" src="../_images/kind_logo.png" style="width: 240px;" /></a>
+</figure>
 <p>여러 쿠버네티스 클러스터 노드를 시뮬레이션하고자 가상머신 대신 도커 컨테이너를 이용한다.</p>
 <p>kind는 kubernetes in docker를 의미한다.</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># 생성</span>
@@ -458,6 +459,27 @@ kubectl<span class="w"> </span>-n<span class="w"> </span>kubernetes-dashboard<sp
 <h2>요약<a class="headerlink" href="#id11" title="Link to this heading"></a></h2>
 <p>쿠버네티스 클러스터를 설치하고 생성된 클러스터를 탐색하기 위한 몇 가지 명령을 실행해봤다.</p>
 <p>4장에서는 kubectl 도구를 활용하는 방법을 살펴본다.</p>
+<style type="text/css">
+img {
+  border-radius: 0.1rem;
+}
+
+.gray-bg > img {
+  background: #403F4C;
+  padding: 1rem;
+}
+
+.white-bg > img {
+  background: white;
+  padding: 1rem;
+}
+
+.white-bg-sp > img {
+  background: white;
+  padding: 0.5rem;
+}
+
+</style>
 </section>
 </section>
 
@@ -489,7 +511,7 @@ kubectl<span class="w"> </span>-n<span class="w"> </span>kubernetes-dashboard<sp
           SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
-    <div class="rst-versions" role="note" style="padding: 1rem; font-weight: bold;"">
+    <div class="rst-versions" role="note" style="padding: 1rem; font-weight: bold;">
         <a href="https://github.com/study-zero/newbie"><span class="fa fa-link"> Github</span></a>
     </div>
 

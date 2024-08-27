@@ -30,6 +30,7 @@ language = 'ko'
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 html_baseurl = '/newbie/'
+html_favicon = '_static/kitty.png'
 
 # --
 source_suffix = {

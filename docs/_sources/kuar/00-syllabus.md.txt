@@ -5,7 +5,7 @@
 - [Kubernetes Up and Running 3/e](https://www.oreilly.com/library/view/kubernetes-up-and/9781491935668/)
 
 ## 방식
-매주 2개 쳅터를 읽고 2명의 스터디원이 내용을 정리하여 발표함.
+매주 2개 챕터를 읽고 2명의 스터디원이 내용을 정리하여 발표함.
 
 스터디원은 해당 챕터에 대해 함께 토론하고 복습함.
 

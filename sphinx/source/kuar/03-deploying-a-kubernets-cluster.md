@@ -1,15 +1,10 @@
 # 3장. 쿠버네티스 클러스터 배포
 ## 쿠버네티스 설치
-<img src="/newbie/_static/images/kuar/ch03/nav_logo.svg" width="240px" style="background: #403F4C; padding: 1rem;"/>
-
-<!-- 
-```{image} images/kuar/ch03/nav_logo.svg
-:alt: Select Parameters
+```{figure} /images/kuar/ch03/nav_logo.svg
+:alt: image
 :width: 240px
-:align: center
+:class: gray-bg
 ```
--->
-<!-- https://stackoverflow.com/a/73306746 -->
 
 이전 장에서 앱 컨테이너를 성공적으로 구축했다.
 
@@ -27,7 +22,11 @@
 
 ### 퍼블릭 클라우드
 #### 구글 클라우드 플랫폼(GCP)
-<img src="/newbie/_static/images/kuar/ch03/google_cloud_logo.svg" width="240px" style="background: white; padding: 1rem;"/>
+```{figure} /images/kuar/ch03/google_cloud_logo.svg
+:alt: image
+:width: 240px
+:class: white-bg
+```
 
 GKE(Google Kubernetes Engine)을 사용한다.
 - [https://cloud.google.com/sdk/docs/install-sdk?hl=ko](https://cloud.google.com/sdk/docs/install-sdk?hl=ko)
@@ -96,9 +95,13 @@ eksctl create cluster
 
 ### 로컬 환경
 #### 미니큐브
-<img src="/newbie/_static/images/kuar/ch03/minikube_logo_full.png" width="240px" style="background: white; padding: 0.5rem;"/>
+```{figure} /images/kuar/ch03/minikube_logo_full.png
+:alt: image
+:width: 240px
+:class: white-bg
+```
 
-간단한 단일 노드 클러스트를 구출할 수 있다.
+간단한 단일 노드 클러스트를 구축할 수 있다.
 
 도커 데스크톱이 이미 설치돼 있는 경우 단일 머신 쿠버 네티스가 함께 제공된다.
 
@@ -122,7 +125,11 @@ $ minikube delete
 <br/>
 
 #### Kind(도커 환경)
-<img src="/newbie/_static/images/kuar/ch03/kind_logo.png" width="240px" style="background: white; padding: 0.5rem;"/>
+```{figure} /images/kuar/ch03/kind_logo.png
+:alt: image
+:width: 240px
+:class: .white-bg-sp
+```
 
 여러 쿠버네티스 클러스터 노드를 시뮬레이션하고자 가상머신 대신 도커 컨테이너를 이용한다.
 
@@ -388,3 +395,24 @@ kubectl -n kubernetes-dashboard create token admin-user
 
 4장에서는 kubectl 도구를 활용하는 방법을 살펴본다.
 
+<style type="text/css">
+img {
+  border-radius: 0.1rem;
+}
+
+.gray-bg > img {
+  background: #403F4C;
+  padding: 1rem;
+}
+
+.white-bg > img {
+  background: white;
+  padding: 1rem;
+}
+
+.white-bg-sp > img {
+  background: white;
+  padding: 0.5rem;
+}
+
+</style>
