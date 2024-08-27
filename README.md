@@ -21,7 +21,7 @@ rye run sphinx-build -M html docs/source/ docs/build/
 ## serve locally(using output)
 ```sh
 cd docs
-python -m http.server 4001
+python -m http.server -d ./docs 4001 
 # use your own port
 ```
 
