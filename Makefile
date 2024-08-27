@@ -5,9 +5,9 @@
 # from the environment for the first two.
 SPHINXOPTS    ?=
 SPHINXBUILD   ?= rye run sphinx-build
-SOURCEDIR     = source
-BUILDDIR      = build
-DOCSDIR       = ../docs
+SOURCEDIR     = sphinx/source
+BUILDDIR      = sphinx/build
+DOCSDIR       = docs
 
 # Put it first so that "make" without argument is like "make help".
 help:

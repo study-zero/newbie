@@ -1,6 +1,6 @@
 # build
-```
-make clean html
+```sh
+make clean && make html
 ```
 
 # glob
