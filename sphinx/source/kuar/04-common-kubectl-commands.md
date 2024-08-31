@@ -226,6 +226,9 @@ kubectl logs <파드 이름> -f
 ```
 
 ```{note}
+
+쿠버네티스에서 파드의 로그는 `stdout`의 redirect를 통해 kubelet 내에 저장된다. [#](https://stackoverflow.com/a/58718841/16783410)
+
 쿠버네티스 1.2 버전 이상부터 [아래 명령어로 노드에 ssh 접속을 할 수 있다](https://kubernetes.io/docs/tasks/debug/debug-cluster/kubectl-node-debug/).
 
 `k debug node/my-node -it --image=ubuntu`
@@ -342,7 +345,7 @@ pod5      11m          62Mi
 
 클러스터 관리를 위해 특정 노드를 차단(cordon)하고 비울(drain) 수 있다.
 
-노드를 차단하면 해당 노드에 팟이 스케줄링되지 안흔다.
+노드를 차단하면 해당 노드에 팟이 스케줄링되지 않는다.
 
 노드에 대한 비우기를 설정하면 해당 노드에서 실행 중인 모든 파드가 제거된다.
 
