@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ko" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>4장. 공통 kubectl 명령 &mdash; newbie v0.0.1 문서</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../_static/kitty.png"/>
+    <link rel="canonical" href="/newbie/kuar/04-common-kubectl-commands.html" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=f8b18680"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/translations.js?v=e33e7ba0"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="색인" href="../genindex.html" />
+    <link rel="search" title="검색" href="../search.html" />
+    <link rel="next" title="5장. 파드" href="05-pods.html" />
+    <link rel="prev" title="3장. 쿠버네티스 클러스터 배포" href="03-deploying-a-kubernets-cluster.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            newbie
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">쿠버네티스 시작하기 3/e</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="00-syllabus.html">0장. 스터디 개요</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01-introduction.html">1장. 쿠버네티스 소개</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02-creating-and-running-containers.html">2장. 컨테이너 생성과 실행</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03-deploying-a-kubernets-cluster.html">3장. 쿠버네티스 클러스터 배포</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">4장. 공통 kubectl 명령</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">네임스페이스</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">컨텍스트</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#api">쿠버네티스 API 객체 조회</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">쿠버네티스 객체 생성, 수정 삭제</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">객체 라벨링과 애노테이션</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">디버깅 명령</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">클러스터 관리</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id7">명령 자동 완성</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id8">클러스터 조회의 대안</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id9">요약</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="05-pods.html">5장. 파드</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">newbie</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">4장. 공통 kubectl 명령</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/kuar/04-common-kubectl-commands.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="kubectl">
+<h1>4장. 공통 kubectl 명령<a class="headerlink" href="#kubectl" title="Link to this heading"></a></h1>
+<p><strong>kubectl</strong> 커맨드라인 유틸리티는 쿠버네티스 API와 상호작용하는 강력한 도구다.</p>
+<br/>
+<section id="id1">
+<h2>네임스페이스<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<p><strong>네임스페이스</strong>는 쿠버네티스 객체들의 집합을 담고 있는 폴더와 같다.</p>
+<p>kubectl은 기본적으로 default 네임스페이스와 상호작용한다.</p>
+<p>다른 네임스페이스를 사용하고 싶다면 <code class="docutils literal notranslate"><span class="pre">--namespace</span></code> 플래그를 추가할 수 있다.</p>
+<p>모든 네임스페이스와 상호작용 하고 싶다면 <code class="docutils literal notranslate"><span class="pre">--all-namespaces</span></code> 또는 <code class="docutils literal notranslate"><span class="pre">-A</span></code> 플래그를 추가해야 한다.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># 특정 네임스페이스 사용</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>po<span class="w"> </span>--namespace<span class="o">=</span>mystuff
+<span class="c1"># 모든 네임스페이스 사용</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>po<span class="w"> </span>--all-namespaces
+<span class="c1"># 또는 kubectl -A</span>
+</pre></div>
+</div>
+<br/>
+</section>
+<section id="id2">
+<h2>컨텍스트<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<p><strong>컨텍스트</strong>는 세 가지 요소인 <em>클러스터</em>, <em>사용자</em>, <em>네임스페이스</em>로 이루어진다.</p>
+<p>예를 들어 <code class="docutils literal notranslate"><span class="pre">dev-frontend</span></code> 컨텍스트는 “<code class="docutils literal notranslate"><span class="pre">development</span></code> 클러스터의 <code class="docutils literal notranslate"><span class="pre">frontend</span></code> 네임스페이스에 접근하는데 <code class="docutils literal notranslate"><span class="pre">developer</span></code> 사용자 자격증명을 사용하라고 알려준다.” <a class="reference external" href="https://kubernetes.io/ko/docs/tasks/access-application-cluster/configure-access-multiple-clusters/#%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0-%EC%82%AC%EC%9A%A9%EC%9E%90-%EC%BB%A8%ED%85%8D%EC%8A%A4%ED%8A%B8-%EC%A0%95%EC%9D%98">#</a></p>
+<p>컨텍스트는 주로 <code class="docutils literal notranslate"><span class="pre">$HOME/.kube/config</span></code> 경로에 존재하는 kubectl 컨피규레이션 파일<sup>kubeconfig</sup>에 기록돼있다.</p>
+<p>특정 네임스페이스를 기본값으로 하는 컨텍스트는 아래와 같이 생성하고 사용할 수 있다.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># 컨텍스트 생성</span>
+kubectl<span class="w"> </span>config<span class="w"> </span>set-context<span class="w"> </span>my-context<span class="w"> </span>--namespace<span class="o">=</span>mystuff
+<span class="c1"># 컨텍스트 사용</span>
+kubectl<span class="w"> </span>config<span class="w"> </span>use-context<span class="w"> </span>my-context
+</pre></div>
+</div>
+<br/>
+</section>
+<section id="api">
+<h2>쿠버네티스 API 객체 조회<a class="headerlink" href="#api" title="Link to this heading"></a></h2>
+<p>쿠버네티스의 모든 객체는 RESTful 리소스로 표현된다.</p>
+<p>각 쿠버네티스 객체는 고유의 HTTP 경로에 존재한다.</p>
+<p>아래와 같이 pods 목록을 받아볼 수 있다.</p>
+<p>이는 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">get</span> <span class="pre">pods</span></code>와 동일하다.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">// 쿠버네티스 API 프록시 설정(localhost:port)</span>
+<span class="gp">$ </span>kubectl<span class="w"> </span>proxy<span class="w"> </span><span class="m">8001</span>
+<span class="go">// 쿠버네티스 API 호출</span>
+<span class="gp">$ </span>curl<span class="w"> </span>-is<span class="w"> </span><span class="m">127</span>.0.0.1:8001/api/v1/namespaces/default/pods
+<span class="go">HTTP/1.1 200 OK</span>
+<span class="go">...</span>
+<span class="go">{</span>
+<span class="go">  &quot;kind&quot;: &quot;PodList&quot;,</span>
+<span class="go">  &quot;apiVersion&quot;: &quot;v1&quot;,</span>
+<span class="go">  ...</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">get</span> <span class="pre">&lt;리소스</span> <span class="pre">이름&gt;</span></code>을 실행할 경우 현재 네임스페이스에 존재하는 모든 리소스 목록을 조회할 수 있다.</p>
+<p>특정 리소스를 조회하고자 할 경우에는 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">get</span> <span class="pre">&lt;리소스</span> <span class="pre">이름&gt;</span> <span class="pre">&lt;객체</span> <span class="pre">이름&gt;</span></code>을 사용할 수 있다.</p>
+<p><code class="docutils literal notranslate"><span class="pre">--watch</span></code>를 사용하면 특정 리소스를 지속적으로 모니터링할 수 있다.</p>
+<p><code class="docutils literal notranslate"><span class="pre">kubectl</span></code>은 API 결과를 사람이 읽기 쉽게 가공하여 일부 세부 사항을 생략한다.</p>
+<p>객체의 전체 정보를 얻고자 할 경우에는 <code class="docutils literal notranslate"><span class="pre">-o</span> <span class="pre">json</span></code> 또는 <code class="docutils literal notranslate"><span class="pre">-o</span> <span class="pre">yaml</span></code> 플래그를 사용해 해당 형식으로 조회할 수 있다.</p>
+<p>헤더를 생략하고자 할 경우에는 <code class="docutils literal notranslate"><span class="pre">--no-headers</span></code> 플래그를 사용할 수 있다.</p>
+<p>객체의 특정 필드를 추출할 때는 JSONPath 쿼리 언어를 사용할 수 있다.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>podId<span class="w"> </span>-o<span class="w"> </span>jsonpath<span class="w"> </span>--template<span class="o">=</span><span class="s2">&quot;{.status.podIP}{&#39;\n&#39;}&quot;</span>
+<span class="gp">$ </span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-o<span class="w"> </span>jsonpath<span class="w"> </span>--template<span class="o">=</span><span class="s2">&quot;{.items[*].metadata.name}{&#39;\n&#39;}&quot;</span>
+<span class="gp">$ </span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-o<span class="w"> </span>jsonpath<span class="w"> </span>--template<span class="o">=</span><span class="s1">&#39;{&quot;name\timage\tpodIP\n&quot;}{range .items[*]}{@.metadata.name}{&quot;\t&quot;}{@.spec.containers[*].image}{&quot;\t&quot;}{@.status.podIP}{&quot;\n&quot;}{end}&#39;</span>
+<span class="go">name    image   podIP</span>
+<span class="go">pod0    image0:latest      10.244.1.1</span>
+<span class="go">pod1    image1:latest      10.244.1.2</span>
+<span class="go">pod2    image2:latest      10.244.1.3</span>
+</pre></div>
+</div>
+<p>쉼표로 구분된 타입 목록으로 여러 객체를 동시에 확인할 수 있다.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>kubectl<span class="w"> </span>get<span class="w"> </span>pods,services
+</pre></div>
+</div>
+<p>특정 객체의 자세한 정보를 얻고 싶을 경우 <code class="docutils literal notranslate"><span class="pre">describe</span></code> 명령을 사용할 수 있다.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>kubectl<span class="w"> </span>describe<span class="w"> </span>&lt;리소스<span class="w"> </span>이름&gt;<span class="w"> </span>&lt;객체<span class="w"> </span>이름&gt;
+</pre></div>
+</div>
+<p>쿠버네티스 객체 타입에 대해 지원되는 필드 목록을 보려면 <code class="docutils literal notranslate"><span class="pre">explain</span></code> 명령을 사용할 수 있다.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>kubectl<span class="w"> </span>explain<span class="w"> </span>pods
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">참고</p>
+<p>모든 쿠버네티스 객체 종류는 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">api-resources</span></code>로 조회할 수 있다.</p>
+</div>
+<br/>
+</section>
+<section id="id3">
+<h2>쿠버네티스 객체 생성, 수정 삭제<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<p>쿠버네티스 API의 객체들은 JSON이나 YAML 파일로 표현된다.</p>
+<p>YAML이나 JSON 파일들로 쿠버네티스 객체를 생성, 수정, 삭제할 수 있다.</p>
+<p><code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">apply</span> <span class="pre">-f</span> <span class="pre">&lt;파일명&gt;</span></code>을 통해 객체 생성 및 수정이 가능하다.</p>
+<p>수정 명령은 파일 내용과 다른 설정을 가진 객체들만 수정한다.</p>
+<p>생성 중인 객체가 이미 클러스터에 존재할 경우 변경사항 없이 해당 명령은 종료된다.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># 객체 생성, 수정</span>
+kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>obj.yaml
+</pre></div>
+</div>
+<p>실제 변경없이 <code class="docutils literal notranslate"><span class="pre">apply</span></code> 명령의 적용 사항을 확인하려면 <code class="docutils literal notranslate"><span class="pre">--dry-run=client</span></code>(로컬에서 확인) 또는 <code class="docutils literal notranslate"><span class="pre">--dry-run=server</span></code>(서버에서 검증) 플래그를 사용할 수 있다.</p>
+<p><code class="docutils literal notranslate"><span class="pre">apply</span></code> 명령은 객체의 애노테이션에 이전 컨피규레이션 이력을 기록한다.</p>
+<p><code class="docutils literal notranslate"><span class="pre">apply</span></code> 명령에 <code class="docutils literal notranslate"><span class="pre">edit-last-applied</span></code>, <code class="docutils literal notranslate"><span class="pre">set-last-applied</span></code>, <code class="docutils literal notranslate"><span class="pre">view-last-applied</span></code> 명령을 함께 사용해 객체의 어노테이션 기록된 <code class="docutils literal notranslate"><span class="pre">last-applied-configuration</span></code>을 편집, 설정, 조회할 수 있다.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>kubectl<span class="w"> </span>apply<span class="w"> </span>edit-last-applied<span class="w"> </span>deploy/myDeploy
+kubectl<span class="w"> </span>apply<span class="w"> </span>set-last-applied<span class="w"> </span>deploy/myDeploy<span class="w"> </span>-f<span class="w"> </span>&lt;파일명&gt;
+kubectl<span class="w"> </span>apply<span class="w"> </span>view-last-applied<span class="w"> </span>deploy/myDeploy
+</pre></div>
+</div>
+<p>쿠버네티스 객체의 직접 편집은 <code class="docutils literal notranslate"><span class="pre">edit</span></code> 명령으로 가능하다.</p>
+<p><code class="docutils literal notranslate"><span class="pre">edit</span></code> 명령으로 편집된 파일을 저장하면 쿠버네티스 클러스터에 자동으로 업로드한다.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># 객체 직접 편집</span>
+kubectl<span class="w"> </span>edit<span class="w"> </span>&lt;리소스<span class="w"> </span>이름&gt;<span class="w"> </span>&lt;객체<span class="w"> </span>이름&gt;
+</pre></div>
+</div>
+<p>객체 삭제는 <code class="docutils literal notranslate"><span class="pre">delete</span></code> 명령으로 가능하며 사용자의 확인을 받지 않는다.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># 객체 삭제</span>
+kubectl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> </span>obj.yaml
+<span class="c1"># 객체 삭제</span>
+kubectl<span class="w"> </span>delete<span class="w"> </span>&lt;리소스<span class="w"> </span>이름&gt;<span class="w"> </span>&lt;객체<span class="w"> </span>이름&gt;
+</pre></div>
+</div>
+<br/>
+</section>
+<section id="id4">
+<h2>객체 라벨링과 애노테이션<a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">label</span></code>과 <code class="docutils literal notranslate"><span class="pre">annotation</span></code>은 메타데이터라는 점이 동일하나 다음과 같은 차이점이 있다.</p>
+<p><code class="docutils literal notranslate"><span class="pre">label</span></code>은 <code class="docutils literal notranslate"><span class="pre">selector</span></code>로 활용되는 것처럼 쿠버네티스 운영에 활용되는 데이터이고,</p>
+<p><code class="docutils literal notranslate"><span class="pre">annotation</span></code>은 운영에 활용되지 않지만 사용자에게 필요한 정보나 3rd party가 사용할 수 있는 데이터이다.</p>
+<p>라벨과 애노테이션은 덮어쓰기를 허용하지 않아 <code class="docutils literal notranslate"><span class="pre">--overwrite</span></code> 플래그를 사용하거나 삭제 후 재지정하여야한다.</p>
+<p>자세한 내용은 6장에서 다룬다.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># 레이블 지정</span>
+kubectl<span class="w"> </span>label<span class="w"> </span>pods<span class="w"> </span>myPod<span class="w"> </span><span class="nv">color</span><span class="o">=</span>red
+<span class="c1"># 레이블 삭제</span>
+kubectl<span class="w"> </span>label<span class="w"> </span>pods<span class="w"> </span>myPod<span class="w"> </span>color-
+<span class="c1"># 어노테이션 지정</span>
+kubectl<span class="w"> </span>annotate<span class="w"> </span>pods<span class="w"> </span>myPod<span class="w"> </span><span class="nv">color</span><span class="o">=</span>blue
+<span class="c1"># 어노테이션 삭제</span>
+kubectl<span class="w"> </span>annotate<span class="w"> </span>pods<span class="w"> </span>myPod<span class="w"> </span>color-
+</pre></div>
+</div>
+<br/>
+</section>
+<section id="id5">
+<h2>디버깅 명령<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<p>현재 동작 중인 컨테이너의 로그는 아래와 같이 확인할 수 있다.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># 파드 로그 조회</span>
+kubectl<span class="w"> </span>logs<span class="w"> </span>&lt;파드<span class="w"> </span>이름&gt;
+<span class="c1"># 파드 로그 조회(컨테이너 지정)</span>
+kubectl<span class="w"> </span>logs<span class="w"> </span>&lt;파드<span class="w"> </span>이름&gt;<span class="w"> </span>-c<span class="w"> </span>&lt;컨테이너<span class="w"> </span>이름&gt;
+<span class="c1"># 파드 로그 조회(실시간)</span>
+kubectl<span class="w"> </span>logs<span class="w"> </span>&lt;파드<span class="w"> </span>이름&gt;<span class="w"> </span>-f
+</pre></div>
+</div>
+<p>현재 실행 중인 컨테이너에 명령을 실행하고자 할 경우 <code class="docutils literal notranslate"><span class="pre">exec</span></code> 명령을 사용한다.</p>
+<p>컨테이너에서 실행 중인 프로세스의 콘솔에 접근하려면 <code class="docutils literal notranslate"><span class="pre">attach</span></code> 명령을 사용한다.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>&lt;파드<span class="w"> </span>이름&gt;<span class="w"> </span>--bash
+kubectl<span class="w"> </span>attach<span class="w"> </span>-it<span class="w"> </span>&lt;파드<span class="w"> </span>이름&gt;
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">참고</p>
+<p><code class="docutils literal notranslate"><span class="pre">attach</span></code> 명령 실행 시 아래와 같은 오류가 발생할 수 있다.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>error: Unable to use a TTY - container test did not allocate one
+</pre></div>
+</div>
+<p>이 경우 아래와 같이 <code class="docutils literal notranslate"><span class="pre">.spec.template.spec.containers[].tty</span></code>와 <code class="docutils literal notranslate"><span class="pre">.spec.template.spec.containers[].stdin</span></code>를 <code class="docutils literal notranslate"><span class="pre">true</span></code>로 설정해야한다.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>spec: 
+  containers: 
+  - name: web 
+    image: web:latest 
+    tty: true 
+    stdin: true
+</pre></div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">cp</span></code> 명령을 사용해 컨테이너에 파일을 붙여넣거나 가져올 수 있다.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>kubectl<span class="w"> </span>cp<span class="w"> </span>&lt;파드<span class="w"> </span>이름&gt;:&lt;/path/to/remote/file&gt;<span class="w"> </span>&lt;/path/to/local/file&gt;
+</pre></div>
+</div>
+<p>네트워크를 통해 파드에 접근하고자 할 경우 <code class="docutils literal notranslate"><span class="pre">port-forward</span></code> 명령을 사용해 로컬 머신에서 파드로 네트워크 트래픽을 전달 할 수 있다.</p>
+<p>이는 퍼블릭 네트워크에 노출시키 않고 컨테이너로 안전하게 네트워크 트래픽을 터널링할 수 있다.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># 포트는 &lt;로컬 머신 포트&gt;:&lt;원격 컨테이너 포드&gt; 순서</span>
+kubectl<span class="w"> </span>port-forward<span class="w"> </span>&lt;파드<span class="w"> </span>이름&gt;<span class="w"> </span><span class="m">8080</span>:80
+<span class="c1"># 서비스 객체로 연결. 서비스 내의 단일 파드로만 요청이 전달됨을 유의.</span>
+kubectl<span class="w"> </span>port-forward<span class="w"> </span>svc/&lt;서비스<span class="w"> </span>이름&gt;<span class="w"> </span><span class="m">8080</span>:80
+</pre></div>
+</div>
+<p>쿠버네티스 이벤트를 확인하려면 <code class="docutils literal notranslate"><span class="pre">events</span></code> 객체로 조회할 수 있다.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># 이벤트 조회</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>events
+<span class="c1"># 실시간 이벤트 조회</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>events<span class="w"> </span>--watch
+<span class="c1"># 모든 네임스페이스 이벤트 조회</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>events<span class="w"> </span>-A
+</pre></div>
+</div>
+<p>클러스터의 리소스 사용 현황 조회는 아래와 같이 할 수 있다.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">// 노드의 리소스 사용량 조회</span>
+<span class="gp">$ </span>kubectl<span class="w"> </span>top<span class="w"> </span>nodes
+<span class="go">NAME                       CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%   </span>
+<span class="go">my-cluster-control-plane   135m         6%     933Mi           11%       </span>
+<span class="go">my-cluster-worker          38m          1%     420Mi           5%        </span>
+<span class="go">my-cluster-worker2         43m          2%     411Mi           5%        </span>
+<span class="go">my-cluster-worker3         39m          1%     364Mi           4% </span>
+
+<span class="go">// 파드의 리소스 사용량 조회</span>
+<span class="gp">$ </span>kubectl<span class="w"> </span>top<span class="w"> </span>pods
+<span class="go">NAME      CPU(cores)   MEMORY(bytes)   </span>
+<span class="go">pod0      10m          51Mi            </span>
+<span class="go">pod1      9m           51Mi            </span>
+<span class="go">pod2      9m           51Mi            </span>
+<span class="go">pod3      9m           60Mi            </span>
+<span class="go">pod4      9m           67Mi            </span>
+<span class="go">pod5      11m          62Mi </span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">참고</p>
+<p><code class="docutils literal notranslate"><span class="pre">error:</span> <span class="pre">Metrics</span> <span class="pre">API</span> <span class="pre">not</span> <span class="pre">available</span></code> 오류가 발생할 경우 metrics server 설치가 필요하다.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/kubernetes-sigs/metrics-server?tab=readme-ov-file#installation">kubernetes-sigs/metrics-server</a></p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">apply</span> <span class="pre">-f</span> <span class="pre">https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml</span></code></p>
+<p>설치 후에도 명령이 실행되지 않는다면 아래와 같이 <code class="docutils literal notranslate"><span class="pre">metrics-server</span></code> 객체의 args에 2개 항목을 추가해준다.
+<code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">edit</span> <span class="pre">deploy</span> <span class="pre">metrics-server</span> <span class="pre">-n</span> <span class="pre">kube-system</span></code></p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>  spec:
+    containers:
+    - args:
+      - --kubelet-insecure-tls
+      - --kubelet-preferred-address-types=InternalIP
+</pre></div>
+</div>
+</div>
+<br/>
+</section>
+<section id="id6">
+<h2>클러스터 관리<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
+<p>클러스터 관리를 위해 특정 노드를 차단(cordon)하고 비울(drain) 수 있다.</p>
+<p>노드를 차단하면 해당 노드에 팟이 스케줄링되지 안흔다.</p>
+<p>노드에 대한 비우기를 설정하면 해당 노드에서 실행 중인 모든 파드가 제거된다.</p>
+<p>수리나 업그레이드를 위해 물리 머신을 제거하려면 <code class="docutils literal notranslate"><span class="pre">cordon</span></code> 및 <code class="docutils literal notranslate"><span class="pre">drain</span></code> 수행 후 안전하게 제거할 수 있다.</p>
+<p>머신이 수리되면 <code class="docutils literal notranslate"><span class="pre">uncordon</span></code> 명령으로 파드 스케줄링을 다시 활성화할 수 있다.</p>
+<p>시스템 재시작과 같이 긴 시간이 소요되지 않을 경우 일반적으로 차단하거나 비울 필요는 없다.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">// 파드 스케줄링 중지</span>
+<span class="gp">$ </span>kubectl<span class="w"> </span>cordon<span class="w"> </span>my-node3
+<span class="go">node/myNode cordoned</span>
+
+<span class="go">// 노드 상태 확인</span>
+<span class="gp">$ </span>kubectl<span class="w"> </span>get<span class="w"> </span>nodes
+<span class="go">NAME               STATUS                     ROLES           AGE   VERSION</span>
+<span class="go">my-control-plane   Ready                      control-plane   47h   v1.31.0</span>
+<span class="go">my-node1           Ready                      &lt;none&gt;          47h   v1.31.0</span>
+<span class="go">my-node2           Ready                      &lt;none&gt;          47h   v1.31.0</span>
+<span class="go">my-node3           Ready,SchedulingDisabled   &lt;none&gt;          47h   v1.31.0</span>
+
+<span class="go">// 클러스터 내 파드 모두 제거</span>
+<span class="gp">$ </span>kubectl<span class="w"> </span>drain<span class="w"> </span>myNode
+
+<span class="go">// 파드 스케줄링 재활성화</span>
+<span class="gp">$ </span>kubectl<span class="w"> </span>uncordon<span class="w"> </span>myNode
+
+<span class="go">// 노드 상태 확인</span>
+<span class="gp">$ </span>kubectl<span class="w"> </span>get<span class="w"> </span>nodes
+<span class="go">NAME               STATUS                     ROLES           AGE   VERSION</span>
+<span class="go">my-control-plane   Ready                      control-plane   47h   v1.31.0</span>
+<span class="go">my-node1           Ready                      &lt;none&gt;          47h   v1.31.0</span>
+<span class="go">my-node2           Ready                      &lt;none&gt;          47h   v1.31.0</span>
+<span class="go">my-node3           Ready                      &lt;none&gt;          47h   v1.31.0</span>
+</pre></div>
+</div>
+<br/>
+</section>
+<section id="id7">
+<h2>명령 자동 완성<a class="headerlink" href="#id7" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">kubectl</span></code>은 셸과의 통합(integration)을 지원한다.</p>
+<p>먼저 아래와 같은 패키지를 설치해야한다.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># macos</span>
+brew<span class="w"> </span>install<span class="w"> </span>bash-completion
+<span class="c1"># centos/redhat</span>
+yum<span class="w"> </span>install<span class="w"> </span>bash-completion
+<span class="c1"># debian/ubuntu</span>
+apt-get<span class="w"> </span>install<span class="w"> </span>bash-completion
+</pre></div>
+</div>
+<p>위 패키지가 설치되었다면 아래 명령어로 자동 완성 기능을 추가할 수 있다.</p>
+<p><code class="docutils literal notranslate"><span class="pre">.bashrc</span></code>나 <code class="docutils literal notranslate"><span class="pre">.zshrc</span></code> 등에 추가하여 셸 실행 시 자동으로 추가할 수 있다.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># bash</span>
+<span class="nb">source</span><span class="w"> </span>&lt;<span class="o">(</span>kubectl<span class="w"> </span>completion<span class="w"> </span>bash<span class="o">)</span>
+<span class="c1"># zsh</span>
+<span class="nb">source</span><span class="w"> </span>&lt;<span class="o">(</span>kubectl<span class="w"> </span>completion<span class="w"> </span>zsh<span class="o">)</span>
+</pre></div>
+</div>
+<br/>
+</section>
+<section id="id8">
+<h2>클러스터 조회의 대안<a class="headerlink" href="#id8" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">kubectl</span></code>외에도 쿠버네티스 클러스터와 상호작용하기 위한 도구들이 있다.</p>
+<ul class="simple">
+<li><p>Visual Studio Code Extensions <a class="reference external" href="https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools">#</a></p></li>
+<li><p>IntelliJ Plugins <a class="reference external" href="https://plugins.jetbrains.com/plugin/10485-kubernetes">#</a></p></li>
+<li><p>Eclipse Tools <a class="reference external" href="https://marketplace.eclipse.org/content/ekube">#</a></p></li>
+</ul>
+<p>관리형 쿠버네티스 사용 시 대부분 웹 기반 UX가 제공된다.</p>
+<p><a class="reference external" href="https://github.com/rancher/dashboard">Rancher dashboard</a>와 <a class="reference external" href="https://github.com/headlamp-k8s/headlamp">Headlamp project</a> 등 여러 오픈소스 GUI 대시보드가 있다.</p>
+<br/>
+</section>
+<section id="id9">
+<h2>요약<a class="headerlink" href="#id9" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">kubectl</span></code>은 쿠버네티스 클러스터에서 애플리케이션을 관리하는 강력한 도구다.</p>
+<p>4장에서는 <code class="docutils literal notranslate"><span class="pre">kubectl</span></code>의 일반적인 사용 방법을 소개했다.</p>
+<p><code class="docutils literal notranslate"><span class="pre">help</span></code> 명령어를 통해 더 많은 정보를 확인할 수 있다.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>kubectl<span class="w"> </span><span class="nb">help</span>
+kubectl<span class="w"> </span><span class="nb">help</span><span class="w"> </span>&lt;명령<span class="w"> </span>이름&gt;
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="03-deploying-a-kubernets-cluster.html" class="btn btn-neutral float-left" title="3장. 쿠버네티스 클러스터 배포" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="05-pods.html" class="btn btn-neutral float-right" title="5장. 파드" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, newbie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="rst-versions" role="note" style="padding: 1rem; font-weight: bold;">
+        <a href="https://github.com/study-zero/newbie"><span class="fa fa-link"> Github</span></a>
+    </div>
+
+</body>
+</html>
