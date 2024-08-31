@@ -4,6 +4,11 @@
 <br/>
 
 ## 네임스페이스
+```{figure} /images/kuar/ch04/namespace.png
+:alt: image
+:width: 520px
+```
+
 **네임스페이스**는 쿠버네티스 객체들의 집합을 담고 있는 폴더와 같다.
 
 kubectl은 기본적으로 default 네임스페이스와 상호작용한다.
@@ -23,6 +28,11 @@ kubectl get po --all-namespaces
 <br/>
 
 ## 컨텍스트
+```{figure} /images/kuar/ch04/context.png
+:alt: image
+:width: 400px
+```
+
 **컨텍스트**는 세 가지 요소인 *클러스터*, *사용자*, *네임스페이스*로 이루어진다.
 
 예를 들어 `dev-frontend` 컨텍스트는 "`development` 클러스터의 `frontend` 네임스페이스에 접근하는데 `developer` 사용자 자격증명을 사용하라고 알려준다." [#](https://kubernetes.io/ko/docs/tasks/access-application-cluster/configure-access-multiple-clusters/#%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0-%EC%82%AC%EC%9A%A9%EC%9E%90-%EC%BB%A8%ED%85%8D%EC%8A%A4%ED%8A%B8-%EC%A0%95%EC%9D%98)
@@ -41,6 +51,10 @@ kubectl config use-context my-context
 <br/>
 
 ## 쿠버네티스 API 객체 조회
+```{figure} /images/kuar/ch04/kubernetes-api.png
+:alt: image
+:width: 540px
+```
 
 쿠버네티스의 모든 객체는 RESTful 리소스로 표현된다.
 
@@ -113,6 +127,11 @@ kubectl explain pods
 <br/>
 
 ## 쿠버네티스 객체 생성, 수정 삭제
+```{figure} /images/kuar/ch04/apply.png
+:alt: image
+:width: 540px
+```
+
 쿠버네티스 API의 객체들은 JSON이나 YAML 파일로 표현된다.
 
 YAML이나 JSON 파일들로 쿠버네티스 객체를 생성, 수정, 삭제할 수 있다.
@@ -161,6 +180,11 @@ kubectl delete <리소스 이름> <객체 이름>
 <br/>
 
 ## 객체 라벨링과 애노테이션
+```{figure} /images/kuar/ch04/labels.png
+:alt: image
+:width: 400px
+```
+
 `label`과 `annotation`은 메타데이터라는 점이 동일하나 다음과 같은 차이점이 있다.
 
 `label`은 `selector`로 활용되는 것처럼 쿠버네티스 운영에 활용되는 데이터이고,
@@ -185,6 +209,11 @@ kubectl annotate pods myPod color-
 <br/>
 
 ## 디버깅 명령
+```{figure} /images/kuar/ch04/logging-architecture.png
+:alt: image
+:width: 400px
+```
+
 현재 동작 중인 컨테이너의 로그는 아래와 같이 확인할 수 있다.
 
 ```sh
@@ -196,12 +225,25 @@ kubectl logs <파드 이름> -c <컨테이너 이름>
 kubectl logs <파드 이름> -f
 ```
 
+```{note}
+쿠버네티스 1.2 버전 이상부터 [아래 명령어로 노드에 ssh 접속을 할 수 있다](https://kubernetes.io/docs/tasks/debug/debug-cluster/kubectl-node-debug/).
+
+`k debug node/my-node -it --image=ubuntu`
+
+호스트 파일은 `/host`에 마운트된다.
+
+컨테이너 로그는 아래 위치에서 확인할 수 있다.
+
+`cd /host/var/log/pods/...`
+
+```
+
 현재 실행 중인 컨테이너에 명령을 실행하고자 할 경우 `exec` 명령을 사용한다.
 
 컨테이너에서 실행 중인 프로세스의 콘솔에 접근하려면 `attach` 명령을 사용한다.
 
 ```sh
-kubectl exec -it <파드 이름> --bash
+kubectl exec -it <파드 이름> -- bash
 kubectl attach -it <파드 이름>
 ```
 
@@ -292,6 +334,11 @@ pod5      11m          62Mi
 <br/>
 
 ## 클러스터 관리
+
+```{figure} /images/kuar/ch04/cordon-drain.png
+:alt: image
+:width: 400px
+```
 
 클러스터 관리를 위해 특정 노드를 차단(cordon)하고 비울(drain) 수 있다.
 
