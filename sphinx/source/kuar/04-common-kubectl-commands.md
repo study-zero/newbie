@@ -227,7 +227,7 @@ kubectl logs <파드 이름> -f
 
 ```{note}
 
-쿠버네티스에서 파드의 로그는 `stdout`의 redirect를 통해 kubelet 내에 저장된다. [#](https://stackoverflow.com/a/58718841/16783410)
+쿠버네티스에서 컨테이너의 로그는 `stdout`의 redirect를 통해 kubelet 내에 저장된다. [#](https://stackoverflow.com/a/58718841/16783410)
 
 쿠버네티스 1.2 버전 이상부터 [아래 명령어로 노드에 ssh 접속을 할 수 있다](https://kubernetes.io/docs/tasks/debug/debug-cluster/kubectl-node-debug/).
 
