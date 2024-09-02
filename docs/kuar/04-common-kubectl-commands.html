@@ -263,6 +263,7 @@ kubectl<span class="w"> </span>logs<span class="w"> </span>&lt;파드<span class
 </div>
 <div class="admonition note">
 <p class="admonition-title">참고</p>
+<p>쿠버네티스에서 컨테이너의 로그는 <code class="docutils literal notranslate"><span class="pre">stdout</span></code>의 redirect를 통해 kubelet 내에 저장된다. <a class="reference external" href="https://stackoverflow.com/a/58718841/16783410">#</a></p>
 <p>쿠버네티스 1.2 버전 이상부터 <a class="reference external" href="https://kubernetes.io/docs/tasks/debug/debug-cluster/kubectl-node-debug/">아래 명령어로 노드에 ssh 접속을 할 수 있다</a>.</p>
 <p><code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">debug</span> <span class="pre">node/my-node</span> <span class="pre">-it</span> <span class="pre">--image=ubuntu</span></code></p>
 <p>호스트 파일은 <code class="docutils literal notranslate"><span class="pre">/host</span></code>에 마운트된다.</p>
@@ -357,7 +358,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>events<span class="w">
 <a class="reference internal image-reference" href="../_images/cordon-drain.png"><img alt="image" src="../_images/cordon-drain.png" style="width: 400px;" /></a>
 </figure>
 <p>클러스터 관리를 위해 특정 노드를 차단(cordon)하고 비울(drain) 수 있다.</p>
-<p>노드를 차단하면 해당 노드에 팟이 스케줄링되지 안흔다.</p>
+<p>노드를 차단하면 해당 노드에 팟이 스케줄링되지 않는다.</p>
 <p>노드에 대한 비우기를 설정하면 해당 노드에서 실행 중인 모든 파드가 제거된다.</p>
 <p>수리나 업그레이드를 위해 물리 머신을 제거하려면 <code class="docutils literal notranslate"><span class="pre">cordon</span></code> 및 <code class="docutils literal notranslate"><span class="pre">drain</span></code> 수행 후 안전하게 제거할 수 있다.</p>
 <p>머신이 수리되면 <code class="docutils literal notranslate"><span class="pre">uncordon</span></code> 명령으로 파드 스케줄링을 다시 활성화할 수 있다.</p>
