@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ko" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>6장. 라벨과 애노테이션 &mdash; newbie v0.0.1 문서</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../_static/kitty.png"/>
+    <link rel="canonical" href="/newbie/kuar/06-label-and-annotation.html" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=f8b18680"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/translations.js?v=e33e7ba0"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="색인" href="../genindex.html" />
+    <link rel="search" title="검색" href="../search.html" />
+    <link rel="prev" title="5장. 파드" href="05-pods.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            newbie
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">쿠버네티스 시작하기 3/e</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="00-syllabus.html">0장. 스터디 개요</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01-introduction.html">1장. 쿠버네티스 소개</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02-creating-and-running-containers.html">2장. 컨테이너 생성과 실행</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03-deploying-a-kubernets-cluster.html">3장. 쿠버네티스 클러스터 배포</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04-common-kubectl-commands.html">4장. 공통 kubectl 명령</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05-pods.html">5장. 파드</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">6장. 라벨과 애노테이션</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">라벨</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id3">라벨 적용</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">라벨 수정</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">라벨 셀렉터</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api">API 객체의 라벨 셀렉터</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">애노테이션</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">newbie</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">6장. 라벨과 애노테이션</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/kuar/06-label-and-annotation.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>6장. 라벨과 애노테이션<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
+<p>라벨은 파드와 레플리카셋 같은 쿠버네티스 객체에 연결할 수 있는 키/값 쌍으로, 쿠버네티스 객체에 식별 정보를 첨부하는데 매우 유용하다. 라벨은 객체를 그룹화하기 위한 기초를 제공한다.
+애노테이션은 도구와 라이브러리에서 활용할 수 있게 비식별 정보를 유지해 설계된 키/값 쌍이다. 라벨과 다르게 쿼리, 필터링 또는 파드를 서로 구분하기 위한 수단이 아니다.</p>
+<section id="id2">
+<h2>라벨<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<p>라벨은 객체의 메타데이터를 식별하는 기능을 제공한다.
+라벨의 키는 두 부분으로 나눌 수 있는데, <strong>선택적 접두사</strong>와 <strong>이름</strong>이며 슬래시(/)로 구분된다.
+접두사가 지정된 경우, 반드시 DNS 하위 도메인이어야 한다.</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../_images/label.png"><img alt="image" src="../_images/label.png" style="width: 540px;" /></a>
+</figure>
+<section id="id3">
+<h3>라벨 적용<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<p><strong>Before</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 디플로이먼트를 생성</span>
+kubectl<span class="w"> </span>run<span class="w"> </span>alpaca-prod<span class="w"> </span><span class="se">\</span>
+--image<span class="o">=</span>gcr.io/kuar-demo/kuard-amd64:blue<span class="w"> </span><span class="se">\</span>
+--replicas<span class="o">=</span><span class="m">2</span><span class="w"> </span><span class="se">\</span>
+--labels<span class="o">=</span><span class="s2">&quot;ver=1,app=alpaca,env=pod&quot;</span>
+</pre></div>
+</div>
+<blockquote>
+<div><p>error: unknown flag: –replicas</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">--replicas</span></code> option was deprecated in Kubernetes 1.18 and removed in a Kubernetes 1.21.</p>
+</div></blockquote>
+<p><strong>After</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 디플로이먼트를 생성</span>
+kubectl<span class="w"> </span>create<span class="w"> </span>deployment<span class="w"> </span>alpaca-prod<span class="w"> </span><span class="se">\</span>
+--image<span class="o">=</span>gcr.io/kuar-demo/kuard-amd64:blue<span class="w"> </span><span class="se">\</span>
+--replicas<span class="o">=</span><span class="m">2</span>
+
+<span class="c1"># 라벨 적용</span>
+kubectl<span class="w"> </span>label<span class="w"> </span>deployments<span class="w"> </span>alpaca-prod<span class="w"> </span><span class="nv">ver</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">app</span><span class="o">=</span>alpaca<span class="w"> </span><span class="nv">env</span><span class="o">=</span>prod<span class="w"> </span>--overwrite<span class="o">=</span><span class="nb">true</span>
+</pre></div>
+</div>
+<p><strong>&lt;라벨 기반의 벤다이어그램&gt;</strong></p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../_images/diagram.png"><img alt="image" src="../_images/diagram.png" style="width: 540px;" /></a>
+</figure>
+<ul class="simple">
+<li><p>app, env, ver 별 그룹핑 가능</p></li>
+</ul>
+</section>
+<section id="id4">
+<h3>라벨 수정<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 라벨 수정</span>
+kubectl<span class="w"> </span>label<span class="w"> </span>deployments<span class="w"> </span>alpaca-prod<span class="w"> </span><span class="nv">ver</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="s2">&quot;canary=false&quot;</span>
+</pre></div>
+</div>
+<blockquote>
+<div><p>error: ‘canary’ already has a value (true), and –overwrite is false</p>
+<p>–overwrite=true를 추가해야 함</p>
+</div></blockquote>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 라벨 제거</span>
+kubectl<span class="w"> </span>label<span class="w"> </span>deployments<span class="w"> </span>alpaca-prod<span class="w"> </span><span class="nv">ver</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="s2">&quot;canary-&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="id5">
+<h3>라벨 셀렉터<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<p><strong>라벨 셀렉터</strong>는 라벨의 집합을 기반으로 쿠버네티스 객체를 필터링하는데 사용된다.</p>
+<p><strong>현재 클러스터에서 실행 중인 모든 파드의 상태 확인</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>--show-labels
+</pre></div>
+</div>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../_images/show-labels.png"><img alt="image" src="../_images/show-labels.png" style="width: 540px;" /></a>
+</figure>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pod-template-hash</span></code>: 디플로이먼트에 적용되는 라벨로, 특정 파드가 어떤 템플릿 버전에서 생성됐는지 추적할 수 있음</p></li>
+</ul>
+<p><strong>ver 라벨이 2로 설정된 파드만을 나열</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>--selector<span class="o">=</span><span class="s2">&quot;ver=2&quot;</span>
+
+or
+
+kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-l<span class="w"> </span><span class="s2">&quot;ver=2&quot;</span>
+</pre></div>
+</div>
+<p><strong>app 라벨이 bandicoot 이면서 ver 라벨이 2로 설정된 파드만을 나열</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>--selector<span class="o">=</span><span class="s2">&quot;app=bandicoot,ver=2&quot;</span>
+</pre></div>
+</div>
+<p><strong>app 라벨이 alpaca 또는 bandicoot로 설정된 파드만을 나열</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>--selector<span class="o">=</span><span class="s2">&quot;app in (alpaca,bandicoot)&quot;</span>
+</pre></div>
+</div>
+<p><strong>셀렉터 연산자</strong></p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../_images/label-selector.png"><img alt="image" src="../_images/label-selector.png" style="width: 540px;" /></a>
+</figure>
+</section>
+<section id="api">
+<h3>API 객체의 라벨 셀렉터<a class="headerlink" href="#api" title="Link to this heading"></a></h3>
+<p>쿠버네티스에서 특정 객체가 다른 객체 집합을 참조하고자 <strong>라벨 셀렉터</strong>를 사용한다.
+이때, <strong>구문 분석된 구조(parsed structure)</strong> 를 사용한다.</p>
+<div class="highlight-YAML notranslate"><div class="highlight"><pre><span></span><span class="c1"># app=alpaca, ver in (1, 2)</span>
+<span class="nt">selector</span><span class="p">:</span><span class="w">  </span>
+<span class="w">  </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alpaca</span><span class="w">  </span>
+<span class="w">  </span><span class="nt">matchExpressions</span><span class="p">:</span><span class="w">  </span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="nv">ver</span><span class="p p-Indicator">,</span><span class="nt"> operator</span><span class="p">:</span><span class="w"> </span><span class="nv">In</span><span class="p p-Indicator">,</span><span class="nt"> values</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">]}</span>
+</pre></div>
+</div>
+<div class="highlight-YAML notranslate"><div class="highlight"><pre><span></span><span class="c1"># app=alpaca, ver=1</span>
+<span class="nt">selector</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alpaca</span>
+<span class="w">  </span><span class="nt">ver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+</pre></div>
+</div>
+<p><strong>라벨은 쿠버네티스에서 애플리케이션을 서로 연결하고 관리해주는 강력한 도구다.</strong></p>
+<ul class="simple">
+<li><p>파드의 여러 복제본을 생성하고 유지 관리하는 레플리카셋의 경우, <strong>셀렉터</strong>를 통해 관리 중인 파드를 찾는다.</p></li>
+<li><p>서비스 로드밸런서의 경우, <strong>셀렉터 쿼리</strong>를 통해 트래픽을 전달해야 하는 파드를 찾는다.</p></li>
+</ul>
+</section>
+</section>
+<section id="id6">
+<h2>애노테이션<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
+<p><strong>애노테이션</strong>은 <strong>메타데이터</strong>의 유일한 목적인, 쿠버네티스 객체에 <strong>추가적인 정보를 저장</strong>할 수 있는 장소를 제공한다.</p>
+<p><strong>라벨 vs 애노테이션</strong>
+확실하지 않은 경우, <strong>애노테이션</strong>을 통해 객체에 정보를 추가하고
+셀렉터에서 사용하려는 경우, <strong>라벨</strong>을 사용한다.</p>
+<p><strong>애노테이션은 어떤 용도로 사용되는가</strong></p>
+<ul class="simple">
+<li><p>객체의 최신 업데이트에 대한 이유 추적</p></li>
+<li><p>라벨에 적합하지 않은 빌드, 릴리즈 또는 이미지 관련 정보 첨부</p></li>
+<li><p>UI의 시각적 품질이나 유용성을 향상시키고자 추가 데이터 제공</p></li>
+<li><p>…</p></li>
+</ul>
+<p><strong>애노테이션의 포맷</strong></p>
+<ul class="simple">
+<li><p>라벨 키와 동일한 포맷을 사용</p></li>
+<li><p>추가적인 정보 제공에 주로 사용되므로, 키의 ‘네임스페이스’ 부분이 보다 중요</p></li>
+<li><p>키의 예시) deployment.kubernetes.io/change-cause</p></li>
+</ul>
+<p><strong>애노테이션은 모든 쿠버네티스 객체의 공통 metadata 섹션에 정의된다.</strong></p>
+<div class="highlight-YAML notranslate"><div class="highlight"><pre><span></span><span class="nn">...</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">example.com/icon-url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/icon.png&quot;</span>
+<span class="nn">...</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="05-pods.html" class="btn btn-neutral float-left" title="5장. 파드" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, newbie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="rst-versions" role="note" style="padding: 1rem; font-weight: bold;">
+        <a href="https://github.com/study-zero/newbie"><span class="fa fa-link"> Github</span></a>
+    </div>
+
+</body>
+</html>
