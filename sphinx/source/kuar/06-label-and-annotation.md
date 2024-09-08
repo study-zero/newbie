@@ -49,6 +49,7 @@ kubectl label deployments alpaca-prod ver=1 app=alpaca env=prod --overwrite=true
 # 라벨 수정
 kubectl label deployments alpaca-prod ver=1 "canary=false"
 ```
+
 > error: 'canary' already has a value (true), and --overwrite is false
 > 
 > --overwrite=true를 추가해야 함
