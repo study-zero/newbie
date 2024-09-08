@@ -21,6 +21,7 @@ kubectl run alpaca-prod \
 --replicas=2 \
 --labels="ver=1,app=alpaca,env=pod"
 ```
+
 > error: unknown flag: --replicas
 > 
 > The `--replicas` option was deprecated in Kubernetes 1.18 and removed in a Kubernetes 1.21.
