@@ -39,6 +39,17 @@ vi sphinx/source/kuar/---.md
 # vi sphinx/source/kuar/---.rst
 ```
 
+## How to add post
+1. git clone https://github.com/study-zero/newbie.git
+2. cd newbie
+3. rye sync
+4. vi sphinx/source/kuar/---.md
+5. make clean & make html
+6. git add .
+7. git commit -m "commit message"
+8. git push origin main
+
+
 ## tools
 - https://rye.astral.sh/
 - https://sphinx-rtd-theme.readthedocs.io/en/stable/installing.html
