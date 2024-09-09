@@ -55,6 +55,27 @@
 <li class="toctree-l1"><a class="reference internal" href="03-deploying-a-kubernets-cluster.html">3장. 쿠버네티스 클러스터 배포</a></li>
 <li class="toctree-l1"><a class="reference internal" href="04-common-kubectl-commands.html">4장. 공통 kubectl 명령</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">5장. 파드</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#id2">파드의 필요성</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#id3">쿠버네티스에서의 파드</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#id4">파드에 대한 생각</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#id5">파드 매니페스트</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#id6">파드 생성</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#id7">파드 매니페스트 생성</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#id8">파드 실행</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#id9">파드 조회</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#id10">파드 세부 사항</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#id11">파드 삭제</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#id12">파드에 접근</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id13">로그를 통해 더 많은 정보 얻기</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#exec">exec을 사용해 컨테이너에서 명령 실행</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id14">컨테이너 내외부로 파일 복사</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#id15">상태 검사</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#id16">활성 프로브</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#id17">준비 프로브</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#id18">시작 프로브</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#id19">상태 검사의 기타 기입</a></li>
 <li class="toctree-l1"><a class="reference internal" href="06-label-and-annotation.html">6장. 라벨과 애노테이션</a></li>
 </ul>
 
@@ -84,6 +105,452 @@
              
   <section id="id1">
 <h1>5장. 파드<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
+</section>
+<section id="id2">
+<h1>파드의 필요성<a class="headerlink" href="#id2" title="Link to this heading"></a></h1>
+<p>서비스 레벨에 차이가 있으면서 한 머신에 있어야 할 공생 관계를 가진 경우를 컨트롤 하기 위해서</p>
+<ul class="simple">
+<li><p>local filesystem을 공유하는 git 동기화 컨테이너와 웹 서빙 컨테이너</p></li>
+<li><p>MSA에서 각 어플리케이션과 해당 어플리케이션의 정보 및 네트워크를 컨트롤하는 사이드카</p></li>
+</ul>
+</section>
+<section id="id3">
+<h1>쿠버네티스에서의 파드<a class="headerlink" href="#id3" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p>쿠버네티스 컨테이너의 배포 단위로 같은 파드에 속한 컨테이너 들은 모두 같은 머신 혹은 node에 속한다.</p></li>
+<li><p>동일 파드</p>
+<ul>
+<li><p>동일 ip</p></li>
+<li><p>포트</p></li>
+<li><p>네트워크 네임스페이스</p></li>
+<li><p>호스트 명(UTS 네임스페이스)</p>
+<ul>
+<li><p>UTS 네임스페이스 - 리눅스 커널의 네임스페이스 중 하나로 시스템의 호스트명과 도메인 이름을 격리하는 역할을 함, kubernetes에서 pod안의 모든 컨테이너들은 동일한 uts네임스페이스를 공유하고 그 결과 pod내의 모든 컨테이너들은 동일한 호스트명을 가짐. 이를 통해 하나의 pod내에서 실행 중인 여러 컨테이너들은 같은 호스트를 사용할 수 있게 되고 이것이 네트워크 상호작용을 간단하게 만드는 효과를 만든다고 한다.</p></li>
+</ul>
+</li>
+<li><p>프로세스 간 통신 채널로 동일 파드에 속하는 컨테이너는 서로 소통 가능</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="id4">
+<h1>파드에 대한 생각<a class="headerlink" href="#id4" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p>파드 안의 존재들은 모두 같은 스케일링 전략을 가져야 한다.</p></li>
+<li><p>각기 다른 머신에 존재하여도 문제없이 실행될 수 있다면 같은 pod에 놓는 것은 좋지 못한 선택일 수 있다.</p>
+<ul>
+<li><p>ex) database와 웹서버</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="id5">
+<h1>파드 매니페스트<a class="headerlink" href="#id5" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p>정의: 쿠버네티스 api 객체를 단순히 텍스트 파일 형태로 표현한 것</p></li>
+<li><p>declarative configuration</p>
+<ul>
+<li><p>상태를 지정하고 해당 상태를 유지하도록 조치를 취하는 서비스로 제출하는 것</p></li>
+</ul>
+</li>
+<li><p>처리과정</p>
+<ol class="arabic simple">
+<li><p>매니페스트 파일을 API 서버에 제출</p></li>
+<li><p>매니페스트 검증 및 수락 + 처리</p></li>
+<li><p>영구 저장소(etcd)에 저장</p>
+<ol class="arabic simple">
+<li><p>etcd: Kubernetes의 분산 키-값 저장소로, 클러스터의 상태 정보를 모두 저장합니다. 이에는 파드 매니페스트를 비롯한 클러스터 내의 모든 오브젝트의 상태(예: 파드, 서비스, 컨피그맵, 시크릿, 노드 정보 등)가 포함됩니다.(gpt)</p></li>
+</ol>
+</li>
+<li><p>스케줄러가 노드에 파드를 배치</p></li>
+<li><p>kubelet에 의해 파드 실행</p></li>
+<li><p>매니페스트 파일에 기반하여 실제 객체를 지속적으로 관리</p></li>
+</ol>
+</li>
+</ul>
+</section>
+<section id="id6">
+<h1>파드 생성<a class="headerlink" href="#id6" title="Link to this heading"></a></h1>
+<ul>
+<li><p>kubectl run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>user@AL02502768<span class="w"> </span>kind<span class="w"> </span>%<span class="w"> </span>kubectl<span class="w"> </span>run<span class="w"> </span>kuard<span class="w"> </span>--generator<span class="o">=</span>run-pod/v1<span class="w"> </span><span class="se">\</span>
+--image<span class="o">=</span>gcr.io/kuar-demo/kuard-amd64:blue
+pod/kuard<span class="w"> </span>created
+</pre></div>
+</div>
+<ul>
+<li><p>—generator 옵션</p>
+<ul>
+<li><p>종류</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">run-pod/v1</span></code>: Pod를 생성하기 위한 생성기.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">deployment/apps.v1</span></code>: Deployment를 생성하기 위한 생성기.</p></li>
+</ul>
+</li>
+<li><p>구 버전에서 쓰이는 방식이고 현재는 다음과 같은 방식으로 대체되었다고 한다.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>kubectl<span class="w"> </span>run<span class="w"> </span>&lt;pod-name&gt;<span class="w"> </span>--image<span class="o">=</span>&lt;image-name&gt;<span class="w"> </span>--restart<span class="o">=</span>Never
+</pre></div>
+</div>
+<p><img alt="alt text" src="kuar/image.png" /></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>생성된 pods 확인</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>user@AL02502768<span class="w"> </span>kind<span class="w"> </span>%<span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w">  </span>
+NAME<span class="w">    </span>READY<span class="w">   </span>STATUS<span class="w">    </span>RESTARTS<span class="w">   </span>AGE
+kuard<span class="w">   </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>15m
+</pre></div>
+</div>
+</li>
+<li><p>특정 파드 삭제</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>user@AL02502768<span class="w"> </span>kind<span class="w"> </span>%<span class="w"> </span>kubectl<span class="w"> </span>delete<span class="w"> </span>pods/kuard
+pod<span class="w"> </span><span class="s2">&quot;kuard&quot;</span><span class="w"> </span>deleted
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id7">
+<h1>파드 매니페스트 생성<a class="headerlink" href="#id7" title="Link to this heading"></a></h1>
+<ul>
+<li><p>yaml이나 json으로 생성 가능하지만 주로 yaml 사용(comment)</p></li>
+<li><p>key-value 스타일</p></li>
+<li><p>metadata vs spec section</p>
+<ul class="simple">
+<li><p>metadata section: 파드와 그 라벨에 대한 설명</p></li>
+<li><p>spec: 컨테이너 목록 설명</p></li>
+</ul>
+</li>
+<li><p>예시코드:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcr.io/kuar-demo/kuard-amd64:blue</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="w">          </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id8">
+<h1>파드 실행<a class="headerlink" href="#id8" title="Link to this heading"></a></h1>
+<ul>
+<li><p>apply 명령 사용</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>user@AL02502768<span class="w"> </span>kind<span class="w"> </span>%<span class="w"> </span>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>kuard-pod.yaml
+pod/kuard<span class="w"> </span>created
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id9">
+<h1>파드 조회<a class="headerlink" href="#id9" title="Link to this heading"></a></h1>
+<ul>
+<li><p>get 명령 사용</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>user@AL02502768<span class="w"> </span>kind<span class="w"> </span>%<span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w">               </span>
+NAME<span class="w">    </span>READY<span class="w">   </span>STATUS<span class="w">    </span>RESTARTS<span class="w">   </span>AGE
+kuard<span class="w">   </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>20s
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id10">
+<h1>파드 세부 사항<a class="headerlink" href="#id10" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p>describe 명령어 사용</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>user@AL02502768<span class="w"> </span>kind<span class="w"> </span>%<span class="w"> </span>kubectl<span class="w"> </span>describe<span class="w"> </span>pods<span class="w"> </span>kuard
+<span class="c1"># 파드에 대한 기본적인 정보</span>
+Name:<span class="w">         </span>kuard
+Namespace:<span class="w">    </span>default
+Priority:<span class="w">     </span><span class="m">0</span>
+Node:<span class="w">         </span>kind-control-plane/10.89.1.4
+Start<span class="w"> </span>Time:<span class="w">   </span>Mon,<span class="w"> </span><span class="m">02</span><span class="w"> </span>Sep<span class="w"> </span><span class="m">2024</span><span class="w"> </span><span class="m">01</span>:28:18<span class="w"> </span>+0900
+Labels:<span class="w">       </span>&lt;none&gt;
+Annotations:<span class="w">  </span>kubectl.kubernetes.io/last-applied-configuration:
+<span class="w">                </span><span class="s2">&quot;&quot;</span><span class="o">{</span><span class="s2">&quot;apiVersion&quot;</span>:<span class="s2">&quot;v1&quot;</span>,<span class="s2">&quot;kind&quot;</span>:<span class="s2">&quot;Pod&quot;</span>,<span class="s2">&quot;metadata&quot;</span>:<span class="o">{</span><span class="s2">&quot;annotations&quot;</span>:<span class="o">{}</span>,<span class="s2">&quot;name&quot;</span>:<span class="s2">&quot;kuard&quot;</span>,<span class="s2">&quot;namespace&quot;</span>:<span class="s2">&quot;default&quot;</span><span class="o">}</span>,<span class="s2">&quot;spec&quot;</span>:<span class="o">{</span><span class="s2">&quot;containers&quot;</span>:<span class="o">[{</span><span class="s2">&quot;image&quot;</span>:<span class="s2">&quot;gcr.io/...&quot;</span>
+Status:<span class="w">       </span>Running
+IP:<span class="w">           </span><span class="m">10</span>.244.0.6
+IPs:
+<span class="w">  </span>IP:<span class="w">  </span><span class="m">10</span>.244.0.6
+
+<span class="c1"># 파드 내 컨테이너에 대한 설명</span>
+Containers:
+<span class="w">  </span>kuard:
+<span class="w">    </span>Container<span class="w"> </span>ID:<span class="w">   </span>containerd://33deba34b9f3e27905b686f25d97bd5b46e4af1d184231f74e7bcd183187e2a7
+<span class="w">    </span>Image:<span class="w">          </span>gcr.io/kuar-demo/kuard-amd64:blue
+<span class="w">    </span>Image<span class="w"> </span>ID:<span class="w">       </span>gcr.io/kuar-demo/kuard-amd64@sha256:1ecc9fb2c871302fdb57a25e0c076311b7b352b0a9246d442940ca8fb4efe229
+<span class="w">    </span>Port:<span class="w">           </span><span class="m">8080</span>/TCP
+<span class="w">    </span>Host<span class="w"> </span>Port:<span class="w">      </span><span class="m">0</span>/TCP
+<span class="w">    </span>State:<span class="w">          </span>Running
+<span class="w">      </span>Started:<span class="w">      </span>Mon,<span class="w"> </span><span class="m">02</span><span class="w"> </span>Sep<span class="w"> </span><span class="m">2024</span><span class="w"> </span><span class="m">01</span>:28:18<span class="w"> </span>+0900
+<span class="w">    </span>Ready:<span class="w">          </span>True
+<span class="w">    </span>Restart<span class="w"> </span>Count:<span class="w">  </span><span class="m">0</span>
+<span class="w">    </span>Environment:<span class="w">    </span>&lt;none&gt;
+<span class="w">    </span>Mounts:
+<span class="w">      </span>/var/run/secrets/kubernetes.io/serviceaccount<span class="w"> </span>from<span class="w"> </span>kube-api-access-5btk2<span class="w"> </span><span class="o">(</span>ro<span class="o">)</span>
+Conditions:
+<span class="w">  </span>Type<span class="w">                        </span>Status
+<span class="w">  </span>PodReadyToStartContainers<span class="w">   </span>True<span class="w"> </span>
+<span class="w">  </span>Initialized<span class="w">                 </span>True<span class="w"> </span>
+<span class="w">  </span>Ready<span class="w">                       </span>True<span class="w"> </span>
+<span class="w">  </span>ContainersReady<span class="w">             </span>True<span class="w"> </span>
+<span class="w">  </span>PodScheduled<span class="w">                </span>True<span class="w"> </span>
+Volumes:
+<span class="w">  </span>kube-api-access-5btk2:
+<span class="w">    </span>Type:<span class="w">                    </span>Projected<span class="w"> </span><span class="o">(</span>a<span class="w"> </span>volume<span class="w"> </span>that<span class="w"> </span>contains<span class="w"> </span>injected<span class="w"> </span>data<span class="w"> </span>from<span class="w"> </span>multiple<span class="w"> </span>sources<span class="o">)</span>
+<span class="w">    </span>TokenExpirationSeconds:<span class="w">  </span><span class="m">3607</span>
+<span class="w">    </span>ConfigMapName:<span class="w">           </span>kube-root-ca.crt
+<span class="w">    </span>ConfigMapOptional:<span class="w">       </span>&lt;nil&gt;
+<span class="w">    </span>DownwardAPI:<span class="w">             </span><span class="nb">true</span>
+QoS<span class="w"> </span>Class:<span class="w">                   </span>BestEffort
+Node-Selectors:<span class="w">              </span>&lt;none&gt;
+Tolerations:<span class="w">                 </span>node.kubernetes.io/not-ready:NoExecute<span class="w"> </span><span class="k">for</span><span class="w"> </span>300s
+<span class="w">                             </span>node.kubernetes.io/unreachable:NoExecute<span class="w"> </span><span class="k">for</span><span class="w"> </span>300s
+<span class="c1"># 이벤트 정보</span>
+Events:
+<span class="w">  </span>Type<span class="w">    </span>Reason<span class="w">     </span>Age<span class="w">    </span>From<span class="w">                         </span>Message
+<span class="w">  </span>----<span class="w">    </span>------<span class="w">     </span>----<span class="w">   </span>----<span class="w">                         </span>-------
+<span class="w">  </span>Normal<span class="w">  </span>Scheduled<span class="w">  </span>8m58s<span class="w">  </span>default-scheduler<span class="w">            </span>Successfully<span class="w"> </span>assigned<span class="w"> </span>default/kuard<span class="w"> </span>to<span class="w"> </span>kind-control-plane
+<span class="w">  </span>Normal<span class="w">  </span>Pulled<span class="w">     </span>8m58s<span class="w">  </span>kubelet,<span class="w"> </span>kind-control-plane<span class="w">  </span>Container<span class="w"> </span>image<span class="w"> </span><span class="s2">&quot;gcr.io/kuar-demo/kuard-amd64:blue&quot;</span><span class="w"> </span>already<span class="w"> </span>present<span class="w"> </span>on<span class="w"> </span>machine
+<span class="w">  </span>Normal<span class="w">  </span>Created<span class="w">    </span>8m58s<span class="w">  </span>kubelet,<span class="w"> </span>kind-control-plane<span class="w">  </span>Created<span class="w"> </span>container<span class="w"> </span>kuard
+<span class="w">  </span>Normal<span class="w">  </span>Started<span class="w">    </span>8m58s<span class="w">  </span>kubelet,<span class="w"> </span>kind-control-plane<span class="w">  </span>Started<span class="w"> </span>container<span class="w"> </span>kuard
+</pre></div>
+</div>
+<ul>
+<li><p>man page</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>user@AL02502768<span class="w"> </span>kind<span class="w"> </span>%<span class="w"> </span>kubectl<span class="w"> </span>describe<span class="w"> </span>--help<span class="w">    </span>
+Show<span class="w"> </span>details<span class="w"> </span>of<span class="w"> </span>a<span class="w"> </span>specific<span class="w"> </span>resource<span class="w"> </span>or<span class="w"> </span>group<span class="w"> </span>of<span class="w"> </span>resources
+
+<span class="w"> </span>Print<span class="w"> </span>a<span class="w"> </span>detailed<span class="w"> </span>description<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>selected<span class="w"> </span>resources,<span class="w"> </span>including<span class="w"> </span>related<span class="w"> </span>resources<span class="w"> </span>such<span class="w"> </span>as<span class="w"> </span>events<span class="w"> </span>or<span class="w"> </span>controllers.<span class="w"> </span>You
+may<span class="w"> </span><span class="k">select</span><span class="w"> </span>a<span class="w"> </span>single<span class="w"> </span>object<span class="w"> </span>by<span class="w"> </span>name,<span class="w"> </span>all<span class="w"> </span>objects<span class="w"> </span>of<span class="w"> </span>that<span class="w"> </span>type,<span class="w"> </span>provide<span class="w"> </span>a<span class="w"> </span>name<span class="w"> </span>prefix,<span class="w"> </span>or<span class="w"> </span>label<span class="w"> </span>selector.<span class="w"> </span>For<span class="w"> </span>example:
+
+<span class="w">  </span>$<span class="w"> </span>kubectl<span class="w"> </span>describe<span class="w"> </span>TYPE<span class="w"> </span>NAME_PREFIX
+<span class="w">  </span>
+<span class="w"> </span>will<span class="w"> </span>first<span class="w"> </span>check<span class="w"> </span><span class="k">for</span><span class="w"> </span>an<span class="w"> </span>exact<span class="w"> </span>match<span class="w"> </span>on<span class="w"> </span>TYPE<span class="w"> </span>and<span class="w"> </span>NAME_PREFIX.<span class="w"> </span>If<span class="w"> </span>no<span class="w"> </span>such<span class="w"> </span>resource<span class="w"> </span>exists,<span class="w"> </span>it<span class="w"> </span>will<span class="w"> </span>output<span class="w"> </span>details<span class="w"> </span><span class="k">for</span>
+every<span class="w"> </span>resource<span class="w"> </span>that<span class="w"> </span>has<span class="w"> </span>a<span class="w"> </span>name<span class="w"> </span>prefixed<span class="w"> </span>with<span class="w"> </span>NAME_PREFIX.
+
+Use<span class="w"> </span><span class="s2">&quot;kubectl api-resources&quot;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>a<span class="w"> </span><span class="nb">complete</span><span class="w"> </span>list<span class="w"> </span>of<span class="w"> </span>supported<span class="w"> </span>resources.
+
+Examples:
+<span class="w">  </span><span class="c1"># Describe a node</span>
+<span class="w">  </span>kubectl<span class="w"> </span>describe<span class="w"> </span>nodes<span class="w"> </span>kubernetes-node-emt8.c.myproject.internal
+<span class="w">  </span>
+<span class="w">  </span><span class="c1"># Describe a pod</span>
+<span class="w">  </span>kubectl<span class="w"> </span>describe<span class="w"> </span>pods/nginx
+<span class="w">  </span>
+<span class="w">  </span><span class="c1"># Describe a pod identified by type and name in &quot;pod.json&quot;</span>
+<span class="w">  </span>kubectl<span class="w"> </span>describe<span class="w"> </span>-f<span class="w"> </span>pod.json
+<span class="w">  </span>
+<span class="w">  </span><span class="c1"># Describe all pods</span>
+<span class="w">  </span>kubectl<span class="w"> </span>describe<span class="w"> </span>pods
+<span class="w">  </span>
+<span class="w">  </span><span class="c1"># Describe pods by label name=myLabel</span>
+<span class="w">  </span>kubectl<span class="w"> </span>describe<span class="w"> </span>po<span class="w"> </span>-l<span class="w"> </span><span class="nv">name</span><span class="o">=</span>myLabel
+<span class="w">  </span>
+<span class="w">  </span><span class="c1"># Describe all pods managed by the &#39;frontend&#39; replication controller (rc-created pods</span>
+<span class="w">  </span><span class="c1"># get the name of the rc as a prefix in the pod the name).</span>
+<span class="w">  </span>kubectl<span class="w"> </span>describe<span class="w"> </span>pods<span class="w"> </span>frontend
+
+Options:
+<span class="w">  </span>-A,<span class="w"> </span>--all-namespaces<span class="o">=</span>false:<span class="w"> </span>If<span class="w"> </span>present,<span class="w"> </span>list<span class="w"> </span>the<span class="w"> </span>requested<span class="w"> </span>object<span class="o">(</span>s<span class="o">)</span><span class="w"> </span>across<span class="w"> </span>all<span class="w"> </span>namespaces.<span class="w"> </span>Namespace<span class="w"> </span><span class="k">in</span><span class="w"> </span>current
+context<span class="w"> </span>is<span class="w"> </span>ignored<span class="w"> </span>even<span class="w"> </span><span class="k">if</span><span class="w"> </span>specified<span class="w"> </span>with<span class="w"> </span>--namespace.
+<span class="w">  </span>-f,<span class="w"> </span>--filename<span class="o">=[]</span>:<span class="w"> </span>Filename,<span class="w"> </span>directory,<span class="w"> </span>or<span class="w"> </span>URL<span class="w"> </span>to<span class="w"> </span>files<span class="w"> </span>containing<span class="w"> </span>the<span class="w"> </span>resource<span class="w"> </span>to<span class="w"> </span>describe
+<span class="w">  </span>-k,<span class="w"> </span>--kustomize<span class="o">=</span><span class="s1">&#39;&#39;</span>:<span class="w"> </span>Process<span class="w"> </span>the<span class="w"> </span>kustomization<span class="w"> </span>directory.<span class="w"> </span>This<span class="w"> </span>flag<span class="w"> </span>can<span class="s1">&#39;t be used together with -f or -R.</span>
+<span class="s1">  -R, --recursive=false: Process the directory used in -f, --filename recursively. Useful when you want to manage</span>
+<span class="s1">related manifests organized within the same directory.</span>
+<span class="s1">  -l, --selector=&#39;&#39;: Selector (label query) to filter on, supports &#39;</span><span class="o">=</span><span class="s1">&#39;, &#39;</span><span class="o">==</span><span class="s1">&#39;, and &#39;</span>!<span class="o">=</span><span class="err">&#39;</span>.<span class="o">(</span>e.g.<span class="w"> </span>-l<span class="w"> </span><span class="nv">key1</span><span class="o">=</span>value1,key2<span class="o">=</span>value2<span class="o">)</span>
+<span class="w">      </span>--show-events<span class="o">=</span>true:<span class="w"> </span>If<span class="w"> </span>true,<span class="w"> </span>display<span class="w"> </span>events<span class="w"> </span>related<span class="w"> </span>to<span class="w"> </span>the<span class="w"> </span>described<span class="w"> </span>object.
+
+Usage:
+<span class="w">  </span>kubectl<span class="w"> </span>describe<span class="w"> </span><span class="o">(</span>-f<span class="w"> </span>FILENAME<span class="w"> </span><span class="p">|</span><span class="w"> </span>TYPE<span class="w"> </span><span class="o">[</span>NAME_PREFIX<span class="w"> </span><span class="p">|</span><span class="w"> </span>-l<span class="w"> </span>label<span class="o">]</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>TYPE/NAME<span class="o">)</span><span class="w"> </span><span class="o">[</span>options<span class="o">]</span>
+
+Use<span class="w"> </span><span class="s2">&quot;kubectl options&quot;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>a<span class="w"> </span>list<span class="w"> </span>of<span class="w"> </span>global<span class="w"> </span>command-line<span class="w"> </span>options<span class="w"> </span><span class="o">(</span>applies<span class="w"> </span>to<span class="w"> </span>all<span class="w"> </span>commands<span class="o">)</span>.
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>관련 설명 필요</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="id11">
+<h1>파드 삭제<a class="headerlink" href="#id11" title="Link to this heading"></a></h1>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>user@AL02502768<span class="w"> </span>kind<span class="w"> </span>%<span class="w"> </span>kubectl<span class="w"> </span>delete<span class="w"> </span>pods/kuard
+pod<span class="w"> </span><span class="s2">&quot;kuard&quot;</span><span class="w"> </span>deleted
+</pre></div>
+</div>
+</section>
+<section id="id12">
+<h1>파드에 접근<a class="headerlink" href="#id12" title="Link to this heading"></a></h1>
+<section id="id13">
+<h2>로그를 통해 더 많은 정보 얻기<a class="headerlink" href="#id13" title="Link to this heading"></a></h2>
+<ul>
+<li><p>logs 명령어 사용</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>user@AL02502768<span class="w"> </span>kind<span class="w"> </span>%<span class="w"> </span>kubectl<span class="w"> </span>logs<span class="w"> </span>kuard
+<span class="m">2024</span>/09/01<span class="w"> </span><span class="m">16</span>:45:52<span class="w"> </span>Starting<span class="w"> </span>kuard<span class="w"> </span>version:<span class="w"> </span>v0.10.0-blue
+<span class="m">2024</span>/09/01<span class="w"> </span><span class="m">16</span>:45:52<span class="w"> </span>**********************************************************************
+<span class="m">2024</span>/09/01<span class="w"> </span><span class="m">16</span>:45:52<span class="w"> </span>*<span class="w"> </span>WARNING:<span class="w"> </span>This<span class="w"> </span>server<span class="w"> </span>may<span class="w"> </span>expose<span class="w"> </span>sensitive
+<span class="m">2024</span>/09/01<span class="w"> </span><span class="m">16</span>:45:52<span class="w"> </span>*<span class="w"> </span>and<span class="w"> </span>secret<span class="w"> </span>information.<span class="w"> </span>Be<span class="w"> </span>careful.
+<span class="m">2024</span>/09/01<span class="w"> </span><span class="m">16</span>:45:52<span class="w"> </span>**********************************************************************
+<span class="m">2024</span>/09/01<span class="w"> </span><span class="m">16</span>:45:52<span class="w"> </span>Config:<span class="w"> </span>
+<span class="o">{</span>
+<span class="w">  </span><span class="s2">&quot;address&quot;</span>:<span class="w"> </span><span class="s2">&quot;:8080&quot;</span>,
+<span class="w">  </span><span class="s2">&quot;debug&quot;</span>:<span class="w"> </span>false,
+<span class="w">  </span><span class="s2">&quot;debug-sitedata-dir&quot;</span>:<span class="w"> </span><span class="s2">&quot;./sitedata&quot;</span>,
+<span class="w">  </span><span class="s2">&quot;keygen&quot;</span>:<span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="s2">&quot;enable&quot;</span>:<span class="w"> </span>false,
+<span class="w">    </span><span class="s2">&quot;exit-code&quot;</span>:<span class="w"> </span><span class="m">0</span>,
+<span class="w">    </span><span class="s2">&quot;exit-on-complete&quot;</span>:<span class="w"> </span>false,
+<span class="w">    </span><span class="s2">&quot;memq-queue&quot;</span>:<span class="w"> </span><span class="s2">&quot;&quot;</span>,
+<span class="w">    </span><span class="s2">&quot;memq-server&quot;</span>:<span class="w"> </span><span class="s2">&quot;&quot;</span>,
+<span class="w">    </span><span class="s2">&quot;num-to-gen&quot;</span>:<span class="w"> </span><span class="m">0</span>,
+<span class="w">    </span><span class="s2">&quot;time-to-run&quot;</span>:<span class="w"> </span><span class="m">0</span>
+<span class="w">  </span><span class="o">}</span>,
+<span class="w">  </span><span class="s2">&quot;liveness&quot;</span>:<span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="s2">&quot;fail-next&quot;</span>:<span class="w"> </span><span class="m">0</span>
+<span class="w">  </span><span class="o">}</span>,
+<span class="w">  </span><span class="s2">&quot;readiness&quot;</span>:<span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="s2">&quot;fail-next&quot;</span>:<span class="w"> </span><span class="m">0</span>
+<span class="w">  </span><span class="o">}</span>,
+<span class="w">  </span><span class="s2">&quot;tls-address&quot;</span>:<span class="w"> </span><span class="s2">&quot;:8443&quot;</span>,
+<span class="w">  </span><span class="s2">&quot;tls-dir&quot;</span>:<span class="w"> </span><span class="s2">&quot;/tls&quot;</span>
+<span class="o">}</span>
+<span class="m">2024</span>/09/01<span class="w"> </span><span class="m">16</span>:45:52<span class="w"> </span>Could<span class="w"> </span>not<span class="w"> </span>find<span class="w"> </span>certificates<span class="w"> </span>to<span class="w"> </span>serve<span class="w"> </span>TLS
+<span class="m">2024</span>/09/01<span class="w"> </span><span class="m">16</span>:45:52<span class="w"> </span>Serving<span class="w"> </span>on<span class="w"> </span>HTTP<span class="w"> </span>on<span class="w"> </span>:8080
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="exec">
+<h2>exec을 사용해 컨테이너에서 명령 실행<a class="headerlink" href="#exec" title="Link to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>user@AL02502768<span class="w"> </span>kind<span class="w"> </span>%<span class="w"> </span>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>kuard<span class="w"> </span>--<span class="w"> </span>ash<span class="w"> </span>
+~<span class="w"> </span>$<span class="w"> </span><span class="nb">exit</span>
+</pre></div>
+</div>
+<ul>
+<li><p>참고사항: bash는 없음</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>user@AL02502768<span class="w"> </span>kind<span class="w"> </span>%<span class="w"> </span>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>kuard<span class="w"> </span>--<span class="w"> </span>bash
+error:<span class="w"> </span>Internal<span class="w"> </span>error<span class="w"> </span>occurred:<span class="w"> </span>error<span class="w"> </span>executing<span class="w"> </span><span class="nb">command</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>container:<span class="w"> </span>failed<span class="w"> </span>to<span class="w"> </span><span class="nb">exec</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>container:<span class="w"> </span>failed<span class="w"> </span>to<span class="w"> </span>start<span class="w"> </span><span class="nb">exec</span><span class="w"> </span><span class="s2">&quot;56fbf70a8f69023e46ca86000a3415fa23e0d3302d0e5598aa361169953148ba&quot;</span>:<span class="w"> </span>OCI<span class="w"> </span>runtime<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>failed:<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>failed:<span class="w"> </span>unable<span class="w"> </span>to<span class="w"> </span>start<span class="w"> </span>container<span class="w"> </span>process:<span class="w"> </span>exec:<span class="w"> </span><span class="s2">&quot;bash&quot;</span>:<span class="w"> </span>executable<span class="w"> </span>file<span class="w"> </span>not<span class="w"> </span>found<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">$PATH</span>:<span class="w"> </span>unknown
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id14">
+<h2>컨테이너 내외부로 파일 복사<a class="headerlink" href="#id14" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>안티패턴이지만 장애를 빠르게 해결하는 방안으로는 사용 가능</p></li>
+<li><p>단 사용 후 이미지에 반영하여야 함</p></li>
+</ul>
+</section>
+</section>
+<section id="id15">
+<h1>상태 검사<a class="headerlink" href="#id15" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p>프로세스 상태 검사 → 파드를 항상 살아 있는 상태로 유지할 수 있음</p>
+<ul>
+<li><p>검사 실패 시 프로세스 재시작</p></li>
+</ul>
+</li>
+<li><p>그러나 주요 프로세스를 항상 실행하게 하는 단순한 방식이어서 데드락 같은 상황을 처리할 수 없음</p></li>
+<li><p>각 어플리케이션 별로 특화된 상태 검사가 필요</p>
+<ul>
+<li><p>프로브라고 불리며 매니페스트에 정리</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="id16">
+<h1>활성 프로브<a class="headerlink" href="#id16" title="Link to this heading"></a></h1>
+<ul>
+<li><p>활성 프로브를 추가한 매니페스트</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>apiVersion:<span class="w"> </span>v1
+kind:<span class="w"> </span>Pod
+metadata:
+<span class="w">  </span>name:<span class="w"> </span>kuard
+spec:
+<span class="w">  </span>containers:
+<span class="w">    </span>-<span class="w"> </span>image:<span class="w"> </span>gcr.io/kuar-demo/kuard-amd64:blue
+<span class="w">      </span>name:<span class="w"> </span>kuard
+<span class="w">      </span>livenessProbe:
+<span class="w">        </span>httpGet:
+<span class="w">          </span>path:<span class="w"> </span>/healthy
+<span class="w">          </span>port:<span class="w"> </span><span class="m">8080</span>
+<span class="w">        </span>initialDelaySeconds:<span class="w"> </span><span class="m">5</span>
+<span class="w">        </span>periodSeconds:<span class="w"> </span><span class="m">1</span>
+<span class="w">        </span>failureThreshold:<span class="w"> </span><span class="m">3</span>
+<span class="w">      </span>ports:
+<span class="w">        </span>-<span class="w"> </span>containerPort:<span class="w"> </span><span class="m">8080</span>
+<span class="w">          </span>name:<span class="w"> </span>http
+<span class="w">          </span>protocol:<span class="w"> </span>TCP
+</pre></div>
+</div>
+</li>
+<li><p>강제 실패 시:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>87s<span class="w">         </span>Normal<span class="w">    </span>Created<span class="w">     </span>pod/kuard<span class="w">   </span>Created<span class="w"> </span>container<span class="w"> </span>kuard
+87s<span class="w">         </span>Normal<span class="w">    </span>Started<span class="w">     </span>pod/kuard<span class="w">   </span>Started<span class="w"> </span>container<span class="w"> </span>kuard
+87s<span class="w">         </span>Warning<span class="w">   </span>Unhealthy<span class="w">   </span>pod/kuard<span class="w">   </span>Liveness<span class="w"> </span>probe<span class="w"> </span>failed:<span class="w"> </span>HTTP<span class="w"> </span>probe<span class="w"> </span>failed<span class="w"> </span>with<span class="w"> </span>statuscode:<span class="w"> </span><span class="m">500</span>
+87s<span class="w">         </span>Normal<span class="w">    </span>Killing<span class="w">     </span>pod/kuard<span class="w">   </span>Container<span class="w"> </span>kuard<span class="w"> </span>failed<span class="w"> </span>liveness<span class="w"> </span>probe,<span class="w"> </span>will<span class="w"> </span>be<span class="w"> </span>restarted
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id17">
+<h1>준비 프로브<a class="headerlink" href="#id17" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p>사용자 요청을 받을 수 있는 상태인지에 대한 체크</p></li>
+<li><p>실패시 성공할 때까지 로드밸런서에서 제외, 주기적으로 시도하여 성공시 다시 트래픽 받음</p></li>
+</ul>
+</section>
+<section id="id18">
+<h1>시작 프로브<a class="headerlink" href="#id18" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p>컨테이너가 시작될 때 한 번 실행됨. 이 프로브가 성공할 때까지 쿠버네티스는 컨테이너가 정상적으로 시작되고 있다고 가정하며, 성공하면 준비 및 라이브니스 프로브가 활성화됨</p></li>
+<li><p>만약 시작 프로브가 실패하면, 컨테이너는 재시작되거나 실패 상태로 간주될 수 있음.</p></li>
+</ul>
+</section>
+<section id="id19">
+<h1>상태 검사의 기타 기입<a class="headerlink" href="#id19" title="Link to this heading"></a></h1>
+<p>tcp와 exec 프로브 존재</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="err">apiVersio</span><span class="kc">n</span><span class="p">:</span><span class="w"> </span><span class="err">v</span><span class="mi">1</span>
+<span class="err">ki</span><span class="kc">n</span><span class="err">d</span><span class="p">:</span><span class="w"> </span><span class="err">Pod</span>
+<span class="err">me</span><span class="kc">ta</span><span class="err">da</span><span class="kc">ta</span><span class="p">:</span>
+<span class="w">  </span><span class="kc">na</span><span class="err">me</span><span class="p">:</span><span class="w"> </span><span class="err">kuard</span>
+<span class="err">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="err">co</span><span class="kc">nta</span><span class="err">i</span><span class="kc">ners</span><span class="p">:</span>
+<span class="w">    </span><span class="mi">-</span><span class="w"> </span><span class="err">image</span><span class="p">:</span><span class="w"> </span><span class="err">gcr.io/kuar</span><span class="mi">-</span><span class="err">demo/kuard</span><span class="mi">-</span><span class="err">amd</span><span class="mi">64</span><span class="p">:</span><span class="err">blue</span>
+<span class="w">      </span><span class="kc">na</span><span class="err">me</span><span class="p">:</span><span class="w"> </span><span class="err">kuard</span>
+<span class="w">      </span><span class="err">readi</span><span class="kc">ness</span><span class="err">Probe</span><span class="p">:</span>
+<span class="w">        </span><span class="kc">t</span><span class="err">cpSocke</span><span class="kc">t</span><span class="p">:</span>
+<span class="w">          </span><span class="err">por</span><span class="kc">t</span><span class="p">:</span><span class="w"> </span><span class="mi">8080</span>
+<span class="w">        </span><span class="err">i</span><span class="kc">n</span><span class="err">i</span><span class="kc">t</span><span class="err">ialDelaySeco</span><span class="kc">n</span><span class="err">ds</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span>
+<span class="w">        </span><span class="err">periodSeco</span><span class="kc">n</span><span class="err">ds</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">      </span><span class="err">live</span><span class="kc">ness</span><span class="err">Probe</span><span class="p">:</span>
+<span class="w">        </span><span class="err">h</span><span class="kc">tt</span><span class="err">pGe</span><span class="kc">t</span><span class="p">:</span>
+<span class="w">          </span><span class="err">pa</span><span class="kc">t</span><span class="err">h</span><span class="p">:</span><span class="w"> </span><span class="err">/heal</span><span class="kc">t</span><span class="err">hy</span>
+<span class="w">          </span><span class="err">por</span><span class="kc">t</span><span class="p">:</span><span class="w"> </span><span class="mi">8080</span>
+<span class="w">        </span><span class="err">i</span><span class="kc">n</span><span class="err">i</span><span class="kc">t</span><span class="err">ialDelaySeco</span><span class="kc">n</span><span class="err">ds</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span>
+<span class="w">        </span><span class="err">periodSeco</span><span class="kc">n</span><span class="err">ds</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="kc">fa</span><span class="err">ilureThreshold</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span>
+<span class="w">      </span><span class="err">por</span><span class="kc">ts</span><span class="p">:</span>
+<span class="w">        </span><span class="mi">-</span><span class="w"> </span><span class="err">co</span><span class="kc">nta</span><span class="err">i</span><span class="kc">ner</span><span class="err">Por</span><span class="kc">t</span><span class="p">:</span><span class="w"> </span><span class="mi">8080</span>
+<span class="w">          </span><span class="kc">na</span><span class="err">me</span><span class="p">:</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span>
+<span class="w">          </span><span class="err">pro</span><span class="kc">t</span><span class="err">ocol</span><span class="p">:</span><span class="w"> </span><span class="err">TCP</span>
+</pre></div>
+</div>
 </section>
 
 

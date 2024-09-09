@@ -21,6 +21,7 @@ kubectl run alpaca-prod \
 --replicas=2 \
 --labels="ver=1,app=alpaca,env=pod"
 ```
+
 > error: unknown flag: --replicas
 > 
 > The `--replicas` option was deprecated in Kubernetes 1.18 and removed in a Kubernetes 1.21.
@@ -49,8 +50,8 @@ kubectl label deployments alpaca-prod ver=1 app=alpaca env=prod --overwrite=true
 # 라벨 수정
 kubectl label deployments alpaca-prod ver=1 "canary=false"
 ```
+
 > error: 'canary' already has a value (true), and --overwrite is false
-> 
 > --overwrite=true를 추가해야 함
 
 
