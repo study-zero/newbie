@@ -341,7 +341,7 @@ user@AL02502768 kind % kubectl exec -it kuard -- ash
 
 - 활성 프로브를 추가한 매니페스트
     
-    ```bash
+    ```yaml
     apiVersion: v1
     kind: Pod
     metadata:
@@ -387,7 +387,7 @@ user@AL02502768 kind % kubectl exec -it kuard -- ash
 
 tcp와 exec 프로브 존재
 
-```json
+```yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -415,3 +415,120 @@ spec:
 
 ```
 <br/>
+
+## 리소스 관리
+### 리소스 관리가 필요한 이유
+- 컴퓨트 노드의 전체 사용률을 높여서 비용 효율성을 높이기 위해
+- 이를 위해서는 각 컨테이너가 필요한 리소스를 쿠버네티스에 알려주어야 할 필요성이 있음
+
+### 기호 표기 방법
+- literals:
+  - 메모리 자원을 설정할 때 사용하는 표기 방식으로 기본 단위는 byte
+  - MB/GB/PB와 MiB/GiB/PiB의 차이 비교
+    - 1 MB = 1024KB
+    - 1 MIM = 1024KIB
+- millicores:
+  - CPU 리소스를 설정할 때 사용하는 단위
+    - 1 core == 1000m
+
+### 리소스 요청
+- 개념: 해당 어플리케이션이 보장받아야 하는 최소 리소스 량
+- 예시코드
+  ```yaml
+  apiVersion: v1
+  kind: Pod
+  metadata:
+    name: kuard
+  spec:
+    containers:
+      - image: gcr.io/kuar-demo/kuard-amd64:blue
+        name: kuard
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "128Mi"
+        ports:
+          - containerPort: 8080
+            name: http 
+            protocol: TCP
+  ```
+- 리눅스 커널 cpu-shares:
+  - [관련링크](https://www.redhat.com/sysadmin/cgroups-part-two)
+
+### 리소스 제한
+- 개념: 해당 어플리케이션이 받을 수 있는 최대 리소스 량
+- 예시코드
+  ```yaml
+  apiVersion: v1
+  kind: Pod
+  metadata:
+    name: kuard
+  spec:
+    containers:
+      - image: gcr.io/kuar-demo/kuard-amd64:blue
+        name: kuard
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "128Mi"
+          limits:
+            cpu: "800m"
+            memory: "256Mi"
+        ports:
+          - containerPort: 8080
+            name: http 
+            protocol: TCP
+  ```
+</br>
+
+## 볼륨을 통한 데이터 보존
+### 파드에서 볼륨 사용
+- 해당 파드 매니페스트에서 컨테이너가 접근할 수 있는 모든 볼륨을 정의
+- 예시
+  ```yaml
+  apiVersion: v1
+  kind: Pod
+  metadata:
+    name: kuard
+  spec:
+    volumes:
+      - name: "kuard-data"
+        hostPath: #워커 노드 임의의 위치를 컨테이너에 마운트 할 수 있는 예약 볼륨
+          path: "/var/lib/kuard"
+  ```
+### 컨테이너에서 볼륨 사용
+- 특정 컨테이너에 마운트될 볼륨과 각 볼륨들이 마운트될 경로 정의
+- 예시
+  ```yaml
+  apiVersion: v1
+  kind: Pod
+  metadata:
+    name: kuard
+  spec:
+    volumes:
+      - name: "kuard-data"
+        hostPath: #워커 노드 임의의 위치를 컨테이너에 마운트 할 수 있는 예약 볼륨
+          path: "/var/lib/kuard"
+    containers:
+      - image: gcr.io/kuar-demo/kuard-amd64:blue
+        name: kuard
+        volumeMounts:
+          - mountPath: "/data"
+            name: "kuard-data"
+        ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+  ```
+
+</br>
+
+## 파드에서 볼륨을 사용하는 다양한 방법
+### 통신/동기화
+- 두 컨테이너 사이의 볼륨 공유
+### 캐시
+- emptyDir 볼륨 공유
+### 영구데이터
+- 클라우드 같은 원격 네트워크 스토리지 볼륨 사용
+### 호스트 파일 시스템 필요시
+- hostPath라는 볼륨을 사용

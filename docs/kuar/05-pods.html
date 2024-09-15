@@ -78,6 +78,25 @@
 <li class="toctree-l3"><a class="reference internal" href="#id19">상태 검사의 기타 기입</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#id20">리소스 관리</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id21">리소스 관리가 필요한 이유</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id22">기호 표기 방법</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id23">리소스 요청</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id24">리소스 제한</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id25">볼륨을 통한 데이터 보존</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id26">파드에서 볼륨 사용</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id27">컨테이너에서 볼륨 사용</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id28">파드에서 볼륨을 사용하는 다양한 방법</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id29">통신/동기화</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id30">캐시</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id31">영구데이터</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id32">호스트 파일 시스템 필요시</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="06-label-and-annotation.html">6장. 라벨과 애노테이션</a></li>
@@ -490,25 +509,25 @@ error:<span class="w"> </span>Internal<span class="w"> </span>error<span class="
 <h3>활성 프로브<a class="headerlink" href="#id16" title="Link to this heading"></a></h3>
 <ul>
 <li><p>활성 프로브를 추가한 매니페스트</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>apiVersion:<span class="w"> </span>v1
-kind:<span class="w"> </span>Pod
-metadata:
-<span class="w">  </span>name:<span class="w"> </span>kuard
-spec:
-<span class="w">  </span>containers:
-<span class="w">    </span>-<span class="w"> </span>image:<span class="w"> </span>gcr.io/kuar-demo/kuard-amd64:blue
-<span class="w">      </span>name:<span class="w"> </span>kuard
-<span class="w">      </span>livenessProbe:
-<span class="w">        </span>httpGet:
-<span class="w">          </span>path:<span class="w"> </span>/healthy
-<span class="w">          </span>port:<span class="w"> </span><span class="m">8080</span>
-<span class="w">        </span>initialDelaySeconds:<span class="w"> </span><span class="m">5</span>
-<span class="w">        </span>periodSeconds:<span class="w"> </span><span class="m">1</span>
-<span class="w">        </span>failureThreshold:<span class="w"> </span><span class="m">3</span>
-<span class="w">      </span>ports:
-<span class="w">        </span>-<span class="w"> </span>containerPort:<span class="w"> </span><span class="m">8080</span>
-<span class="w">          </span>name:<span class="w"> </span>http
-<span class="w">          </span>protocol:<span class="w"> </span>TCP
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcr.io/kuar-demo/kuard-amd64:blue</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="w">      </span><span class="nt">livenessProbe</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">httpGet</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/healthy</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<span class="w">        </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">        </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="nt">failureThreshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="w">          </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
 </pre></div>
 </div>
 </li>
@@ -539,33 +558,208 @@ spec:
 <section id="id19">
 <h3>상태 검사의 기타 기입<a class="headerlink" href="#id19" title="Link to this heading"></a></h3>
 <p>tcp와 exec 프로브 존재</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="err">apiVersio</span><span class="kc">n</span><span class="p">:</span><span class="w"> </span><span class="err">v</span><span class="mi">1</span>
-<span class="err">ki</span><span class="kc">n</span><span class="err">d</span><span class="p">:</span><span class="w"> </span><span class="err">Pod</span>
-<span class="err">me</span><span class="kc">ta</span><span class="err">da</span><span class="kc">ta</span><span class="p">:</span>
-<span class="w">  </span><span class="kc">na</span><span class="err">me</span><span class="p">:</span><span class="w"> </span><span class="err">kuard</span>
-<span class="err">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="err">co</span><span class="kc">nta</span><span class="err">i</span><span class="kc">ners</span><span class="p">:</span>
-<span class="w">    </span><span class="mi">-</span><span class="w"> </span><span class="err">image</span><span class="p">:</span><span class="w"> </span><span class="err">gcr.io/kuar</span><span class="mi">-</span><span class="err">demo/kuard</span><span class="mi">-</span><span class="err">amd</span><span class="mi">64</span><span class="p">:</span><span class="err">blue</span>
-<span class="w">      </span><span class="kc">na</span><span class="err">me</span><span class="p">:</span><span class="w"> </span><span class="err">kuard</span>
-<span class="w">      </span><span class="err">readi</span><span class="kc">ness</span><span class="err">Probe</span><span class="p">:</span>
-<span class="w">        </span><span class="kc">t</span><span class="err">cpSocke</span><span class="kc">t</span><span class="p">:</span>
-<span class="w">          </span><span class="err">por</span><span class="kc">t</span><span class="p">:</span><span class="w"> </span><span class="mi">8080</span>
-<span class="w">        </span><span class="err">i</span><span class="kc">n</span><span class="err">i</span><span class="kc">t</span><span class="err">ialDelaySeco</span><span class="kc">n</span><span class="err">ds</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span>
-<span class="w">        </span><span class="err">periodSeco</span><span class="kc">n</span><span class="err">ds</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
-<span class="w">      </span><span class="err">live</span><span class="kc">ness</span><span class="err">Probe</span><span class="p">:</span>
-<span class="w">        </span><span class="err">h</span><span class="kc">tt</span><span class="err">pGe</span><span class="kc">t</span><span class="p">:</span>
-<span class="w">          </span><span class="err">pa</span><span class="kc">t</span><span class="err">h</span><span class="p">:</span><span class="w"> </span><span class="err">/heal</span><span class="kc">t</span><span class="err">hy</span>
-<span class="w">          </span><span class="err">por</span><span class="kc">t</span><span class="p">:</span><span class="w"> </span><span class="mi">8080</span>
-<span class="w">        </span><span class="err">i</span><span class="kc">n</span><span class="err">i</span><span class="kc">t</span><span class="err">ialDelaySeco</span><span class="kc">n</span><span class="err">ds</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span>
-<span class="w">        </span><span class="err">periodSeco</span><span class="kc">n</span><span class="err">ds</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
-<span class="w">        </span><span class="kc">fa</span><span class="err">ilureThreshold</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span>
-<span class="w">      </span><span class="err">por</span><span class="kc">ts</span><span class="p">:</span>
-<span class="w">        </span><span class="mi">-</span><span class="w"> </span><span class="err">co</span><span class="kc">nta</span><span class="err">i</span><span class="kc">ner</span><span class="err">Por</span><span class="kc">t</span><span class="p">:</span><span class="w"> </span><span class="mi">8080</span>
-<span class="w">          </span><span class="kc">na</span><span class="err">me</span><span class="p">:</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span>
-<span class="w">          </span><span class="err">pro</span><span class="kc">t</span><span class="err">ocol</span><span class="p">:</span><span class="w"> </span><span class="err">TCP</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcr.io/kuar-demo/kuard-amd64:blue</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="w">      </span><span class="nt">readinessProbe</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">tcpSocket</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<span class="w">        </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">        </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">livenessProbe</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">httpGet</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/healthy</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<span class="w">        </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">        </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="nt">failureThreshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="w">          </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
 </pre></div>
 </div>
 <br/>
+</section>
+</section>
+<section id="id20">
+<h2>리소스 관리<a class="headerlink" href="#id20" title="Link to this heading"></a></h2>
+<section id="id21">
+<h3>리소스 관리가 필요한 이유<a class="headerlink" href="#id21" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>컴퓨트 노드의 전체 사용률을 높여서 비용 효율성을 높이기 위해</p></li>
+<li><p>이를 위해서는 각 컨테이너가 필요한 리소스를 쿠버네티스에 알려주어야 할 필요성이 있음</p></li>
+</ul>
+</section>
+<section id="id22">
+<h3>기호 표기 방법<a class="headerlink" href="#id22" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>literals:</p>
+<ul>
+<li><p>메모리 자원을 설정할 때 사용하는 표기 방식으로 기본 단위는 byte</p></li>
+<li><p>MB/GB/PB와 MiB/GiB/PiB의 차이 비교</p>
+<ul>
+<li><p>1 MB = 1024KB</p></li>
+<li><p>1 MIM = 1024KIB</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>millicores:</p>
+<ul>
+<li><p>CPU 리소스를 설정할 때 사용하는 단위</p>
+<ul>
+<li><p>1 core == 1000m</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="id23">
+<h3>리소스 요청<a class="headerlink" href="#id23" title="Link to this heading"></a></h3>
+<ul>
+<li><p>개념: 해당 어플리케이션이 보장받아야 하는 최소 리소스 량</p></li>
+<li><p>예시코드</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcr.io/kuar-demo/kuard-amd64:blue</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="w">      </span><span class="nt">resources</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">requests</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;500m&quot;</span>
+<span class="w">          </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;128Mi&quot;</span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span><span class="w"> </span>
+<span class="w">          </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+</pre></div>
+</div>
+</li>
+<li><p>리눅스 커널 cpu-shares:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.redhat.com/sysadmin/cgroups-part-two">관련링크</a></p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="id24">
+<h3>리소스 제한<a class="headerlink" href="#id24" title="Link to this heading"></a></h3>
+<ul>
+<li><p>개념: 해당 어플리케이션이 받을 수 있는 최대 리소스 량</p></li>
+<li><p>예시코드</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcr.io/kuar-demo/kuard-amd64:blue</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="w">      </span><span class="nt">resources</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">requests</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;500m&quot;</span>
+<span class="w">          </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;128Mi&quot;</span>
+<span class="w">        </span><span class="nt">limits</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;800m&quot;</span>
+<span class="w">          </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;256Mi&quot;</span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span><span class="w"> </span>
+<span class="w">          </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</br>
+</section>
+</section>
+<section id="id25">
+<h2>볼륨을 통한 데이터 보존<a class="headerlink" href="#id25" title="Link to this heading"></a></h2>
+<section id="id26">
+<h3>파드에서 볼륨 사용<a class="headerlink" href="#id26" title="Link to this heading"></a></h3>
+<ul>
+<li><p>해당 파드 매니페스트에서 컨테이너가 접근할 수 있는 모든 볼륨을 정의</p></li>
+<li><p>예시</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;kuard-data&quot;</span>
+<span class="w">      </span><span class="nt">hostPath</span><span class="p">:</span><span class="w"> </span><span class="c1">#워커 노드 임의의 위치를 컨테이너에 마운트 할 수 있는 예약 볼륨</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/var/lib/kuard&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="id27">
+<h3>컨테이너에서 볼륨 사용<a class="headerlink" href="#id27" title="Link to this heading"></a></h3>
+<ul>
+<li><p>특정 컨테이너에 마운트될 볼륨과 각 볼륨들이 마운트될 경로 정의</p></li>
+<li><p>예시</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;kuard-data&quot;</span>
+<span class="w">      </span><span class="nt">hostPath</span><span class="p">:</span><span class="w"> </span><span class="c1">#워커 노드 임의의 위치를 컨테이너에 마운트 할 수 있는 예약 볼륨</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/var/lib/kuard&quot;</span>
+<span class="w">  </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcr.io/kuar-demo/kuard-amd64:blue</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="w">      </span><span class="nt">volumeMounts</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/data&quot;</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;kuard-data&quot;</span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="w">          </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</br>
+</section>
+</section>
+<section id="id28">
+<h2>파드에서 볼륨을 사용하는 다양한 방법<a class="headerlink" href="#id28" title="Link to this heading"></a></h2>
+<section id="id29">
+<h3>통신/동기화<a class="headerlink" href="#id29" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>두 컨테이너 사이의 볼륨 공유</p></li>
+</ul>
+</section>
+<section id="id30">
+<h3>캐시<a class="headerlink" href="#id30" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>emptyDir 볼륨 공유</p></li>
+</ul>
+</section>
+<section id="id31">
+<h3>영구데이터<a class="headerlink" href="#id31" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>클라우드 같은 원격 네트워크 스토리지 볼륨 사용</p></li>
+</ul>
+</section>
+<section id="id32">
+<h3>호스트 파일 시스템 필요시<a class="headerlink" href="#id32" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>hostPath라는 볼륨을 사용</p></li>
+</ul>
 </section>
 </section>
 </section>
