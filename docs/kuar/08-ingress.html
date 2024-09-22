@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ko" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>8장. 인그레스를 통한 HTTP 로드밸런싱 &mdash; newbie v0.0.1 문서</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../_static/kitty.png"/>
+    <link rel="canonical" href="/newbie/kuar/08-ingress.html" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=f8b18680"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/translations.js?v=e33e7ba0"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="색인" href="../genindex.html" />
+    <link rel="search" title="검색" href="../search.html" />
+    <link rel="prev" title="6장. 라벨과 애노테이션" href="06-label-and-annotation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            newbie
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">쿠버네티스 시작하기 3/e</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="00-syllabus.html">0장. 스터디 개요</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01-introduction.html">1장. 쿠버네티스 소개</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02-creating-and-running-containers.html">2장. 컨테이너 생성과 실행</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03-deploying-a-kubernets-cluster.html">3장. 쿠버네티스 클러스터 배포</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04-common-kubectl-commands.html">4장. 공통 kubectl 명령</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05-pods.html">5장. 파드</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06-label-and-annotation.html">6장. 라벨과 애노테이션</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">8장. 인그레스를 통한 HTTP 로드밸런싱</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">인그레스</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">인그레스 컨트롤러</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">인그레스 구현</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">인그레스 실습을 준비</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">인그레스 사용</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id6">가장 간단한 사용법</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">호스트 이름 사용</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id8">경로 사용</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id9">인그레스 심화편</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id10">다중 인그레스 컨트롤러 실행</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id11">다중 인그레스 객체</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id12">인그레스와 네임스페이스</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id13">경로 재작성</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tls">TLS 제공</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id14">인그레스의 대체 구현</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id15">인그레스의 미래</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">newbie</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">8장. 인그레스를 통한 HTTP 로드밸런싱</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/kuar/08-ingress.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="http">
+<h1>8장. 인그레스를 통한 HTTP 로드밸런싱<a class="headerlink" href="#http" title="Link to this heading"></a></h1>
+<section id="id1">
+<h2>인그레스<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>쿠버네티스 자체의 HTTP 기반 로드밸런싱 시스템</p></li>
+<li><p>즉, 들어오는 연결을 해석해 올바른 업스트림 서버로 보내는 <strong>트래픽 전달</strong>의 역할을 수행</p></li>
+</ul>
+</section>
+<section id="id2">
+<h2>인그레스 컨트롤러<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">참고</p>
+<p>클러스터 내의 인그레스가 작동하려면, 인그레스 컨트롤러가 실행되고 있어야 한다.</p>
+<p>즉, 적어도 하나의 인그레스 컨트롤러를 선택하고 이를 클러스터 내에 설치해야 한다.</p>
+<p>(https://kubernetes.io/ko/docs/concepts/services-networking/ingress-controllers/)</p>
+</div>
+</br>
+<p>인그레스 컨트롤러는 인그레스 프록시와 인그레스 오퍼레이터로 구성됨</p>
+<ul class="simple">
+<li><p><strong>인그레스 프록시</strong></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">LoadBalancer</span></code> 타입의 서비스를 사용해 클러스터 외부에 노출됨</p></li>
+<li><p>들어오는 요청을 업스트림 서버로 보냄</p></li>
+</ul>
+</li>
+<li><p><strong>인그레스 오퍼레이터</strong></p>
+<ul>
+<li><p>쿠버네티스 API에서 인그레스 객체를 읽고 모니터링</p></li>
+<li><p>인그레스 리소스에 명시된 것처럼 트래픽을 라우팅하도록 인그레스 프록시를 재구성</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="id3">
+<h2>인그레스 구현<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>다른 쿠버네티스 객체처럼 인그레스 객체를 만들고 수정할 수 있지만, 이는 껍데기일뿐 구현은 사용자에 달려있음</p></li>
+<li><ol class="arabic simple">
+<li><p>일반적으로 사용할 수 있는 HTTP 로드밸런서는 하나가 아니기 때문</p></li>
+</ol>
+</li>
+<li><ol class="arabic simple" start="2">
+<li><p>공통 확장 기능이 추가되기 전에 인그레스 객체가 쿠버네티스에 추가됐기 때문</p></li>
+</ol>
+</li>
+</ul>
+</section>
+<section id="id4">
+<h2>인그레스 실습을 준비<a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
+<p><strong>컨투어 설치</strong></p>
+<p>컨투어는 수 많은 인그레스 컨트롤러 중 하나
+</br></p>
+<p><strong>업스트림 서비스 생성</strong></p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../_images/service-creation.png"><img alt="image" src="../_images/service-creation.png" style="width: 540px;" /></a>
+</figure>
+<div class="admonition note">
+<p class="admonition-title">참고</p>
+<p>Mac + Minikube를 위한 설정</p>
+<ul class="simple">
+<li><p>Contour ❌ → NGINX 인그레스 ✅</p></li>
+<li><p>로컬 hosts 파일 변경 (<code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code>)</p></li>
+</ul>
+</div>
+</section>
+<section id="id5">
+<h2>인그레스 사용<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<section id="id6">
+<h3>가장 간단한 사용법<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<p>= 모든 트래픽을 업스트림 서비스에 전달!</p>
+<p><strong>simple-ingress.yaml 작성</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># simple-ingress.yaml v1</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ingress</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">simple-ingress</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alpaca</span>
+<span class="w">    </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+</pre></div>
+</div>
+<p><strong>인그레스 생성</strong></p>
+<div class="highlight-zsh notranslate"><div class="highlight"><pre><span></span><span class="c1"># 인그레스를 생성한다</span>
+kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>simple-ingress.yaml
+</pre></div>
+</div>
+<p><strong>트러블 슈팅</strong></p>
+<div class="admonition error">
+<p class="admonition-title">오류</p>
+<p>no kind “ingress” is registered for version “networking.k8s.io/v1” in scheme “pkg/api/legacyscheme/scheme.go:30”</p>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># simple-ingress.yaml v2</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">simple-ingress</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alpaca</span>
+<span class="w">    </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+</pre></div>
+</div>
+<div class="admonition error">
+<p class="admonition-title">오류</p>
+<p>strict decoding error: unknown field “spec.service”</p>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># simple-ingress.yaml v3</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">simple-ingress</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">defaultBackend</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alpaca</span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+</pre></div>
+</div>
+<p><strong>결과</strong>
+alpaca.example.com / bandicoot.example.com → alpaca</p>
+</section>
+<section id="id7">
+<h3>호스트 이름 사용<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<p>= HTTP 호스트 헤더를 기반으로 트래픽을 전달</p>
+<p><strong>host-ingress.yaml 작성 (트러블 슈팅 이후 버전)</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># host-ingress.yaml</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">host-ingress</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">defaultBackend</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">be-default</span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alpaca.example.com</span>
+<span class="w">      </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">paths</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<span class="w">          </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
+<span class="w">          </span><span class="nt">backend</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alpaca</span>
+<span class="w">              </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+</pre></div>
+</div>
+<p><strong>결과</strong>
+alpaca.example.com → alpaca
+bandicoot.example.com → be-default</p>
+</section>
+<section id="id8">
+<h3>경로 사용<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<p>= HTTP 요청의 경로를 기반으로 트래픽을 전달</p>
+<p><strong>path-ingress.yaml 작성 (트러블 슈팅 이후 버전)</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># path-ingress.yaml</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path-ingress</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bandicoot.example.com</span>
+<span class="w">      </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">paths</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<span class="w">          </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
+<span class="w">          </span><span class="nt">backend</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bandicoot</span>
+<span class="w">              </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/a/</span>
+<span class="w">          </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
+<span class="w">          </span><span class="nt">backend</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alpaca</span>
+<span class="w">              </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+</pre></div>
+</div>
+<p><strong>결과</strong>
+bandicoot.example.com/a → alpaca
+bandicoot.example.com/ → bandicoot</p>
+</section>
+</section>
+<section id="id9">
+<h2>인그레스 심화편<a class="headerlink" href="#id9" title="Link to this heading"></a></h2>
+<section id="id10">
+<h3>다중 인그레스 컨트롤러 실행<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
+<p>인그레스 리소스가 인그레스 컨트롤러에 대한 특정 구현을 요청할 수 있도록 <code class="docutils literal notranslate"><span class="pre">IngressClass</span></code> 리소스가 존재</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example-ingress</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hello-world.example</span>
+<span class="w">      </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">paths</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<span class="w">            </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
+<span class="w">            </span><span class="nt">backend</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web</span>
+<span class="w">                </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">spec.ingressClassName</span></code> 필드를 사용하여 특정 <strong>인그레스 리소스를 명시</strong></p></li>
+</ul>
+</section>
+<section id="id11">
+<h3>다중 인그레스 객체<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
+<p>하나의 인그레스 컨트롤러에 여러 개의 인그레스 객체를 지정할 수 있음</p>
+<p>그러나 중복/충돌하는 컨피규레이션을 지정하면 동작이 정의되지 않을 수 있음</p>
+</section>
+<section id="id12">
+<h3>인그레스와 네임스페이스<a class="headerlink" href="#id12" title="Link to this heading"></a></h3>
+<p>여러 보안 유의 사항으로 때문에, 인그레스 객체는 동일한 네임스페이스에 있는 업스트림 서비스만 참조 가능</p>
+<blockquote>
+<div><p>하나의 인그레스 컨트롤러에 여러 개의 인그레스 객체를 지정할 수 있음</p>
+</div></blockquote>
+<p>이 경우, 한 네임스페이스의 인그레스 객체가 다른 네임스페이스에 문제를 유발할 수 있음</p>
+</section>
+<section id="id13">
+<h3>경로 재작성<a class="headerlink" href="#id13" title="Link to this heading"></a></h3>
+<p>HTTP 요청에 대한 경로를 수정하는 데 사용할 수 있음</p>
+<ul class="simple">
+<li><p>/sub-path → /app-path</p></li>
+</ul>
+<p>경로를 지정할 때 정규식도 지원하는 구현체가 여럿 존재함</p>
+</section>
+<section id="tls">
+<h3>TLS 제공<a class="headerlink" href="#tls" title="Link to this heading"></a></h3>
+<p>시크릿(secret)을 정의하면 인증서가 업로드되고, 이러면 인그레스 객체에서 인증서를 참조할 수 있음</p>
+<p>시크릿을 만드는 방법</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">create</span> <span class="n">secret</span> <span class="n">tls</span> <span class="o">&lt;</span><span class="n">시크릿</span> <span class="n">이름</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">cert</span> <span class="o">&lt;</span><span class="n">인증서</span> <span class="n">pem</span> <span class="n">파일</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">key</span> <span class="o">&lt;</span><span class="n">개인키</span> <span class="n">pem</span> <span class="n">파일</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="id14">
+<h3>인그레스의 대체 구현<a class="headerlink" href="#id14" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>클라우드 서비스 제공자(CSP)가 제공하는 인그레스 구현 (ex. AWS Load Balancer Controller)</p></li>
+<li><p>NGINX 인그레스 컨트롤러</p></li>
+<li><p>Envoy 기반 인그레스 컨트롤러</p></li>
+<li><p>Traefik</p></li>
+<li><p>…</p></li>
+</ul>
+</section>
+<section id="id15">
+<h3>인그레스의 미래<a class="headerlink" href="#id15" title="Link to this heading"></a></h3>
+<div class="admonition tip">
+<p class="admonition-title">팁</p>
+<p>“Gateway API가 미래다”</p>
+<p>Gateway API</p>
+<ul class="simple">
+<li><p>네트워킹 전담 쿠버네티스(SIG)에서 개발 중인 프로젝트</p></li>
+<li><p>HTTP 밸런싱에 중점을 두고 있지만, Layer 4 밸런싱을 제어하기 위한 리소스도 포함됨</p></li>
+</ul>
+</div>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../_images/gateway-api.png"><img alt="image" src="../_images/gateway-api.png" style="width: 540px;" /></a>
+</figure>
+<p>(https://gateway-api.sigs.k8s.io/)</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="06-label-and-annotation.html" class="btn btn-neutral float-left" title="6장. 라벨과 애노테이션" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, newbie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="rst-versions" role="note" style="padding: 1rem; font-weight: bold;">
+        <a href="https://github.com/study-zero/newbie"><span class="fa fa-link"> Github</span></a>
+    </div>
+
+</body>
+</html>
