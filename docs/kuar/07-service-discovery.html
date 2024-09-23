@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ko" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>7장. 서비스 탐색 &mdash; newbie v0.0.1 문서</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../_static/kitty.png"/>
+    <link rel="canonical" href="/newbie/kuar/07-service-discovery.html" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=f8b18680"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/translations.js?v=e33e7ba0"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="색인" href="../genindex.html" />
+    <link rel="search" title="검색" href="../search.html" />
+    <link rel="next" title="8장. 인그레스를 통한 HTTP 로드밸런싱" href="08-ingress.html" />
+    <link rel="prev" title="6장. 라벨과 애노테이션" href="06-label-and-annotation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            newbie
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">쿠버네티스 시작하기 3/e</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="00-syllabus.html">0장. 스터디 개요</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01-introduction.html">1장. 쿠버네티스 소개</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02-creating-and-running-containers.html">2장. 컨테이너 생성과 실행</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03-deploying-a-kubernets-cluster.html">3장. 쿠버네티스 클러스터 배포</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04-common-kubectl-commands.html">4장. 공통 kubectl 명령</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05-pods.html">5장. 파드</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06-label-and-annotation.html">6장. 라벨과 애노테이션</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">7장. 서비스 탐색</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">서비스 객체</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dns">서비스 DNS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#readiness-probe">Readiness probe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">클러스터 외부로의 서비스</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">로드밸런서 연계</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">고급 세부 정보</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id6">엔드포인트</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">수동 서비스 탐색</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kube-proxy-ip">kube-proxy와 클러스터 IP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ip">클러스터 IP 환경 변수</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="08-ingress.html">8장. 인그레스를 통한 HTTP 로드밸런싱</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">newbie</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">7장. 서비스 탐색</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/kuar/07-service-discovery.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>7장. 서비스 탐색<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
+<p><strong>서비스 탐색</strong>이란 특정 프로세스가 서비스를 위해 리스닝하고 있는 주소를 찾는 데 도움을 주는 도구다.</p>
+<p>좋은 서비스 탐색 시스템은 서비스 정보를 빠르고 신뢰성 있게 제공하고, 대기 시간이 짧아 서비스와 관련된 정보가 변경되면 곧 바로 클라이언트에게 업데이트해준다. 그리고 해당 서비스가 무엇인지에 대한 풍부한 정의(포트 정보 등)를 저장할 수 있다.</p>
+<p>대부분의 전통적인 네트워크 인프라의 경우 쿠버네티스의 동적 시스템을 지원하기 어렵다. 서비스 탐색 도구는 이를 도와준다.</p>
+<p><strong>DNS(Domain Name System)</strong>은 인터넷에서 사용하는 전통적인 서비스 탐색 시스템이다. 광범위하고 효율적인 캐싱을 통해 안정적인 이름 확인(name resolution)을 위해 설계됐다.</p>
+<p>대다수의 시스템(eg. java)에서는 DNS 조회 후 캐싱된 데이터를 활용하기 때문에 쿠버네티스의 동적인 환경(파드의 IP가 계속 변경됨)에는 부적합하다.</p>
+<section id="id2">
+<h2>서비스 객체<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<p>서비스 객체란 쿠버네티스에서 서비스 탐색을 수행하는 오브젝트이다.</p>
+<p><code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">expose</span></code> 명령을 통해 쉽게 서비스 객체를 생성할 수 있으며 이는 해당 객체의 레이블을 셀렉터로 가지는 서비스 객체를 생성한다.</p>
+<p><code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">create</span> <span class="pre">deployment</span></code>으로 디플로이먼트를 쉽게 생성하는 방식과 유사하다.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>kubectl<span class="w"> </span>create<span class="w"> </span>deployment<span class="w"> </span>alpaca-prod<span class="w"> </span><span class="se">\</span>
+--image<span class="o">=</span>gcr.io/kuar-demo/kuard-amd64:blue<span class="w"> </span><span class="se">\</span>
+--port<span class="o">=</span><span class="m">8080</span>
+<span class="gp">$ </span>kubectl<span class="w"> </span>scale<span class="w"> </span>deployment<span class="w"> </span>alpaca-prod<span class="w"> </span>--replicas<span class="w"> </span><span class="m">3</span>
+<span class="gp">$ </span>kubectl<span class="w"> </span>expose<span class="w"> </span>deployment<span class="w"> </span>alpaca-prod
+
+<span class="gp">$ </span>kubectl<span class="w"> </span>create<span class="w"> </span>deployment<span class="w">  </span>bandicoot-prod<span class="w"> </span><span class="se">\</span>
+--image<span class="o">=</span>gcr.io/kuar-demo/kuard-amd64:green<span class="w"> </span><span class="se">\</span>
+--port<span class="o">=</span><span class="m">8080</span>
+<span class="gp">$ </span>kubectl<span class="w"> </span>scale<span class="w"> </span>deployment<span class="w"> </span>bandicoot-prod<span class="w"> </span>--replicas<span class="w"> </span><span class="m">2</span>
+<span class="gp">$ </span>kubectl<span class="w"> </span>expose<span class="w"> </span>deployment<span class="w"> </span>bandicoot-prod
+
+<span class="gp">$ </span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-o<span class="w"> </span>wide<span class="w"> </span>--show-labels
+<span class="go">NAME                              READY   STATUS    RESTARTS   AGE   IP           NODE                 NOMINATED NODE   READINESS GATES   LABELS</span>
+<span class="go">alpaca-prod-698b96c7f5-56xt5      1/1     Running   0          21s   10.244.2.2   my-cluster-worker3   &lt;none&gt;           &lt;none&gt;            app=alpaca-prod,pod-template-hash=698b96c7f5</span>
+<span class="go">alpaca-prod-698b96c7f5-5tmsq      1/1     Running   0          27s   10.244.3.3   my-cluster-worker    &lt;none&gt;           &lt;none&gt;            app=alpaca-prod,pod-template-hash=698b96c7f5</span>
+<span class="go">alpaca-prod-698b96c7f5-wwqqk      1/1     Running   0          21s   10.244.1.2   my-cluster-worker2   &lt;none&gt;           &lt;none&gt;            app=alpaca-prod,pod-template-hash=698b96c7f5</span>
+<span class="go">bandicoot-prod-7ddd47b959-6vbh7   1/1     Running   0          13s   10.244.1.3   my-cluster-worker2   &lt;none&gt;           &lt;none&gt;            app=bandicoot-prod,pod-template-hash=7ddd47b959</span>
+<span class="go">bandicoot-prod-7ddd47b959-zbm5r   1/1     Running   0          16s   10.244.3.4   my-cluster-worker    &lt;none&gt;           &lt;none&gt;            app=bandicoot-prod,pod-template-hash=7ddd47b959</span>
+
+<span class="gp">$ </span>kubectl<span class="w"> </span>get<span class="w"> </span>services<span class="w"> </span>-o<span class="w"> </span>wide
+<span class="go">NAME             TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE   SELECTOR</span>
+<span class="go">alpaca-prod      ClusterIP   10.96.78.232    &lt;none&gt;        8080/TCP   63s   app=alpaca-prod</span>
+<span class="go">bandicoot-prod   ClusterIP   10.96.191.162   &lt;none&gt;        8080/TCP   55s   app=bandicoot-prod</span>
+<span class="go">kubernetes       ClusterIP   10.96.0.1       &lt;none&gt;        443/TCP    16h   &lt;none&gt;</span>
+</pre></div>
+</div>
+<p>서비스 객체는 셀렉터에 레이블 조건을 지정하고 서비스와 통신할 수 있는 포트를 지정한다.</p>
+<p>서비스에는 클러스터 IP(Cluster IP)라는 가상 IP가 할당된다.</p>
+<p>파드와 상호작용하기 위해서는 아래처럼 포트포워딩을 수행하고 <a class="reference internal" href="#localhost:48858"><span class="xref myst">localhost:48858</span></a>로 접속해 확인할 수 있다.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nv">ALPACA_POD</span><span class="o">=</span><span class="k">$(</span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-l<span class="w"> </span><span class="nv">app</span><span class="o">=</span>alpaca-prod<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.items[0].metadata.name}&#39;</span><span class="k">)</span>
+<span class="gp">$ </span>kubectl<span class="w"> </span>port-forward<span class="w"> </span><span class="nv">$ALPACA_POD</span><span class="w"> </span><span class="m">48858</span>:8080
+</pre></div>
+</div>
+</section>
+<section id="dns">
+<h2>서비스 DNS<a class="headerlink" href="#dns" title="Link to this heading"></a></h2>
+<p>클러스터 IP는 가상의 IP 주소로 안정적이며 캐싱 가능하여 DNS 주소로 제공할 수 있다.</p>
+<p>쿠버네티스는 클러스터에서 실행되는 파드에 DNS 서비스를 제공한다.</p>
+<p>쿠버네티스 DNS 서비스는 클러스터 IP에 대한 DNS 이름을 제공하며 클러스터를 처음 생성할 때 시스템의 구성 요소로 설치된다.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>dig<span class="w"> </span>alpaca-prod.default.svc.cluster.local
+<span class="go">;; opcode: QUERY, status: NOERROR, id: 12071</span>
+<span class="go">;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 0</span>
+<span class="go">;; QUESTION SECTION:</span>
+<span class="go">;alpaca-prod.default.svc.cluster.local. IN A</span>
+<span class="go">;; ANSWER SECTION:</span>
+<span class="go">alpaca-prod.default.svc.cluster.local. 30 IN A 10.115.245.13</span>
+</pre></div>
+</div>
+<p>DNS 전체 이름 구성은 아래와 같다.</p>
+<dl>
+    <dt>alpaca-prod</dt>
+    <dd>서비스 객체의 이름</dd>
+    <dt>default</dt>
+    <dd>서비스 객체가 속한 네임스페이스</dd>
+    <dt>svc</dt>
+    <dd>서비스 객체임을 표기. 다른 타입도 지원 가능</dd>
+    <dt>cluster.local.</dt>
+    <dd>클러스터의 기본 도메인 이름</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">참고</p>
+<p>쿠버네티스 DNS 서버로의 질의는 nslookup으로 가능하다.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>$ cat /etc/resolv.conf 
+search default.svc.cluster.local svc.cluster.local cluster.local dns.podman
+nameserver 10.96.0.10
+options ndots:5
+
+$ nslookup alpaca-prod 10.96.0.10
+Server:    10.96.0.10
+Address 1: 10.96.0.10 kube-dns.kube-system.svc.cluster.local
+
+Name:      alpaca-prod
+Address 1: 10.96.78.232 alpaca-prod.default.svc.cluster.local
+
+$ kubectl get svc
+NAME             TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+alpaca-prod      ClusterIP   10.96.78.232    &lt;none&gt;        8080/TCP   16m
+</pre></div>
+</div>
+</div>
+</section>
+<section id="readiness-probe">
+<h2>Readiness probe<a class="headerlink" href="#readiness-probe" title="Link to this heading"></a></h2>
+<p>서비스 객체는 준비 검사(Readiness probe)에 실패한 파드를 요청 대상에서 제거한다.</p>
+<p>아래처럼 Readiness probe를 추가하고 endpoints를 모니터링할 수 있다.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>kubectl<span class="w"> </span>edit<span class="w"> </span>deployment/alpaca-prod
+<span class="gp">$ </span>kubectl<span class="w"> </span>get<span class="w"> </span>endpoints<span class="w"> </span>alpaca-prod<span class="w"> </span>--watch
+</pre></div>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alpaca-prod</span>
+<span class="w">                </span><span class="nt">readinessProbe</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">httpGet</span><span class="p">:</span>
+<span class="w">                        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/ready</span>
+<span class="w">                        </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<span class="w">                    </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">                    </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">                    </span><span class="nt">failureThreshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">                    </span><span class="nt">successThreshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h2>클러스터 외부로의 서비스<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<p>NodePorts를 사용하면 간단하게 클러스터 외부에서 내부를 접속할 수 있다.
+아래처럼 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">edit</span></code>을 사용하거나 <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">expose</span></code>시 <code class="docutils literal notranslate"><span class="pre">--type=NodePort</span></code> 플래그를 지정해 생성할 수 있다.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>kubectl<span class="w"> </span>edit<span class="w"> </span>deployment/alpaca-prod
+</pre></div>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NodeProt</span>
+</pre></div>
+</div>
+<p>NodePort가 노출되면 SSH 터널링을 사용할 수 있다.</p>
+<div class="highlight-consoel notranslate"><div class="highlight"><pre><span></span>$ ssh &lt;노드&gt; -L 8080:localhost:32711
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h2>로드밸런서 연계<a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
+<p>외부 로드밸런서와 연계할 수 있는 클러스터가 있는 경우 LoadBalancer 타입을 사용할 수 있다.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>kubectl<span class="w"> </span>edit<span class="w"> </span>deployment/alpaca-prod
+</pre></div>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LoadBalancer</span>
+</pre></div>
+</div>
+</section>
+<section id="id5">
+<h2>고급 세부 정보<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<section id="id6">
+<h3>엔드포인트<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<p>엔드포인트는 서비스의 클러스터 IP와 같은 방식이 아닌 직접 연결할 수 있는 객체이다.</p>
+<p>서비스 객체를 생성할 때 엔드포인트(Endpoint) 객체도 함께 생성된다.</p>
+</section>
+<section id="id7">
+<h3>수동 서비스 탐색<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<p>쿠버네티스 API와 통신해 각 파드에 할당된 IP를 확인할 수 있다.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-o<span class="w"> </span>wide<span class="w"> </span>--show-labels
+</pre></div>
+</div>
+</section>
+<section id="kube-proxy-ip">
+<h3>kube-proxy와 클러스터 IP<a class="headerlink" href="#kube-proxy-ip" title="Link to this heading"></a></h3>
+<p>클러스터 IP는 서비스의 모든 엔드포인트에 트래픽을 로드밸런싱하는 안정적인 가상 IP다.</p>
+<p>kube-proxy가 이를 수행하는데, kube-proxy는 클러스터의 모든 노드에서 실행된다.</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../_images/figure7-1.png"><img alt="image" src="../_images/figure7-1.png" style="width: 560px;" /></a>
+</figure>
+<p>kube-proxy는 API 서버를 통해 클러스터의 새로운 서비스를 감시한다.</p>
+<p>그 다음 해당 호스트의 커널에서 iptables 규칙 집합을 프로그래밍해 패킷의 목적지를 재작성하고, 해당 서비스의 엔드포인트 중 하나를 향하게 한다.</p>
+<p>API 서버는 서비스가 생성될 때 클러스터 IP를 할당한다. 사용자가 지정할 수도 있다.</p>
+<p>클러스터 IP는 삭제하지 않으면 그대로 유지된다.</p>
+</section>
+<section id="ip">
+<h3>클러스터 IP 환경 변수<a class="headerlink" href="#ip" title="Link to this heading"></a></h3>
+<p>파드의 환경 변수에 ALPACA_PROD_SERVICE_HOST, ALPCA_PROD_SERVICE_PORT와 같은 이름으로 서비스 탐색 정보가 설정된다.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="06-label-and-annotation.html" class="btn btn-neutral float-left" title="6장. 라벨과 애노테이션" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="08-ingress.html" class="btn btn-neutral float-right" title="8장. 인그레스를 통한 HTTP 로드밸런싱" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, newbie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="rst-versions" role="note" style="padding: 1rem; font-weight: bold;">
+        <a href="https://github.com/study-zero/newbie"><span class="fa fa-link"> Github</span></a>
+    </div>
+
+</body>
+</html>
