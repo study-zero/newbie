@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ko" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9장. 레플리카 셋 &mdash; newbie v0.0.1 문서</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../_static/kitty.png"/>
+    <link rel="canonical" href="/newbie/kuar/09-ReplicaSet.html" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=f8b18680"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/translations.js?v=e33e7ba0"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="색인" href="../genindex.html" />
+    <link rel="search" title="검색" href="../search.html" />
+    <link rel="prev" title="8장. 인그레스를 통한 HTTP 로드밸런싱" href="08-ingress.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            newbie
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">쿠버네티스 시작하기 3/e</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="00-syllabus.html">0장. 스터디 개요</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01-introduction.html">1장. 쿠버네티스 소개</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02-creating-and-running-containers.html">2장. 컨테이너 생성과 실행</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03-deploying-a-kubernets-cluster.html">3장. 쿠버네티스 클러스터 배포</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04-common-kubectl-commands.html">4장. 공통 kubectl 명령</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05-pods.html">5장. 파드</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06-label-and-annotation.html">6장. 라벨과 애노테이션</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07-service-discovery.html">7장. 서비스 탐색</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08-ingress.html">8장. 인그레스를 통한 HTTP 로드밸런싱</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">9장. 레플리카 셋</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">컨테이너의 여러 복제본이 필요한 이유</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">레플리카 셋을 사용해야 하는 이유</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">조정 루프란?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">파드와 레플리카 셋의 관계</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pod-replicaset-1-container">pod와 replicaSet을 분리함으로써 오는 장점1: 기존 container의 수용 가능</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pod-replicaset-2">pod와 replicaSet을 분리함으로써 오는 장점2: 컨테이너 격리</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">레플리카 셋 명세</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id7">레플리카 셋 생성 및 확인</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#kubectl-describe">레플리카 셋 검사(kubectl describe)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ownerreferences">ownerReferences란?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#selector">selector에 해당하는 파드 찾기</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id8">확장</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#kubectl-scale">명령형 확장(kubectl scale)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kubectl-apply">선언형 확장(kubectl apply)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kubectl-autoscale">자동 확장(kubectl autoscale)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#kubectl-delete">삭제(kubectl delete)</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">newbie</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">9장. 레플리카 셋</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/kuar/09-ReplicaSet.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>9장. 레플리카 셋<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
+<section id="id2">
+<h2>컨테이너의 여러 복제본이 필요한 이유<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>고가용성</p></li>
+<li><p>확장성</p></li>
+<li><p>속도 증가(병렬 처리)</p></li>
+</ul>
+</br>
+</section>
+<section id="id3">
+<h2>레플리카 셋을 사용해야 하는 이유<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>휴먼 에러의 감소</p></li>
+<li><p>파드의 복제본 집합을 명세를 통해 손쉽게 생성하고 관리 가능</p></li>
+</ul>
+</br>
+</section>
+<section id="id4">
+<h2>조정 루프란?<a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>원하는 상태: 명세</p></li>
+<li><p>현재 상태: 시스템의 현재 상태</p></li>
+<li><p>조정 루프의 역할: 현재 상태를 관찰하고 관찰된 상태가 원하는 상태와 일치되도록 동작 시키는 것</p>
+<ul>
+<li><p>노드가 사라지거나 장애가 발생하면 이를 다시 클러스트에 참가시킴</p></li>
+<li><p>사용자의 요청에 따른 확장과 축소를 처리</p></li>
+</ul>
+</li>
+</ul>
+</br>
+</section>
+<section id="id5">
+<h2>파드와 레플리카 셋의 관계<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<p><img alt="alt text" src="../_images/relation_of_RS_and_pod.png" /></p>
+<section id="pod-replicaset-1-container">
+<h3>pod와 replicaSet을 분리함으로써 오는 장점1: 기존 container의 수용 가능<a class="headerlink" href="#pod-replicaset-1-container" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>label만 맞으면 기존 만들어진 pod를 새로 만들어지는 RS를 통해 관리 가능
+기존 Pod</p></li>
+</ul>
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: v1
+kind: Pod
+metadata:
+  name: existing-pod
+  labels:
+    app: my-app
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+</pre></div>
+</div>
+<p>이번에 만든 RS</p>
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: my-replicaset
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+</pre></div>
+</div>
+</section>
+<section id="pod-replicaset-2">
+<h3>pod와 replicaSet을 분리함으로써 오는 장점2: 컨테이너 격리<a class="headerlink" href="#pod-replicaset-2" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>단순히 문제가 있는 파드의 라벨을 변경함으로써 문제가 있는 파드를 그대로 남기면서 서비스로의 영향을 최소화 할 수 있다.</p></li>
+</ul>
+<p><img alt="alt text" src="../_images/container_decoupling.png" /></p>
+</br>
+</section>
+</section>
+<section id="id6">
+<h2>레플리카 셋 명세<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: apps/v1
+kind: ReplicaSet 
+metadata:
+  labels:
+    app: kuard
+    version: &quot;2&quot;
+  name: kuard
+spec:
+  replicas: 1
+  selector:
+    matchLabels: #해당 RS가 어떠한 조건을 가진 pod를 관리하는지, and 조건
+      app: kuard
+      version: &quot;2&quot;
+  template: # 이 아래로 pod template
+    metadata:
+      labels:
+        app: kuard
+        version: &quot;2&quot;
+    spec:
+      containers:
+        - name: kuard
+          image: &quot;gcr.io/kuar-demo/kuard-amd64:green&quot;
+          resources:
+            requests:
+              cpu: &quot;500m&quot;
+              memory: &quot;128Mi&quot;
+</pre></div>
+</div>
+</br>
+</section>
+<section id="id7">
+<h2>레플리카 셋 생성 및 확인<a class="headerlink" href="#id7" title="Link to this heading"></a></h2>
+<div class="highlight-zsh notranslate"><div class="highlight"><pre><span></span>➜<span class="w">  </span>newbie<span class="w"> </span>git:<span class="o">(</span>main<span class="o">)</span><span class="w"> </span>✗<span class="w"> </span>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>kuard-rs.yaml
+replicaset.apps/kuard<span class="w"> </span>created
+➜<span class="w">  </span>newbie<span class="w"> </span>git:<span class="o">(</span>main<span class="o">)</span><span class="w"> </span>✗<span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w">              </span>
+NAME<span class="w">          </span>READY<span class="w">   </span>STATUS<span class="w">    </span>RESTARTS<span class="w">   </span>AGE
+kuard-5rhp6<span class="w">   </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>10s
+</pre></div>
+</div>
+</section>
+<section id="kubectl-describe">
+<h2>레플리카 셋 검사(kubectl describe)<a class="headerlink" href="#kubectl-describe" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Print a detailed description of the selected resources, including related resources such as events or controllers. You
+may select a single object by name, all objects of that type, provide a name prefix, or label selector. For example:
+
+  $ kubectl describe TYPE NAME_PREFIX
+  
+ will first check for an exact match on TYPE and NAME_PREFIX. If no such resource exists, it will output details for
+every resource that has a name prefixed with NAME_PREFIX.
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>➜<span class="w">  </span>newbie<span class="w"> </span>git:<span class="o">(</span>main<span class="o">)</span><span class="w"> </span>✗<span class="w"> </span>kubectl<span class="w"> </span>describe<span class="w"> </span>rs<span class="w">      </span>
+Name:<span class="w">         </span>kuard
+Namespace:<span class="w">    </span>default
+Selector:<span class="w">     </span><span class="nv">app</span><span class="o">=</span>kuard,version<span class="o">=</span><span class="m">2</span>
+Labels:<span class="w">       </span><span class="nv">app</span><span class="o">=</span>kuard
+<span class="w">              </span><span class="nv">version</span><span class="o">=</span><span class="m">2</span>
+Annotations:<span class="w">  </span>kubectl.kubernetes.io/last-applied-configuration:
+<span class="w">                </span><span class="o">{</span><span class="s2">&quot;apiVersion&quot;</span>:<span class="s2">&quot;apps/v1&quot;</span>,<span class="s2">&quot;kind&quot;</span>:<span class="s2">&quot;ReplicaSet&quot;</span>,<span class="s2">&quot;metadata&quot;</span>:<span class="o">{</span><span class="s2">&quot;annotations&quot;</span>:<span class="o">{}</span>,<span class="s2">&quot;labels&quot;</span>:<span class="o">{</span><span class="s2">&quot;app&quot;</span>:<span class="s2">&quot;kuard&quot;</span>,<span class="s2">&quot;version&quot;</span>:<span class="s2">&quot;2&quot;</span><span class="o">}</span>,<span class="s2">&quot;name&quot;</span>:<span class="s2">&quot;kuard&quot;</span>,<span class="s2">&quot;namespace&quot;</span>...
+Replicas:<span class="w">     </span><span class="m">1</span><span class="w"> </span>current<span class="w"> </span>/<span class="w"> </span><span class="m">1</span><span class="w"> </span>desired
+Pods<span class="w"> </span>Status:<span class="w">  </span><span class="m">1</span><span class="w"> </span>Running<span class="w"> </span>/<span class="w"> </span><span class="m">0</span><span class="w"> </span>Waiting<span class="w"> </span>/<span class="w"> </span><span class="m">0</span><span class="w"> </span>Succeeded<span class="w"> </span>/<span class="w"> </span><span class="m">0</span><span class="w"> </span>Failed
+Pod<span class="w"> </span>Template:
+<span class="w">  </span>Labels:<span class="w">  </span><span class="nv">app</span><span class="o">=</span>kuard
+<span class="w">           </span><span class="nv">version</span><span class="o">=</span><span class="m">2</span>
+<span class="w">  </span>Containers:
+<span class="w">   </span>kuard:
+<span class="w">    </span>Image:<span class="w">      </span>gcr.io/kuar-demo/kuard-amd64:green
+<span class="w">    </span>Port:<span class="w">       </span>&lt;none&gt;
+<span class="w">    </span>Host<span class="w"> </span>Port:<span class="w">  </span>&lt;none&gt;
+<span class="w">    </span>Requests:
+<span class="w">      </span>cpu:<span class="w">        </span>500m
+<span class="w">      </span>memory:<span class="w">     </span>128Mi
+<span class="w">    </span>Environment:<span class="w">  </span>&lt;none&gt;
+<span class="w">    </span>Mounts:<span class="w">       </span>&lt;none&gt;
+<span class="w">  </span>Volumes:<span class="w">        </span>&lt;none&gt;
+Events:
+<span class="w">  </span>Type<span class="w">    </span>Reason<span class="w">            </span>Age<span class="w">   </span>From<span class="w">                   </span>Message
+<span class="w">  </span>----<span class="w">    </span>------<span class="w">            </span>----<span class="w">  </span>----<span class="w">                   </span>-------
+<span class="w">  </span>Normal<span class="w">  </span>SuccessfulCreate<span class="w">  </span>12m<span class="w">   </span>replicaset-controller<span class="w">  </span>Created<span class="w"> </span>pod:<span class="w"> </span>kuard-5rhp6
+</pre></div>
+</div>
+</br>
+</section>
+<section id="ownerreferences">
+<h2>ownerReferences란?<a class="headerlink" href="#ownerreferences" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>한 오브젝트가 다른 오브젝트에 종속되어 있음을 나타내는 필드 값. 특히, 특정 오브젝트가 다른 오브젝트에 의해 생성되었거나 관리되고 있다는 정보를 담고 있으며 종속된 오브젝트가 소유자 오브젝트가 삭제될 때 함께 삭제되도록 보장</p></li>
+<li><p>목록:</p>
+<ul>
+<li><p>apiVersion: 소유자 오브젝트의 API 버전.</p></li>
+<li><p>kind: 소유자 오브젝트의 종류 (예: Pod, Deployment 등).</p></li>
+<li><p>name: 소유자 오브젝트의 이름.</p></li>
+<li><p>uid: 소유자 오브젝트의 고유 식별자.</p></li>
+<li><p>controller (optional): 이 값이 true로 설정된 경우, 해당 소유자가 오브젝트의 컨트롤러라는 것을 나타냅니다.</p></li>
+<li><p>blockOwnerDeletion (optional): 이 값이 true인 경우, 소유자가 삭제되기 전에 해당 오브젝트가 삭제되지 않도록 보장합니다.</p></li>
+</ul>
+</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>newbie git:(main) ✗ kubectl get pods kuard-5rhp6 -o=jsonpath=&#39;{.metadata.ownerReferences}&#39;
+[map[apiVersion:apps/v1 blockOwnerDeletion:true controller:true kind:ReplicaSet name:kuard uid:cec3608f-f208-4ae8-a597-141f60ae252c]]%  
+</pre></div>
+</div>
+</br>
+</section>
+<section id="selector">
+<h2>selector에 해당하는 파드 찾기<a class="headerlink" href="#selector" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>➜  newbie git:(main) ✗ kubectl get pods --selector app=kuard,version=2                       
+NAME          READY   STATUS    RESTARTS   AGE
+kuard-5rhp6   1/1     Running   0          27m
+</pre></div>
+</div>
+</br>
+</section>
+<section id="id8">
+<h2>확장<a class="headerlink" href="#id8" title="Link to this heading"></a></h2>
+<section id="kubectl-scale">
+<h3>명령형 확장(kubectl scale)<a class="headerlink" href="#kubectl-scale" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>➜  newbie git:(main) ✗ kubectl scale replicasets kuard --replicas=4   
+replicaset.apps/kuard scaled
+➜  newbie git:(main) ✗ kubectl get pods --selector app=kuard,version=2
+NAME          READY   STATUS    RESTARTS   AGE
+kuard-5rhp6   1/1     Running   0          28m
+kuard-858fr   1/1     Running   0          6s
+kuard-ff2rr   1/1     Running   0          6s
+kuard-xwx7r   1/1     Running   0          6s
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>주의: 명령형 확장을 할 때는 파일에 적혀 있는 정보와 실제 파드 수의 상태가 다를 수 있다. 이는 다른 개발자들에게 상황 파악을 어렵게 할 수 있다.</p></li>
+</ul>
+</section>
+<section id="kubectl-apply">
+<h3>선언형 확장(kubectl apply)<a class="headerlink" href="#kubectl-apply" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>앞에서 이야기했듯 그저 명세를 수정하고 다시 제출한다.</p></li>
+</ul>
+</section>
+<section id="kubectl-autoscale">
+<h3>자동 확장(kubectl autoscale)<a class="headerlink" href="#kubectl-autoscale" title="Link to this heading"></a></h3>
+<ul>
+<li><p>HPA</p>
+<ul>
+<li><p>CPU, 메모리와 같은 메트릭스를 모니터링하고, 설정된 임계값에 도달하면 자동으로 파드 수를 증가시키거나 감소</p></li>
+<li><p>이거 도달하면 일꾼 더 투입시켜</p>
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+name: my-hpa
+spec:
+scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: my-deployment   # 타겟으로 설정할 디플로이먼트 이름
+minReplicas: 1          # 최소 파드 수
+maxReplicas: 10         # 최대 파드 수
+targetCPUUtilizationPercentage: 50  # CPU 사용률 기준
+</pre></div>
+</div>
+</li>
+</ul>
+</li>
+<li><p>VPA</p>
+<ul>
+<li><p>파드의 리소스를 수직으로 확장하여 애플리케이션이 요구하는 리소스를 더 효과적으로 관리</p></li>
+<li><p>이거 도달하면 각 파드에 자원 더 넣어줘</p>
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+name: my-vpa
+spec:
+targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: my-deployment   # 타겟으로 설정할 디플로이먼트 이름
+updatePolicy:
+    updateMode: &quot;Auto&quot;    # 자동으로 리소스 조정 (권장값: Auto)
+resourcePolicy:
+    containerPolicies:
+    - containerName: &quot;*&quot;
+        minAllowed:
+        cpu: 200m      # 최소 CPU 리소스
+        memory: 256Mi  # 최소 메모리 리소스
+        maxAllowed:
+        cpu: 1         # 최대 CPU 리소스
+        memory: 1Gi    # 최대 메모리 리소스
+</pre></div>
+</div>
+</li>
+</ul>
+</li>
+</ul>
+</br>
+</section>
+</section>
+<section id="kubectl-delete">
+<h2>삭제(kubectl delete)<a class="headerlink" href="#kubectl-delete" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>➜  newbie git:(main) ✗ kubectl delete rs kuard    
+replicaset.apps &quot;kuard&quot; deleted      
+➜  newbie git:(main) ✗ kubectl get pods              
+No resources found in default namespace.
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>➜  newbie git:(main) ✗ kubectl get pods                               
+NAME          READY   STATUS    RESTARTS   AGE
+kuard-7nr7k   1/1     Running   0          15s
+kuard-s776v   1/1     Running   0          15s
+See &#39;kubectl delete --help&#39; for usage.
+➜  newbie git:(main) ✗ kubectl delete rs kuard --cascade=false
+replicaset.apps &quot;kuard&quot; deleted
+➜  newbie git:(main) ✗ kubectl get pods                       
+NAME          READY   STATUS    RESTARTS   AGE
+kuard-7nr7k   1/1     Running   0          62s
+kuard-s776v   1/1     Running   0          62s
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="08-ingress.html" class="btn btn-neutral float-left" title="8장. 인그레스를 통한 HTTP 로드밸런싱" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, newbie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="rst-versions" role="note" style="padding: 1rem; font-weight: bold;">
+        <a href="https://github.com/study-zero/newbie"><span class="fa fa-link"> Github</span></a>
+    </div>
+
+</body>
+</html>
