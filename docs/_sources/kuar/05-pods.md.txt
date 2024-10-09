@@ -425,7 +425,7 @@ spec:
 - literals:
   - 메모리 자원을 설정할 때 사용하는 표기 방식으로 기본 단위는 byte
   - MB/GB/PB와 MiB/GiB/PiB의 차이 비교
-    - 1 MB = 1024KB
+    - 1 MB = 1000KB
     - 1 MIM = 1024KIB
 - millicores:
   - CPU 리소스를 설정할 때 사용하는 단위
@@ -526,9 +526,76 @@ spec:
 ## 파드에서 볼륨을 사용하는 다양한 방법
 ### 통신/동기화
 - 두 컨테이너 사이의 볼륨 공유
+```yml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: shared-volume-pod
+spec:
+  volumes:
+    - name: shared-data
+      emptyDir: {}  # 이 예제에서는 emptyDir을 사용합니다. Pod의 수명 동안만 데이터를 저장합니다.
+  containers:
+    - name: container-1
+      image: nginx
+      volumeMounts:
+        - name: shared-data
+          mountPath: /usr/share/nginx/html  # 첫 번째 컨테이너에서의 마운트 경로
+
+    - name: container-2
+      image: busybox
+      command: [ "sh", "-c", "echo 'Hello from container-2' > /shared-data/message.txt && sleep 3600" ]
+      volumeMounts:
+        - name: shared-data
+          mountPath: /shared-data
+```
 ### 캐시
 - emptyDir 볼륨 공유
+```yml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: empty-dir-example
+spec:
+  containers:
+  - name: busybox
+    image: busybox
+    command: ["/bin/sh", "-c", "sleep 3600"]
+    volumeMounts:
+    - mountPath: /tmp/emptydir
+      name: temp-storage
+  volumes:
+  - name: temp-storage
+    emptyDir: {}
+```
+- emptydir
+  - pod가 생성될 때 자동으로 만들어지며, Pod가 삭제되면 함께 삭제됩
+  - 일반적으로는 로컬 디스크에 데이터를 저장하지만 메모리를 기반으로 저장할 수도 있음
+    ```yml
+    volumes:
+    - name: temp-storage
+      emptyDir:
+        medium: Memory
+    ```
 ### 영구데이터
 - 클라우드 같은 원격 네트워크 스토리지 볼륨 사용
 ### 호스트 파일 시스템 필요시
 - hostPath라는 볼륨을 사용
+```yml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hostpath-example
+spec:
+  containers:
+  - name: hostpath-container
+    image: nginx
+    volumeMounts:
+    - mountPath: /usr/share/nginx/html
+      name: hostpath-volume
+  volumes:
+  - name: hostpath-volume
+    hostPath:
+      path: /data/nginx
+      type: Directory
+```

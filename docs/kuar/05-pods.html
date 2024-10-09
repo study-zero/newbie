@@ -607,7 +607,7 @@ error:<span class="w"> </span>Internal<span class="w"> </span>error<span class="
 <li><p>메모리 자원을 설정할 때 사용하는 표기 방식으로 기본 단위는 byte</p></li>
 <li><p>MB/GB/PB와 MiB/GiB/PiB의 차이 비교</p>
 <ul>
-<li><p>1 MB = 1024KB</p></li>
+<li><p>1 MB = 1000KB</p></li>
 <li><p>1 MIM = 1024KIB</p></li>
 </ul>
 </li>
@@ -745,11 +745,66 @@ error:<span class="w"> </span>Internal<span class="w"> </span>error<span class="
 <ul class="simple">
 <li><p>두 컨테이너 사이의 볼륨 공유</p></li>
 </ul>
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: v1
+kind: Pod
+metadata:
+  name: shared-volume-pod
+spec:
+  volumes:
+    - name: shared-data
+      emptyDir: {}  # 이 예제에서는 emptyDir을 사용합니다. Pod의 수명 동안만 데이터를 저장합니다.
+  containers:
+    - name: container-1
+      image: nginx
+      volumeMounts:
+        - name: shared-data
+          mountPath: /usr/share/nginx/html  # 첫 번째 컨테이너에서의 마운트 경로
+
+    - name: container-2
+      image: busybox
+      command: [ &quot;sh&quot;, &quot;-c&quot;, &quot;echo &#39;Hello from container-2&#39; &gt; /shared-data/message.txt &amp;&amp; sleep 3600&quot; ]
+      volumeMounts:
+        - name: shared-data
+          mountPath: /shared-data
+</pre></div>
+</div>
 </section>
 <section id="id30">
 <h3>캐시<a class="headerlink" href="#id30" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>emptyDir 볼륨 공유</p></li>
+</ul>
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: v1
+kind: Pod
+metadata:
+  name: empty-dir-example
+spec:
+  containers:
+  - name: busybox
+    image: busybox
+    command: [&quot;/bin/sh&quot;, &quot;-c&quot;, &quot;sleep 3600&quot;]
+    volumeMounts:
+    - mountPath: /tmp/emptydir
+      name: temp-storage
+  volumes:
+  - name: temp-storage
+    emptyDir: {}
+</pre></div>
+</div>
+<ul>
+<li><p>emptydir</p>
+<ul>
+<li><p>pod가 생성될 때 자동으로 만들어지며, Pod가 삭제되면 함께 삭제됩</p></li>
+<li><p>일반적으로는 로컬 디스크에 데이터를 저장하지만 메모리를 기반으로 저장할 수도 있음</p>
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>volumes:
+- name: temp-storage
+  emptyDir:
+    medium: Memory
+</pre></div>
+</div>
+</li>
+</ul>
+</li>
 </ul>
 </section>
 <section id="id31">
@@ -763,6 +818,24 @@ error:<span class="w"> </span>Internal<span class="w"> </span>error<span class="
 <ul class="simple">
 <li><p>hostPath라는 볼륨을 사용</p></li>
 </ul>
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: v1
+kind: Pod
+metadata:
+  name: hostpath-example
+spec:
+  containers:
+  - name: hostpath-container
+    image: nginx
+    volumeMounts:
+    - mountPath: /usr/share/nginx/html
+      name: hostpath-volume
+  volumes:
+  - name: hostpath-volume
+    hostPath:
+      path: /data/nginx
+      type: Directory
+</pre></div>
+</div>
 </section>
 </section>
 </section>
