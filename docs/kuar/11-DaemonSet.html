@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ko" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>11장. 데몬셋 &mdash; newbie v0.0.1 문서</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../_static/kitty.png"/>
+    <link rel="canonical" href="/newbie/kuar/11-DaemonSet.html" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=f8b18680"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/translations.js?v=e33e7ba0"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="색인" href="../genindex.html" />
+    <link rel="search" title="검색" href="../search.html" />
+    <link rel="prev" title="9장. 레플리카 셋" href="09-ReplicaSet.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            newbie
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">쿠버네티스 시작하기 3/e</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="00-syllabus.html">0장. 스터디 개요</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01-introduction.html">1장. 쿠버네티스 소개</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02-creating-and-running-containers.html">2장. 컨테이너 생성과 실행</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03-deploying-a-kubernets-cluster.html">3장. 쿠버네티스 클러스터 배포</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04-common-kubectl-commands.html">4장. 공통 kubectl 명령</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05-pods.html">5장. 파드</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06-label-and-annotation.html">6장. 라벨과 애노테이션</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07-service-discovery.html">7장. 서비스 탐색</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08-ingress.html">8장. 인그레스를 통한 HTTP 로드밸런싱</a></li>
+<li class="toctree-l1"><a class="reference internal" href="09-ReplicaSet.html">9장. 레플리카 셋</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">11장. 데몬셋</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">데몬셋 스케줄러</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">데몬셋 생성</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">데몬셋을 특정 노드로 제한</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">데몬셋 업데이트</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">newbie</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">11장. 데몬셋</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/kuar/11-DaemonSet.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>11장. 데몬셋<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
+<p><strong>데몬셋</strong>은 모든 노드에 에이전트나 데몬을 실행하기 위한 쿠버네티스 객체</p>
+<p><strong>데몬셋</strong>은 파드의 복사본이 쿠버네티스 클러스터의 노드 집합에서 실행되게 함</p>
+<p><strong>데몬셋</strong>은 레플리카셋과 유사하게, 클러스터의 원하는 상태와 관찰된 상태를 동일하게 만듬</p>
+<p>노드당 하나의 파드를 실행하기 원한다면, 레플리카셋이 아닌 <strong>데몬셋</strong>을 사용해야 함</p>
+<p><em>ex) 로그 수집기, 모니터링 에이전트…</em></p>
+<section id="id2">
+<h2>데몬셋 스케줄러<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<p><strong>데몬셋</strong>은 노드 셀렉터를 사용하지 않는 한, 모든 노드에 파드의 복제본을 생성함</p>
+<p><strong>노드 셀렉터</strong>를 사용하면, 일치하는 라벨 집합을 갖는 노드로 범위를 제한함</p>
+<p>새로운 노드가 클러스터에 추가될 경우, <strong>데몬셋 컨트롤러</strong>는 파드가 없음을 확인하고 새로운 노드에 파드를 추가함</p>
+</section>
+<section id="id3">
+<h2>데몬셋 생성<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># fluentd.yaml</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DaemonSet</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fluentd</span>
+<span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fluentd</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fluentd</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fluentd</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fluentd</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fluent/fluentd:v0.14.10</span>
+<span class="w">        </span><span class="nt">resources</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">limits</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">200Mi</span>
+<span class="w">          </span><span class="nt">requests</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100m</span>
+<span class="w">            </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">200Mi</span>
+<span class="w">        </span><span class="nt">volumeMounts</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">varlog</span>
+<span class="w">          </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/log</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">varlibdockercontainers</span>
+<span class="w">          </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/lob/docker/containers</span>
+<span class="w">          </span><span class="nt">readOnly</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">terminationGracePeriodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+<span class="w">      </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">varlog</span>
+<span class="w">        </span><span class="nt">hostPath</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/log</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">varlibdockercontainers</span>
+<span class="w">        </span><span class="nt">hostPath</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/lib/docker/containers</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">fluentd</span></code>: 로그 수집 및 처리를 위해 사용되는 오픈소스 SW</p></li>
+<li><p>레플리카셋과 달리, 데몬셋은 파드 템플릿 명세를 반드시 갖고 있어야 함</p></li>
+</ul>
+<p><strong><code class="docutils literal notranslate"><span class="pre">$</span> <span class="pre">kubectl</span> <span class="pre">describe</span> <span class="pre">daemonset</span> <span class="pre">fluentd</span></code></strong></p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../_images/describe-daemonset.png"><img alt="image" src="../_images/describe-daemonset.png" style="width: 540px;" /></a>
+</figure>
+<ul class="simple">
+<li><p>클러스터에 새 노드가 추가되면, fluentd 파드가 해당 노드에 자동으로 배포됨!</p></li>
+</ul>
+</section>
+<section id="id4">
+<h2>데몬셋을 특정 노드로 제한<a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
+<p>노드에 라벨 추가</p>
+<p><code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">label</span> <span class="pre">nodes</span> <span class="pre">minikube</span> <span class="pre">ssd=true</span></code></p>
+<p>노드 셀렉터 사용</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nodeSelector</span><span class="p">:</span>
+     <span class="n">ssd</span><span class="p">:</span> <span class="s2">&quot;trues&quot;</span>
+</pre></div>
+</div>
+<p><strong><code class="docutils literal notranslate"><span class="pre">$</span> <span class="pre">kubectl</span> <span class="pre">describe</span> <span class="pre">daemonset</span> <span class="pre">fluentd</span></code></strong></p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../_images/describe-daemonset-with-selector.png"><img alt="image" src="../_images/describe-daemonset-with-selector.png" style="width: 540px;" /></a>
+</figure>
+</section>
+<section id="id5">
+<h2>데몬셋 업데이트<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<p>디플로이먼트와 유사하게, <strong>롤링업데이트 전략</strong> 사용</p>
+<p><strong>spec.minReadySeconds</strong></p>
+<ul class="simple">
+<li><p>롤링업데이트가 파드를 업그레이드하기 전, 파드가 준비 상태로 있어야 하는 시간</p></li>
+<li><p><em>30~60초</em></p></li>
+</ul>
+<p><strong>spec.updateStrategy.rollingUpdate.maxUnavailable</strong></p>
+<ul class="simple">
+<li><p>롤링업데이트로 동시에 업데이트할 수 있는 파드의 수</p></li>
+<li><p><em>1개</em></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="09-ReplicaSet.html" class="btn btn-neutral float-left" title="9장. 레플리카 셋" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, newbie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="rst-versions" role="note" style="padding: 1rem; font-weight: bold;">
+        <a href="https://github.com/study-zero/newbie"><span class="fa fa-link"> Github</span></a>
+    </div>
+
+</body>
+</html>
