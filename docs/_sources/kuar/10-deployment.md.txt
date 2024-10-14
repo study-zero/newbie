@@ -563,7 +563,7 @@ $ k delete -f kuard-deployment.yaml
 디플로이먼트 상태는 `kubectl describe deployment`를 통해 확인할 수 있으며<br/>
 `.status.conditions` 배열에 나타난다.
 
-배포가 실패할 때 `Type=Progressing, Status=False`로 표시도니다.
+배포가 실패할 때 `Type=Progressing, Status=False`로 표시된다.
 
 <br/>
 
