@@ -20,6 +20,15 @@
 
 새로운 노드가 클러스터에 추가될 경우, **데몬셋 컨트롤러**는 파드가 없음을 확인하고 새로운 노드에 파드를 추가함
 
+```{figure} /images/kuar/ch11/k8s-cluster.png
+:alt: image
+:width: 720px
+```
+- **데몬셋 컨트롤러**는 Controller Manager 중 하나
+  - 컨트롤러 매니저는 Control Plane 컴포넌트 중 하나
+  - _ex) Deployment Controller, Replication Controller, DaemonSet Controller_
+- 일반적으로 쿠버네티스 스케줄러에 의해 파드가 실행되는 노드가 선택되지만, 데몬셋 파드는 데몬셋 컨트롤러에 의해 생성되고 각 노드에 할당됨
+
 
 ## 데몬셋 생성
 

@@ -104,6 +104,18 @@
 <p><strong>데몬셋</strong>은 노드 셀렉터를 사용하지 않는 한, 모든 노드에 파드의 복제본을 생성함</p>
 <p><strong>노드 셀렉터</strong>를 사용하면, 일치하는 라벨 집합을 갖는 노드로 범위를 제한함</p>
 <p>새로운 노드가 클러스터에 추가될 경우, <strong>데몬셋 컨트롤러</strong>는 파드가 없음을 확인하고 새로운 노드에 파드를 추가함</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../_images/k8s-cluster.png"><img alt="image" src="../_images/k8s-cluster.png" style="width: 720px;" /></a>
+</figure>
+<ul class="simple">
+<li><p><strong>데몬셋 컨트롤러</strong>는 Controller Manager 중 하나</p>
+<ul>
+<li><p>컨트롤러 매니저는 Control Plane 컴포넌트 중 하나</p></li>
+<li><p><em>ex) Deployment Controller, Replication Controller, DaemonSet Controller</em></p></li>
+</ul>
+</li>
+<li><p>일반적으로 쿠버네티스 스케줄러에 의해 파드가 실행되는 노드가 선택되지만, 데몬셋 파드는 데몬셋 컨트롤러에 의해 생성되고 각 노드에 할당됨</p></li>
+</ul>
 </section>
 <section id="id3">
 <h2>데몬셋 생성<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
