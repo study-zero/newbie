@@ -255,7 +255,7 @@ kubectl create을 통해 만들 수 있다.
 <dd>키를 지정하여 생성</dd>
 <dt>--from-file=<디렉터리></dt>
 <dd>디렉터리 내에서 키 이름을 순회하여 생성</dd>
-<dt>--from-file=<키>=<값></dt><dt></dt>
+<dt>--from-literal=<키>=<값></dt><dt></dt>
 <dd>키/값 직접 지정</dd>
 </dl>
 <br/>
