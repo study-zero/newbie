@@ -206,15 +206,58 @@ spec:
 <br/>
 
 ## 컨피그맵과 시크릿 관리
-
-<br/>
-
 ### 조회
+```console
+$ k get secrets
+NAME                         TYPE                 DATA   AGE
+kuard-tls                    Opaque               2      6m3s
+sh.helm.release.v1.test.v1   helm.sh/release.v1   1      13d
+$ k get cm
+NAME               DATA   AGE
+kube-root-ca.crt   1      13d
+my-config          3      21m
+$ k describe cm my-config
+Name:         my-config
+Namespace:    default
+Labels:       <none>
+Annotations:  <none>
+
+Data
+====
+another-another:
+----
+extra-value
+
+extra-param:
+----
+extra-value
+
+my-config.txt:
+----
+parameter1 = value1
+parameter2 = value2
+
+
+BinaryData
+====
+
+Events:  <none>
+```
 
 <br/>
 
 ### 생성
-
+kubectl create을 통해 만들 수 있다.
+<dl>
+<dt>--from-file=<파일 이름></dt>
+<dd>파일 이름과 동일한 키로 생성</dd>
+<dt>--from-file=<키>=<파일 이름></dt>
+<dd>키를 지정하여 생성</dd>
+<dt>--from-file=<디렉터리></dt>
+<dd>디렉터리 내에서 키 이름을 순회하여 생성</dd>
+<dt>--from-file=<키>=<값></dt><dt></dt>
+<dd>키/값 직접 지정</dd>
+</dl>
 <br/>
 
 ### 업데이트
