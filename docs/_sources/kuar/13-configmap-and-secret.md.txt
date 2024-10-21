@@ -262,8 +262,30 @@ kubectl create을 통해 만들 수 있다.
 
 ### 업데이트
 
+#### 파일에서 업데이트
+kubectl replace -f 사용
+
+#### 재생성과 업데이트
+```console
+$ kubectl create secret generic kuard-tls \
+  --from-file=kuard.crt --from-file=kuard.key \
+  --dry-run -o yaml | kubectl replace -f -
+```
+
+#### 현재 버전 수정
+```console
+$ kubectl edit configmap my-config
+```
+
+#### 실시간 업데이트
+마운트된 컨피그맵 또는 시크릿을 파드 내에서 실시간으로 데이터가 업데이트된다.<br/>
+신호는 따로 존재하지 않는다.
+
 <br/>
 
 ## 요약
+컨피그맵과 시크릿은 애플리케이션에 동적 컨피규레이션을 제공하는 좋은 방법이다.<br/>
+컨피그맵과 시크릿을 사용해서 컨테이너 이미지를 재사용할 수 있다.<br/>
+dev, test, prod 환경 등에서 동일 이미지를 사용할 수 있다.
 
 <br/>
