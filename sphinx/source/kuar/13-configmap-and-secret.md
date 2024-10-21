@@ -65,6 +65,7 @@ metadata:
 <dd>커맨드라인을 동적으로 생성할 수 있다.</dd>
 </dl>
 
+- kuard-config.yaml
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -98,26 +99,110 @@ spec:
             name: my-config
 ```
 
+- kubectl apply
+```sh
+kubectl apply -f kuard-config.yaml
+```
+
 <br/>
 
 ## 시크릿
+비빈번호, 보안 토큰, 개인키 같은 데이터를 저장하는 **시크릿** 객체가 있다.<br/>
+시크릿은 클러스터 etcd 스토리지에 평문으로 저장된다.
 
 <br/>
 
 ### 시크릿 생성
+```console
+$ curl -o kuard.crt https://storage.googleapis.com/kuar-demo/kuard.crt
+$ curl -o kuard.key https://storage.googleapis.com/kuar-demo/kuard.key
+$ kubectl create secret generic kuard-tls \
+  --from-file=kuard.crt \
+  --from-file=kuard.key
+secret/kuard-tls created
+$ k describe secret kuard-tls
+Name:         kuard-tls
+Namespace:    default
+Labels:       <none>
+Annotations:  <none>
 
+Type:  Opaque
+
+Data
+====
+kuard.crt:  1050 bytes
+kuard.key:  1679 bytes
+
+```
 <br/>
 
 ### 시크릿 사용
+쿠버네티스 API를 호출하거나 시크릿 볼륨(Secret volume)을 사용한다.<br/>
+시크릿 볼륨은 kubelet에 의해 관리되며 파드 생성 시점에 생성된다.<br/>
+시크릿은 tmpfs 볼륨(RAM 디스크)에 저장되며 노드의 디스크에는 기록되지 않는다.
 
+- kuard-secret.yml
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kuard-tls
+spec:
+  containers:
+    - name: kuard-tls
+      image: gcr.io/kuar-demo/kuard-amd64:blue
+      imagePullPolicy: Always
+      volumeMounts:
+        - name: tls-certs
+      mountPath: "/tls"
+      readOnly: true
+      volumes:
+        - name: tls-certs
+          secret:
+            secretName: kuard-tls
+```
 <br/>
 
 ### 사설 컨테이너 레지스트리
+쿠버네티스가 사설 레지스트리에 저장된 이미지 사용을 할 때 자격증명 저장 용도로 시크릿을 사용할 수 있다.
 
+```console
+$ kubectl create secret docker-registry my-image-pull-secret \
+  --docker-username=<username> \
+  --docker-password=<password> \
+  --docker-email=<email-address>
+```
+
+-  kuard-secret-ips.yaml
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+name: kuard-tls
+spec:
+  containers:
+    - name: kuard-tls
+      image: gcr.io/kuar-demo/kuard-amd64:blue
+      imagePullPolicy: Always
+      volumeMounts:
+        - name: tls-certs
+      mountPath: "/tls"
+      readOnly: true
+      imagePullSecrets:
+        - name: my-image-pull-secret
+      volumes:
+        - name: tls-certs
+          secret:
+            secretName: kuard-tls
+```
 <br/>
 
 ## 명명 규칙
+컨피그맵과 시크릿의 키는 regex 제한이 있다.
 
+```regex
+^[.[?[a-zAZ0-9[([.[?[a-zA-Z0-9[+[-_a-zA-Z0-9[?)*$
+```
 <br/>
 
 ## 컨피그맵과 시크릿 관리
