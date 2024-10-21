@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ko" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>12장 job &mdash; newbie v0.0.1 문서</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../_static/kitty.png"/>
+    <link rel="canonical" href="/newbie/kuar/12-job.html" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=f8b18680"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/translations.js?v=e33e7ba0"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="색인" href="../genindex.html" />
+    <link rel="search" title="검색" href="../search.html" />
+    <link rel="prev" title="11장. 데몬셋" href="11-DaemonSet.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            newbie
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">쿠버네티스 시작하기 3/e</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="00-syllabus.html">0장. 스터디 개요</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01-introduction.html">1장. 쿠버네티스 소개</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02-creating-and-running-containers.html">2장. 컨테이너 생성과 실행</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03-deploying-a-kubernets-cluster.html">3장. 쿠버네티스 클러스터 배포</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04-common-kubectl-commands.html">4장. 공통 kubectl 명령</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05-pods.html">5장. 파드</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06-label-and-annotation.html">6장. 라벨과 애노테이션</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07-service-discovery.html">7장. 서비스 탐색</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08-ingress.html">8장. 인그레스를 통한 HTTP 로드밸런싱</a></li>
+<li class="toctree-l1"><a class="reference internal" href="09-ReplicaSet.html">9장. 레플리카 셋</a></li>
+<li class="toctree-l1"><a class="reference internal" href="10-deployment.html">10장. 디플로이먼트</a></li>
+<li class="toctree-l1"><a class="reference internal" href="11-DaemonSet.html">11장. 데몬셋</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">12장 job</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">만들어진 목적</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">job 객체</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#job-pattern">job pattern</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">원 샷</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id4">참고</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">병렬 고정 완료</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">작업 대기열</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id7">준비물</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">newbie</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">12장 job</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/kuar/12-job.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="job">
+<h1>12장 job<a class="headerlink" href="#job" title="Link to this heading"></a></h1>
+</br>
+<section id="id1">
+<h2>만들어진 목적<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>단기간의 일회성 작업을 실행하기 위해</p></li>
+<li><p>종료 코드에 상관없이 지속적으로 재시작하는 일반 pod와는 달리 종료코드 0으로 끝나면 재시작 되지 않음</p></li>
+</ul>
+</br>
+</section>
+<section id="id2">
+<h2>job 객체<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>잡 명세 템플릿에 정의된 파드를 생성 및 관리</p></li>
+<li><p>잡이 종료코드 0으로 끝나지 않는 경우 파드 템를릿을 기반으로 새로운 pod 생성</p></li>
+</ul>
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: batch/v1
+kind: Job
+metadata:
+  name: oneshot
+spec:
+  template:
+    spec:
+      containers:
+      - name: kuard
+        image: gcr.io/kuar-demo/kuard-amd64:blue
+        imagePullPolicy: Always
+        command:
+        - &quot;/kuard&quot;
+        args:
+        - &quot;--keygen-enable&quot; 
+        - &quot;--keygen-exit-on-complete&quot; # 성공시 종료
+        - &quot;--keygen-num-to-gen=10&quot; 
+      restartPolicy: OnFailure # 실패시 job 객체 생성
+</pre></div>
+</div>
+</br>
+</section>
+<section id="job-pattern">
+<h2>job pattern<a class="headerlink" href="#job-pattern" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>각 잡은 졸료코드 0으로 끝날 때까지 단일 파드를 2번 실행함</p></li>
+<li><p>작업 패턴은 작업 완료 수와 병렬로 실행할 파드 수로 정의됨</p></li>
+<li><p>작업 패턴</p>
+<ul>
+<li><p>원샷: 파드가 성공적으로 종료될 때까지 단일 파드를 한 번 실행하는 방법을 제공</p></li>
+<li><p>병렬 고정 완료: 여러 일을 여러 pods에서 처리함, 한번에 뜨는 pod의 개수가 제한됨(재활용이 아니라는 사실에 유의)</p></li>
+<li><p>작업 대기열: 하나의 큰 객체의 일을 여러 pods에서 병렬로 처리함</p></li>
+</ul>
+</li>
+</ul>
+</br>
+</section>
+<section id="id3">
+<h2>원 샷<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: batch/v1
+kind: Job
+metadata:
+  name: oneshot
+spec:
+  template:
+    spec:
+      containers:
+      - name: kuard
+        image: gcr.io/kuar-demo/kuard-amd64:blue
+        imagePullPolicy: Always
+        command:
+        - &quot;/kuard&quot;
+        args:
+        - &quot;--keygen-enable&quot;
+        - &quot;--keygen-exit-on-complete&quot;
+        - &quot;--keygen-num-to-gen=10&quot;
+      restartPolicy: OnFailure
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Name:<span class="w">           </span>oneshot
+Namespace:<span class="w">      </span>default
+Selector:<span class="w">       </span>batch.kubernetes.io/controller-uid<span class="o">=</span>ed8954e5-b567-4227-a0cb-b33b0566d35a
+Labels:<span class="w">         </span>batch.kubernetes.io/controller-uid<span class="o">=</span>ed8954e5-b567-4227-a0cb-b33b0566d35a
+<span class="w">                </span>batch.kubernetes.io/job-name<span class="o">=</span>oneshot
+<span class="w">                </span>controller-uid<span class="o">=</span>ed8954e5-b567-4227-a0cb-b33b0566d35a
+<span class="w">                </span>job-name<span class="o">=</span>oneshot
+Annotations:<span class="w">    </span>kubectl.kubernetes.io/last-applied-configuration:
+<span class="w">                  </span><span class="o">{</span><span class="s2">&quot;apiVersion&quot;</span>:<span class="s2">&quot;batch/v1&quot;</span>,<span class="s2">&quot;kind&quot;</span>:<span class="s2">&quot;Job&quot;</span>,<span class="s2">&quot;metadata&quot;</span>:<span class="o">{</span><span class="s2">&quot;annotations&quot;</span>:<span class="o">{}</span>,<span class="s2">&quot;name&quot;</span>:<span class="s2">&quot;oneshot&quot;</span>,<span class="s2">&quot;namespace&quot;</span>:<span class="s2">&quot;default&quot;</span><span class="o">}</span>,<span class="s2">&quot;spec&quot;</span>:<span class="o">{</span><span class="s2">&quot;template&quot;</span>:<span class="o">{</span><span class="s2">&quot;spec&quot;</span>:<span class="o">{</span><span class="s2">&quot;co...</span>
+<span class="s2">Parallelism:    1</span>
+<span class="s2">Completions:    1</span>
+<span class="s2">Start Time:     Mon, 21 Oct 2024 10:21:05 +0900</span>
+<span class="s2">Completed At:   Mon, 21 Oct 2024 10:21:26 +0900</span>
+<span class="s2">Duration:       21s</span>
+<span class="s2">Pods Statuses:  0 Running / 1 Succeeded / 0 Failed</span>
+<span class="s2">Pod Template:</span>
+<span class="s2">  Labels:  batch.kubernetes.io/controller-uid=ed8954e5-b567-4227-a0cb-b33b0566d35a</span>
+<span class="s2">           batch.kubernetes.io/job-name=oneshot</span>
+<span class="s2">           controller-uid=ed8954e5-b567-4227-a0cb-b33b0566d35a</span>
+<span class="s2">           job-name=oneshot</span>
+<span class="s2">  Containers:</span>
+<span class="s2">   kuard:</span>
+<span class="s2">    Image:      gcr.io/kuar-demo/kuard-amd64:blue</span>
+<span class="s2">    Port:       &lt;none&gt;</span>
+<span class="s2">    Host Port:  &lt;none&gt;</span>
+<span class="s2">    Command:</span>
+<span class="s2">      /kuard</span>
+<span class="s2">    Args:</span>
+<span class="s2">      --keygen-enable</span>
+<span class="s2">      --keygen-exit-on-complete</span>
+<span class="s2">      --keygen-num-to-gen=10</span>
+<span class="s2">    Environment:  &lt;none&gt;</span>
+<span class="s2">    Mounts:       &lt;none&gt;</span>
+<span class="s2">  Volumes:        &lt;none&gt;</span>
+<span class="s2">Events:</span>
+<span class="s2">  Type    Reason            Age    From            Message</span>
+<span class="s2">  ----    ------            ----   ----            -------</span>
+<span class="s2">  Normal  SuccessfulCreate  2m41s  job-controller  Created pod: oneshot-w4nfr</span>
+<span class="s2">  Normal  Completed         2m20s  job-controller  Job completed</span>
+</pre></div>
+</div>
+<section id="id4">
+<h3>참고<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>➜<span class="w">  </span>newbie<span class="w"> </span>git:<span class="o">(</span>main<span class="o">)</span><span class="w"> </span>✗<span class="w"> </span>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>job-oneshot.yaml
+Warning:<span class="w"> </span>kubectl<span class="w"> </span>apply<span class="w"> </span>should<span class="w"> </span>be<span class="w"> </span>used<span class="w"> </span>on<span class="w"> </span>resource<span class="w"> </span>created<span class="w"> </span>by<span class="w"> </span>either<span class="w"> </span>kubectl<span class="w"> </span>create<span class="w"> </span>--save-config<span class="w"> </span>or<span class="w"> </span>kubectl<span class="w"> </span>apply
+The<span class="w"> </span>Job<span class="w"> </span><span class="s2">&quot;oneshot&quot;</span><span class="w"> </span>is<span class="w"> </span>invalid:<span class="w"> </span>spec.template:<span class="w"> </span>Invalid<span class="w"> </span>value:<span class="w"> </span>core.PodTemplateSpec<span class="o">{</span>ObjectMeta:v1.ObjectMeta<span class="o">{</span>Name:<span class="s2">&quot;&quot;</span>,<span class="w"> </span>GenerateName:<span class="s2">&quot;&quot;</span>,<span class="w"> </span>Namespace:<span class="s2">&quot;&quot;</span>,<span class="w"> </span>SelfLink:<span class="s2">&quot;&quot;</span>,<span class="w"> </span>UID:<span class="s2">&quot;&quot;</span>,<span class="w"> </span>ResourceVersion:<span class="s2">&quot;&quot;</span>,<span class="w"> </span>Generation:0,<span class="w"> </span>CreationTimestamp:time.Date<span class="o">(</span><span class="m">1</span>,<span class="w"> </span>time.January,<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="m">0</span>,<span class="w"> </span><span class="m">0</span>,<span class="w"> </span><span class="m">0</span>,<span class="w"> </span><span class="m">0</span>,<span class="w"> </span>time.UTC<span class="o">)</span>,<span class="w"> </span>DeletionTimestamp:&lt;nil&gt;,<span class="w"> </span>DeletionGracePeriodSeconds:<span class="o">(</span>*int64<span class="o">)(</span>nil<span class="o">)</span>,<span class="w"> </span>Labels:map<span class="o">[</span>string<span class="o">]</span>string<span class="o">{</span><span class="s2">&quot;batch.kubernetes.io/controller-uid&quot;</span>:<span class="s2">&quot;54c42c9c-b4ec-43b2-b671-16c4848554ea&quot;</span>,<span class="w"> </span><span class="s2">&quot;batch.kubernetes.io/job-name&quot;</span>:<span class="s2">&quot;oneshot&quot;</span>,<span class="w"> </span><span class="s2">&quot;controller-uid&quot;</span>:<span class="s2">&quot;54c42c9c-b4ec-43b2-b671-16c4848554ea&quot;</span>,<span class="w"> </span><span class="s2">&quot;job-name&quot;</span>:<span class="s2">&quot;oneshot&quot;</span>,<span class="w"> </span><span class="s2">&quot;run&quot;</span>:<span class="s2">&quot;oneshot&quot;</span><span class="o">}</span>,<span class="w"> </span>Annotations:map<span class="o">[</span>string<span class="o">]</span>string<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>OwnerReferences:<span class="o">[]</span>v1.OwnerReference<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>Finalizers:<span class="o">[]</span>string<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>ManagedFields:<span class="o">[]</span>v1.ManagedFieldsEntry<span class="o">(</span>nil<span class="o">)}</span>,<span class="w"> </span>Spec:core.PodSpec<span class="o">{</span>Volumes:<span class="o">[]</span>core.Volume<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>InitContainers:<span class="o">[]</span>core.Container<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>Containers:<span class="o">[]</span>core.Container<span class="o">{</span>core.Container<span class="o">{</span>Name:<span class="s2">&quot;kuard&quot;</span>,<span class="w"> </span>Image:<span class="s2">&quot;gcr.io/kuar-demo/kuard-amd64:blue&quot;</span>,<span class="w"> </span>Command:<span class="o">[]</span>string<span class="o">{</span><span class="s2">&quot;/kuard&quot;</span><span class="o">}</span>,<span class="w"> </span>Args:<span class="o">[]</span>string<span class="o">{</span><span class="s2">&quot;--keygen-enable&quot;</span>,<span class="w"> </span><span class="s2">&quot;--keygen-exit-on-complete&quot;</span>,<span class="w"> </span><span class="s2">&quot;--keygen-num-to-gen=10&quot;</span><span class="o">}</span>,<span class="w"> </span>WorkingDir:<span class="s2">&quot;&quot;</span>,<span class="w"> </span>Ports:<span class="o">[]</span>core.ContainerPort<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>EnvFrom:<span class="o">[]</span>core.EnvFromSource<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>Env:<span class="o">[]</span>core.EnvVar<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>Resources:core.ResourceRequirements<span class="o">{</span>Limits:core.ResourceList<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>Requests:core.ResourceList<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>Claims:<span class="o">[]</span>core.ResourceClaim<span class="o">(</span>nil<span class="o">)}</span>,<span class="w"> </span>ResizePolicy:<span class="o">[]</span>core.ContainerResizePolicy<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>RestartPolicy:<span class="o">(</span>*core.ContainerRestartPolicy<span class="o">)(</span>nil<span class="o">)</span>,<span class="w"> </span>VolumeMounts:<span class="o">[]</span>core.VolumeMount<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>VolumeDevices:<span class="o">[]</span>core.VolumeDevice<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>LivenessProbe:<span class="o">(</span>*core.Probe<span class="o">)(</span>nil<span class="o">)</span>,<span class="w"> </span>ReadinessProbe:<span class="o">(</span>*core.Probe<span class="o">)(</span>nil<span class="o">)</span>,<span class="w"> </span>StartupProbe:<span class="o">(</span>*core.Probe<span class="o">)(</span>nil<span class="o">)</span>,<span class="w"> </span>Lifecycle:<span class="o">(</span>*core.Lifecycle<span class="o">)(</span>nil<span class="o">)</span>,<span class="w"> </span>TerminationMessagePath:<span class="s2">&quot;/dev/termination-log&quot;</span>,<span class="w"> </span>TerminationMessagePolicy:<span class="s2">&quot;File&quot;</span>,<span class="w"> </span>ImagePullPolicy:<span class="s2">&quot;Always&quot;</span>,<span class="w"> </span>SecurityContext:<span class="o">(</span>*core.SecurityContext<span class="o">)(</span>nil<span class="o">)</span>,<span class="w"> </span>Stdin:false,<span class="w"> </span>StdinOnce:false,<span class="w"> </span>TTY:false<span class="o">}</span>,<span class="w"> </span>core.Container<span class="o">{</span>Name:<span class="s2">&quot;oneshot&quot;</span>,<span class="w"> </span>Image:<span class="s2">&quot;gcr.io/kuar-demo/kuard-amd64:blue&quot;</span>,<span class="w"> </span>Command:<span class="o">[]</span>string<span class="o">{</span><span class="s2">&quot;/kuard&quot;</span>,<span class="w"> </span><span class="s2">&quot;--keygen-enable&quot;</span>,<span class="w"> </span><span class="s2">&quot;--keygen-exit-on-complete&quot;</span>,<span class="w"> </span><span class="s2">&quot;--keygen-num-to-gen&quot;</span>,<span class="w"> </span><span class="s2">&quot;10&quot;</span>,<span class="w"> </span><span class="s2">&quot;-a&quot;</span><span class="o">}</span>,<span class="w"> </span>Args:<span class="o">[]</span>string<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>WorkingDir:<span class="s2">&quot;&quot;</span>,<span class="w"> </span>Ports:<span class="o">[]</span>core.ContainerPort<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>EnvFrom:<span class="o">[]</span>core.EnvFromSource<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>Env:<span class="o">[]</span>core.EnvVar<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>Resources:core.ResourceRequirements<span class="o">{</span>Limits:core.ResourceList<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>Requests:core.ResourceList<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>Claims:<span class="o">[]</span>core.ResourceClaim<span class="o">(</span>nil<span class="o">)}</span>,<span class="w"> </span>ResizePolicy:<span class="o">[]</span>core.ContainerResizePolicy<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>RestartPolicy:<span class="o">(</span>*core.ContainerRestartPolicy<span class="o">)(</span>nil<span class="o">)</span>,<span class="w"> </span>VolumeMounts:<span class="o">[]</span>core.VolumeMount<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>VolumeDevices:<span class="o">[]</span>core.VolumeDevice<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>LivenessProbe:<span class="o">(</span>*core.Probe<span class="o">)(</span>nil<span class="o">)</span>,<span class="w"> </span>ReadinessProbe:<span class="o">(</span>*core.Probe<span class="o">)(</span>nil<span class="o">)</span>,<span class="w"> </span>StartupProbe:<span class="o">(</span>*core.Probe<span class="o">)(</span>nil<span class="o">)</span>,<span class="w"> </span>Lifecycle:<span class="o">(</span>*core.Lifecycle<span class="o">)(</span>nil<span class="o">)</span>,<span class="w"> </span>TerminationMessagePath:<span class="s2">&quot;/dev/termination-log&quot;</span>,<span class="w"> </span>TerminationMessagePolicy:<span class="s2">&quot;File&quot;</span>,<span class="w"> </span>ImagePullPolicy:<span class="s2">&quot;IfNotPresent&quot;</span>,<span class="w"> </span>SecurityContext:<span class="o">(</span>*core.SecurityContext<span class="o">)(</span>nil<span class="o">)</span>,<span class="w"> </span>Stdin:true,<span class="w"> </span>StdinOnce:true,<span class="w"> </span>TTY:false<span class="o">}}</span>,<span class="w"> </span>EphemeralContainers:<span class="o">[]</span>core.EphemeralContainer<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>RestartPolicy:<span class="s2">&quot;OnFailure&quot;</span>,<span class="w"> </span>TerminationGracePeriodSeconds:<span class="o">(</span>*int64<span class="o">)(</span>0x400a9022c8<span class="o">)</span>,<span class="w"> </span>ActiveDeadlineSeconds:<span class="o">(</span>*int64<span class="o">)(</span>nil<span class="o">)</span>,<span class="w"> </span>DNSPolicy:<span class="s2">&quot;ClusterFirst&quot;</span>,<span class="w"> </span>NodeSelector:map<span class="o">[</span>string<span class="o">]</span>string<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>ServiceAccountName:<span class="s2">&quot;&quot;</span>,<span class="w"> </span>AutomountServiceAccountToken:<span class="o">(</span>*bool<span class="o">)(</span>nil<span class="o">)</span>,<span class="w"> </span>NodeName:<span class="s2">&quot;&quot;</span>,<span class="w"> </span>SecurityContext:<span class="o">(</span>*core.PodSecurityContext<span class="o">)(</span>0x4002089d60<span class="o">)</span>,<span class="w"> </span>ImagePullSecrets:<span class="o">[]</span>core.LocalObjectReference<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>Hostname:<span class="s2">&quot;&quot;</span>,<span class="w"> </span>Subdomain:<span class="s2">&quot;&quot;</span>,<span class="w"> </span>SetHostnameAsFQDN:<span class="o">(</span>*bool<span class="o">)(</span>nil<span class="o">)</span>,<span class="w"> </span>Affinity:<span class="o">(</span>*core.Affinity<span class="o">)(</span>nil<span class="o">)</span>,<span class="w"> </span>SchedulerName:<span class="s2">&quot;default-scheduler&quot;</span>,<span class="w"> </span>Tolerations:<span class="o">[]</span>core.Toleration<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>HostAliases:<span class="o">[]</span>core.HostAlias<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>PriorityClassName:<span class="s2">&quot;&quot;</span>,<span class="w"> </span>Priority:<span class="o">(</span>*int32<span class="o">)(</span>nil<span class="o">)</span>,<span class="w"> </span>PreemptionPolicy:<span class="o">(</span>*core.PreemptionPolicy<span class="o">)(</span>nil<span class="o">)</span>,<span class="w"> </span>DNSConfig:<span class="o">(</span>*core.PodDNSConfig<span class="o">)(</span>nil<span class="o">)</span>,<span class="w"> </span>ReadinessGates:<span class="o">[]</span>core.PodReadinessGate<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>RuntimeClassName:<span class="o">(</span>*string<span class="o">)(</span>nil<span class="o">)</span>,<span class="w"> </span>Overhead:core.ResourceList<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>EnableServiceLinks:<span class="o">(</span>*bool<span class="o">)(</span>nil<span class="o">)</span>,<span class="w"> </span>TopologySpreadConstraints:<span class="o">[]</span>core.TopologySpreadConstraint<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>OS:<span class="o">(</span>*core.PodOS<span class="o">)(</span>nil<span class="o">)</span>,<span class="w"> </span>SchedulingGates:<span class="o">[]</span>core.PodSchedulingGate<span class="o">(</span>nil<span class="o">)</span>,<span class="w"> </span>ResourceClaims:<span class="o">[]</span>core.PodResourceClaim<span class="o">(</span>nil<span class="o">)}}</span>:<span class="w"> </span>field<span class="w"> </span>is<span class="w"> </span>immutable
+</pre></div>
+</div>
+<p>원인: 기존 oneshot으로 올렸던 job이 존재하였고 해당 job을 수정하는 것으로 착각 하였기에 발생한 오류</p>
+</br>
+</section>
+</section>
+<section id="id5">
+<h2>병렬 고정 완료<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>completions: 끝내야 하는 일의 횟수</p></li>
+<li><p>parallelism: 동시에 뜰 수 있는 pods의 수</p></li>
+</ul>
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: batch/v1
+kind: Job
+metadata:
+  name: parallel
+  labels:
+    chapter: jobs
+spec:
+  parallelism: 5
+  completions: 10
+  template:
+    metadata:
+      labels:
+        chapter: jobs
+    spec:
+      containers:
+      - name: kuard
+        image: gcr.io/kuar-demo/kuard-amd64:blue
+        imagePullPolicy: Always
+        command:
+        - &quot;/kuard&quot;
+        args:
+        - &quot;--keygen-enable&quot;
+        - &quot;--keygen-exit-on-complete&quot;
+        - &quot;--keygen-num-to-gen=10&quot;
+      restartPolicy: OnFailure
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>➜<span class="w">  </span>newbie<span class="w"> </span>git:<span class="o">(</span>main<span class="o">)</span><span class="w"> </span>✗<span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w">   </span>
+NAME<span class="w">             </span>READY<span class="w">   </span>STATUS<span class="w">      </span>RESTARTS<span class="w">   </span>AGE
+oneshot-w4nfr<span class="w">    </span><span class="m">0</span>/1<span class="w">     </span>Completed<span class="w">   </span><span class="m">0</span><span class="w">          </span>6h1m
+parallel-2pcxp<span class="w">   </span><span class="m">0</span>/1<span class="w">     </span>Completed<span class="w">   </span><span class="m">0</span><span class="w">          </span>73s
+parallel-689g5<span class="w">   </span><span class="m">0</span>/1<span class="w">     </span>Completed<span class="w">   </span><span class="m">0</span><span class="w">          </span>78s
+parallel-6sd5s<span class="w">   </span><span class="m">0</span>/1<span class="w">     </span>Completed<span class="w">   </span><span class="m">0</span><span class="w">          </span>75s
+parallel-jssqh<span class="w">   </span><span class="m">0</span>/1<span class="w">     </span>Completed<span class="w">   </span><span class="m">0</span><span class="w">          </span>107s
+parallel-lllvw<span class="w">   </span><span class="m">0</span>/1<span class="w">     </span>Completed<span class="w">   </span><span class="m">0</span><span class="w">          </span>107s
+parallel-n8wcw<span class="w">   </span><span class="m">0</span>/1<span class="w">     </span>Completed<span class="w">   </span><span class="m">0</span><span class="w">          </span>107s
+parallel-s7r9j<span class="w">   </span><span class="m">0</span>/1<span class="w">     </span>Completed<span class="w">   </span><span class="m">0</span><span class="w">          </span>76s
+parallel-tc6m4<span class="w">   </span><span class="m">0</span>/1<span class="w">     </span>Completed<span class="w">   </span><span class="m">0</span><span class="w">          </span>70s
+parallel-xv6sr<span class="w">   </span><span class="m">0</span>/1<span class="w">     </span>Completed<span class="w">   </span><span class="m">0</span><span class="w">          </span>107s
+parallel-zz5kw<span class="w">   </span><span class="m">0</span>/1<span class="w">     </span>Completed<span class="w">   </span><span class="m">0</span><span class="w">          </span>107s
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>총 끝내야 하는 job이 10개이기에 10개의 pod가 만들어진다</p></li>
+</ul>
+</br>
+</section>
+<section id="id6">
+<h2>작업 대기열<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
+<section id="id7">
+<h3>준비물<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<ul>
+<li><p>queue 역할을 할 Pod</p>
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  labels:
+    app: work-queue
+    component: queue
+    chapter: jobs
+  name: queue
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: work-queue
+      component: queue
+      chapter: jobs
+  template:
+    metadata:
+      labels:
+        app: work-queue
+        component: queue
+        chapter: jobs
+    spec:
+      containers:
+      - name: queue
+        image: &quot;gcr.io/kuar-demo/kuard-amd64:blue&quot;
+        imagePullPolicy: Always
+</pre></div>
+</div>
+<p><img alt="image" src="../_images/memQ-server.png" /></p>
+</li>
+<li><p>해당 pod를 서비스를 사용해 공개</p>
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: work-queue
+    component: queue
+    chapter: jobs
+  name: queue
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: work-queue
+    component: queue
+</pre></div>
+</div>
+</li>
+<li><p>대기열 적재</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a work queue called &#39;keygen&#39;</span>
+curl<span class="w"> </span>-X<span class="w"> </span>PUT<span class="w"> </span>localhost:8080/memq/server/queues/keygen
+
+<span class="c1"># Create 100 work items and load up the queue.</span>
+<span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span>work-item-<span class="o">{</span><span class="m">0</span>..99<span class="o">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>localhost:8080/memq/server/queues/keygen/enqueue<span class="w"> </span>-d<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span>
+<span class="k">done</span>
+</pre></div>
+</div>
+</li>
+<li><p>내용 확인
+<img alt="image" src="../_images/memQ-server-after-input.png" /></p></li>
+<li><p>소비 방법 지정(소비자 잡 생성)</p>
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app: message-queue
+    component: consumer
+    chapter: jobs
+  name: consumers
+spec:
+  parallelism: 5
+  template:
+    metadata:
+      labels:
+        app: message-queue
+        component: consumer
+        chapter: jobs
+    spec:
+      containers:
+      - name: worker
+        image: &quot;gcr.io/kuar-demo/kuard-amd64:blue&quot;
+        imagePullPolicy: Always
+        command:
+        - &quot;/kuard&quot;
+        args:
+        - &quot;--keygen-enable&quot;
+        - &quot;--keygen-exit-on-complete&quot;
+        - &quot;--keygen-memq-server=http://queue:8080/memq/server&quot;
+        - &quot;--keygen-memq-queue=keygen&quot;
+      restartPolicy: OnFailure
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="11-DaemonSet.html" class="btn btn-neutral float-left" title="11장. 데몬셋" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, newbie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="rst-versions" role="note" style="padding: 1rem; font-weight: bold;">
+        <a href="https://github.com/study-zero/newbie"><span class="fa fa-link"> Github</span></a>
+    </div>
+
+</body>
+</html>
