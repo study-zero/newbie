@@ -1,0 +1,18 @@
+apiVersion: admissionregistration.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: kuar-validator
+webhooks:
+- name: validator.kuar.com
+  rules:
+  - apiGroups:
+    - "beta.kuar.com"
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    resources:
+    - loadtests
+  clientConfig:
+    url: <웹훅을 위한 URL>
+    caBundle: <base64로 인코딩된 CA 인증서>
