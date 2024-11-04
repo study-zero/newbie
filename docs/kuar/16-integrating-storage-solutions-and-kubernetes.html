@@ -1,0 +1,565 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ko" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>16장. 스토리지 솔루션과 쿠버네티스의 연계 &mdash; newbie v0.0.1 문서</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+    <link rel="shortcut icon" href="../_static/kitty.png"/>
+    <link rel="canonical" href="/newbie/kuar/16-integrating-storage-solutions-and-kubernetes.html" />
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f8b18680"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=afa94a99"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="색인" href="../genindex.html" />
+    <link rel="search" title="검색" href="../search.html" />
+    <link rel="next" title="17장. 쿠버네티스 확장" href="17-kubernetes_extension.html" />
+    <link rel="prev" title="15장 서비스 메시" href="15-service_mesh.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            newbie
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">쿠버네티스 시작하기 3/e</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="00-syllabus.html">0장. 스터디 개요</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01-introduction.html">1장. 쿠버네티스 소개</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02-creating-and-running-containers.html">2장. 컨테이너 생성과 실행</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03-deploying-a-kubernets-cluster.html">3장. 쿠버네티스 클러스터 배포</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04-common-kubectl-commands.html">4장. 공통 kubectl 명령</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05-pods.html">5장. 파드</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06-label-and-annotation.html">6장. 라벨과 애노테이션</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07-service-discovery.html">7장. 서비스 탐색</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08-ingress.html">8장. 인그레스를 통한 HTTP 로드밸런싱</a></li>
+<li class="toctree-l1"><a class="reference internal" href="09-ReplicaSet.html">9장. 레플리카 셋</a></li>
+<li class="toctree-l1"><a class="reference internal" href="10-deployment.html">10장. 디플로이먼트</a></li>
+<li class="toctree-l1"><a class="reference internal" href="11-DaemonSet.html">11장. 데몬셋</a></li>
+<li class="toctree-l1"><a class="reference internal" href="12-job.html">12장 job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="13-configmap-and-secret.html">13장. 컨피그맵과 시크릿</a></li>
+<li class="toctree-l1"><a class="reference internal" href="14-rbac.html">14장.  쿠버네티스를 위한 역할 기반 접근 제어</a></li>
+<li class="toctree-l1"><a class="reference internal" href="15-service_mesh.html">15장 서비스 메시</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">16장. 스토리지 솔루션과 쿠버네티스의 연계</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">외부 서비스 가져오기</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id3">셀렉터가 없는 서비스</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">외부 서비스의 제약 사항: 상태 검사</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">신뢰할 수 있는 싱글톤 실행</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mysql">MySQL 싱글톤 실행</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">동적 볼륨 프로비저닝</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id7">스테이트풀셋을 통한 쿠버네티스 네이티브 스토리지</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id8">스테이트풀셋 속성</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#db">스테이트풀셋을 통한 몽고DB 수동 복제</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id9">몽고DB 클러스터 생성 자동화</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id10">영구 볼륨과 스테이트풀셋</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id11">마지막 단계: 준비 프로브</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id12">요약</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="17-kubernetes_extension.html">17장.  쿠버네티스 확장</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">newbie</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">16장. 스토리지 솔루션과 쿠버네티스의 연계</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/kuar/16-integrating-storage-solutions-and-kubernetes.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>16장. 스토리지 솔루션과 쿠버네티스의 연계<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
+<p>상태 비저장 방식으로 마이크로서비스를 구축하면 신뢰성를 확보하고 관리가 용이하다.<br/>
+하지만 서비스 운영 시 어느 시점에는 어딘가에 저장된 데이터가 필요하다.<br/>
+컨테이너 오케스트레이션 솔루션 상의 애플리케이션은 불변하고 선언형인 상태로 관리될 필요가 있다.<br/>
+기존 애플리케이션은 데이터 중력(data gravity)로 인해 컨테이너로 운영되더라도<br/>
+격리된 상태로 구축되지 않고 기존 VM과 데이터를 공유할 수 있어서 분리가 필요한 복잡성이 요구된다.</p>
+<p>15장에서는 쿠버네티스 환경에서 스토리지를 컨테이너형 마이크로서비스로<br/>연계하기 위한 다양한 접근 방법을 살펴본다.</p>
+<section id="id2">
+<h2>외부 서비스 가져오기<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<p>데이터베이스가 실행되고 있는 기존 시스템과 통합하는 방법이다.<br/>
+레거시 서버와 서비스를 쿠버네티스에 포함시킬 경우<br/>
+쿠버네티스에서 제공하는 모든 내장 네이밍 및 서비스 탐색의 기본 기능 같은 이점을 활용할 수 있다.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-database</span>
+<span class="w">  </span><span class="c1"># note &#39;test&#39; namespace here</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test</span>
+</pre></div>
+</div>
+<p>위와 같은 서비스는 아래와 같은 포인터를 가진다.</p>
+<ul class="simple">
+<li><p>my-database.test.svc.cluster.internal</p></li>
+</ul>
+<p>네임스페이스를 prod로 설정할 경우 아래와 같은 포인터를 가진다.</p>
+<ul class="simple">
+<li><p>my-database.prod.svc.cluster.internal</p></li>
+</ul>
+<section id="id3">
+<h3>셀렉터가 없는 서비스<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<p>데이터베이스가 실행 중인 특정 서버를 가리키는 DNS를 서비스와 연결할 수 있다.</p>
+<p><em>예제 15-1. dns-service.yaml</em></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">external-database</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ExternalName</span>
+<span class="w">  </span><span class="nt">externalName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">database.company.com</span>
+</pre></div>
+</div>
+<p>ExternalName 타입의 서비스를 생성하면 사용자가 지정한 외부 서비스를 가리키는 CNAME 레코드를 쿠버네티스 DNS 서비스에 등록한다.</p>
+<p>클러스터 내에서 호스트 이름 external-database.svc.default.cluster의 DNS를 조회하면 DNS 프로토콜은 database.company.com의 이름으로 별칭을 부여한다.<br/>
+그후 이 이름을 외부 데이터베이스 서버의 IP 주소로 해석한다.</p>
+<p>IP 주소로 외부 서비스를 쿠버네티스로 가져오는 것도 가능하다.<br/>
+이 경우 서비스와 엔드포인트 객체를 직접 등록해주어야한다.<br/>
+또한 서버의 IP 주소의 최산화 책임을 가지게 되기에 고정 IP 사용 또는 자동으로 엔드포인트를 업데이트해주는 절차를 마련해야한다.</p>
+<p><em>예제 15-2. external-ip-service.yaml</em></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">external-ip-database</span>
+</pre></div>
+</div>
+<p><em>예제 15-3. external-ip-endpoints.yaml</em></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Endpoints</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">external-ip-database</span>
+<span class="nt">subsets</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">addresses</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">ip</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.168.0.1</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3306</span>
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h3>외부 서비스의 제약 사항: 상태 검사<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<p>외부 서비스는 health check를 수행하지 않아서 별도로 신뢰성을 확인해야한다.</p>
+</section>
+</section>
+<section id="id5">
+<h2>신뢰할 수 있는 싱글톤 실행<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<p>쿠버네티스 기본 객체를 활용하되 복제본을 생성하지 않으면 관리가 간단하다.</p>
+<p>신뢰할 수 있는 분산 시스템 구축 원칙에 반하는 것으로 보일 수 있지만<br/>
+기존 시스템이 단일 가상머신이나 단일 물리머신인 경우가 많고<br/>
+소규모 애플리케이션의 경우 제한된 다운타임은 복잡성을 줄일 수 있는 합리적인 트레이드오프 관계로 볼 수 있다.</p>
+<p>다음절에서 설명하는 것과 같이 레플리카셋을 사용하면 싱글톤이어도 장애를 어느 정도 대비할 수 있다.</p>
+<section id="mysql">
+<h3>MySQL 싱글톤 실행<a class="headerlink" href="#mysql" title="Link to this heading"></a></h3>
+<p>MySQL을 쿠버네티스 내에서 싱글톤으로 실행하기 위해 다음과 같은 세 가지 기본 객체를 생성한다.</p>
+<ul class="simple">
+<li><p>MySQL 애플리케이션과 독립적인 영구 볼륨</p></li>
+<li><p>MySQL 애플리케이션 파드</p></li>
+<li><p>MySQL 파드를 노출하기 위한 서비스</p></li>
+</ul>
+<p><em>예제 15-4. nfs-volume.yaml</em></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PersistentVolume</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">database</span>
+<span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">volume</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-volume</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">accessModes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ReadWriteMany</span>
+<span class="w">  </span><span class="nt">capacity</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">storage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1Gi</span>
+<span class="w">  </span><span class="nt">nfs</span><span class="p">:</span><span class="w"> </span><span class="c1"># nfs</span>
+<span class="w">    </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.168.0.1</span>
+<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/exports&quot;</span>
+</pre></div>
+</div>
+<p>아래와 같이 영구 볼륨을 생성 가능하다.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>nfs-volume.yaml
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">참고</p>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Network_File_System">Network File System(NFS)</a>란 1984년 Sun Microsystems에서 개발한 분산 파일 시스템 프로토콜로 클라이언트 컴퓨터의 사용자가 로컬 저장소에 액세스하는 것과 매우 유사하게 컴퓨터 네트워크를 통해 파일에 액세스할 수 있도록 한다.</p>
+</div>
+<p><em>예제 15-5. nfs-volume-claim.yaml</em></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PersistentVolumeClaim</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">database</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">accessModes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ReadWriteMany</span>
+<span class="w">  </span><span class="nt">resources</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">requests</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">storage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1Gi</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">v olume</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-volume</span>
+</pre></div>
+</div>
+<p>위와 같이 PVC를 통해 영구 볼륨 사용 요청을 할 수 있다.<br/>
+굳이 PV가 아닌 PVC를 통해 영구 볼륨을 연결하는 이유는 파드에 대한 정의를 스토리지의 정의에서 분리하기 위함이다(일종의 프록시 느낌).</p>
+<p><em>예제 15-6. mysql-replicaset.yaml</em></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">extensions/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ReplicaSet</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mysql</span>
+<span class="w">   </span><span class="l l-Scalar l-Scalar-Plain"># labels so that we can bind a Service to this Pod</span>
+<span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mysql</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mysql</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mysql</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">database</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mysql</span>
+<span class="w">        </span><span class="nt">resources</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">requests</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">            </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2Gi</span>
+<span class="w">        </span><span class="nt">env</span><span class="p">:</span>
+<span class="w">          </span><span class="c1"># 보다 나은 보안은 11장 참고</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYSQL_ROOT_PASSWORD</span>
+<span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">some-password-here</span>
+<span class="w">        </span><span class="nt">livenessProbe</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">tcpSocket</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3306</span>
+<span class="w">        </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3306</span>
+<span class="w">        </span><span class="nt">volumeMounts</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">database</span>
+<span class="w">            </span><span class="c1"># /var/lib/mysql가 MySQL이 데이터를 저장하는 장소</span>
+<span class="w">            </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/var/lib/mysql&quot;</span>
+<span class="w">        </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">database</span>
+<span class="w">            </span><span class="nt">persistentVolumeClaim</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">claimName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">database</span>
+</pre></div>
+</div>
+<p>레플리카셋을 사용해서 파드가 다운될 경우 정상 노드에 스케쥴링을 보장할 수 있다.<br/>
+단일 머신 장애 등을 방지하기 위함이다.</p>
+<p><em>예제 15-7. mysql-service.yaml</em></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mysql</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="nt">ports</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3306</span>
+<span class="w">    </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+<span class="w">    </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mysql</span>
+</pre></div>
+</div>
+</section>
+<section id="id6">
+<h3>동적 볼륨 프로비저닝<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<p>StorageClass 객체를 통해 동적 볼륨 프로비저닝을 사용할 수 있다.</p>
+<p>클러스터는 여러 개의 다른 스토리지 클래스가 설치될 수 있다.<br/>
+NFS 서버용과 iSCSI 블록 저장소용 등 스토리지 클래스가 함께 존재할 수 있다.</p>
+<p><em>예제 15-8. storageclass.yaml</em></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">storage.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">StorageClass</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">storageclass.beta.kubernetes.io/is-default-class</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;true&quot;</span>
+<span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">kubernetes.io/cluster-service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;true&quot;</span>
+<span class="nt">provisioner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubernetes.io/azure-disk</span>
+</pre></div>
+</div>
+<p><em>예제 15-9. dynamic-volume-claim.yaml</em></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PersistentVolumeClaim</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-claim</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">volume.beta.kubernetes.io/storage-class</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w"> </span><span class="c1"># default 스토리지 클래스 연결</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">accessModes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ReadWriteOnce</span>
+<span class="w">  </span><span class="nt">resources</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">requests</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">storage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10Gi</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id7">
+<h2>스테이트풀셋을 통한 쿠버네티스 네이티브 스토리지<a class="headerlink" href="#id7" title="Link to this heading"></a></h2>
+<p>상태 비저장 애플리케이션이 비식별성을 가지는 것과 달리<br/>
+상태 저장 애플리케이션은 식별성을 필요로 한다.</p>
+<p>쿠버네티스 1.5에서 스테이트풀셋이 소개됐다.</p>
+<section id="id8">
+<h3>스테이트풀셋 속성<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<p>스테이트풀셋은 레플리카셋과 유사하게 복제된 파드의 그룹으로 구성된다.<br/>
+하지만 아래와 같은 차이점이 있다.</p>
+<ul class="simple">
+<li><p>각 복제본은 고유한 인덱스와 함께 영구 호스트 이름을 갖는다.
+(예. database-0, database-1 등)</p></li>
+<li><p>각 복제본은 인덱스 번호가 가장 낮은 순서부터 높은 순서로 생성되고,
+이전 인덱스 번호의 파드가 안정적이고 이용 가능한 상태가 될 때까지 복제본은 생성되지 않는다.
+이러한 특성은 확장(scale up) 시에도 동일하게 적용된다.</p></li>
+<li><p>스테이트풀셋이 삭제될 때 각각의 관리되는 복제본 파드는 가장 높은 번호에서 낮은 순으로 삭제된다.
+이는 축소(scale down)하는 데도 적용된다.</p></li>
+</ul>
+</section>
+<section id="db">
+<h3>스테이트풀셋을 통한 몽고DB 수동 복제<a class="headerlink" href="#db" title="Link to this heading"></a></h3>
+<p><em>예제 15-10. mongo-simple.yaml</em></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">StatefulSet</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongo</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">serviceName</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mongo&quot;</span>
+<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongo</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongodb</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongo:3.4.1</span>
+<span class="w">          </span><span class="nt">command</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongod</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--replSet</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rs0</span><span class="w"> </span><span class="c1"># 복제본 세트 이름 지정</span>
+<span class="w">          </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">27017</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">peer</span>
+</pre></div>
+</div>
+<p><em>예제 15-11. mongo-service.yaml</em></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongo</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">27017</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">peer</span>
+<span class="w">  </span><span class="nt">clusterIP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongo</span>
+</pre></div>
+</div>
+<p>아래와 같이 DNS 항목을 확인할 수 있다.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>kubectl<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--rm<span class="w"> </span>--image<span class="w"> </span>busybox<span class="w"> </span>busybox<span class="w"> </span>ping<span class="w"> </span>mongo-1.mongo
+</pre></div>
+</div>
+<p>아래 처럼 첫번째 파드에 접속해 replicaset을 수동 설정할 수 있다.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>mongo-0<span class="w"> </span>mongo
+<span class="go">&gt; rs.initiate( {</span>
+<span class="go">  _id: &quot;rs0&quot;,</span>
+<span class="go">  members:[ { _id: 0, host: &quot;mongo-0.mongo:27017&quot; } ]</span>
+<span class="go">  });</span>
+<span class="go">  OK</span>
+<span class="go">&gt; rs.add(&quot;mongo-1.mongo:27017&quot;);</span>
+<span class="go">&gt; rs.add(&quot;mongo-2.mongo:27017&quot;);</span>
+</pre></div>
+</div>
+</section>
+<section id="id9">
+<h3>몽고DB 클러스터 생성 자동화<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<p>컨피그맵 객체에 스크립트를 저장하여 몽고DB 클러스터 생성 자동화에 서용할 수 있다.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">...</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">init-mongo</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongo:3.4.1</span>
+<span class="w">  </span><span class="nt">command</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bash</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/config/init.sh</span>
+<span class="w">  </span><span class="nt">volumeMounts</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config</span>
+<span class="w">      </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/config</span>
+<span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config</span>
+<span class="w">    </span><span class="nt">configMap</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mongo-init&quot;</span>
+</pre></div>
+</div>
+<p><em>Example 15-12. mongo-configmap.yaml</em></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ConfigMap</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongo-init</span>
+<span class="nt">data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">init.sh</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">#!/bin/bash</span>
+<span class="w">    </span><span class="no"># Need to wait for the readiness health check to pass so that the</span>
+<span class="w">    </span><span class="no"># mongo names resolve. This is kind of wonky.</span>
+<span class="w">    </span><span class="no">until ping -c 1 ${HOSTNAME}.mongo; do</span>
+<span class="w">    </span><span class="no">echo &quot;waiting for DNS (${HOSTNAME}.mongo)...&quot;</span>
+<span class="w">    </span><span class="no">sleep 2</span>
+<span class="w">    </span><span class="no">done</span>
+<span class="w">    </span><span class="no">until /usr/bin/mongo --eval &#39;printjson(db.serverStatus())&#39;; do</span>
+<span class="w">    </span><span class="no">echo &quot;connecting to local mongo...&quot;</span>
+<span class="w">    </span><span class="no">sleep 2</span>
+<span class="w">    </span><span class="no">done</span>
+<span class="w">    </span><span class="no">echo &quot;connected to local.&quot;</span>
+<span class="w">    </span><span class="no">HOST=mongo-0.mongo:27017</span>
+<span class="w">    </span><span class="no">until /usr/bin/mongo --host=${HOST} --eval &#39;printjson(db.serverStatus())&#39;; do</span>
+<span class="w">    </span><span class="no">echo &quot;connecting to remote mongo...&quot;</span>
+<span class="w">    </span><span class="no">sleep 2</span>
+<span class="w">    </span><span class="no">done</span>
+<span class="w">    </span><span class="no">echo &quot;connected to remote.&quot;</span>
+<span class="w">    </span><span class="no">if [[ &quot;${HOSTNAME}&quot; != &#39;mongo-0&#39; ]]; then</span>
+<span class="w">    </span><span class="no">until /usr/bin/mongo --host=${HOST} --eval=&quot;printjson(rs.status())&quot; \</span>
+<span class="w">    </span><span class="no">| grep -v &quot;no replset config has been received&quot;; do</span>
+<span class="w">    </span><span class="no">echo &quot;waiting for replication set initialization&quot;</span>
+<span class="w">    </span><span class="no">sleep 2</span>
+<span class="w">    </span><span class="no">done</span>
+<span class="w">    </span><span class="no">echo &quot;adding self to mongo-0&quot;</span>
+<span class="w">    </span><span class="no">/usr/bin/mongo --host=${HOST} \</span>
+<span class="w">    </span><span class="no">--eval=&quot;printjson(rs.add(&#39;${HOSTNAME}.mongo&#39;))&quot;</span>
+<span class="w">    </span><span class="no">fi</span>
+<span class="w">    </span><span class="no">if [[ &quot;${HOSTNAME}&quot; == &#39;mongo-0&#39; ]]; then</span>
+<span class="w">    </span><span class="no">echo &quot;initializing replica set&quot;</span>
+<span class="w">    </span><span class="no">/usr/bin/mongo --eval=&quot;printjson(rs.initiate(\</span>
+<span class="w">    </span><span class="no">{&#39;_id&#39;: &#39;rs0&#39;, &#39;members&#39;: [{&#39;_id&#39;: 0, \</span>
+<span class="w">    </span><span class="no">&#39;host&#39;: &#39;mongo-0.mongo:27017&#39;}]}))&quot;</span>
+<span class="w">    </span><span class="no">fi</span>
+<span class="w">    </span><span class="no">echo &quot;initialized&quot;</span>
+<span class="w">    </span><span class="no">while true; do</span>
+<span class="w">    </span><span class="no">sleep 3600</span>
+<span class="w">    </span><span class="no">done</span>
+</pre></div>
+</div>
+<p><em>Example 15-13. mongo.yaml</em></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">StatefulSet</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongo</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">serviceName</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mongo&quot;</span>
+<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongo</span>
+<span class="w">  </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongodb</span>
+<span class="w">      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongo:3.4.1</span>
+<span class="w">      </span><span class="nt">command</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongod</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--replSet</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rs0</span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">27017</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web</span>
+<span class="w">      </span><span class="c1"># This container initializes the mongodb server, then sleeps.</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">init-mongo</span>
+<span class="w">      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mongo:3.4.1</span>
+<span class="w">      </span><span class="nt">command</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bash</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/config/init.sh</span>
+<span class="w">      </span><span class="nt">volumeMounts</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config</span>
+<span class="w">          </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/config</span>
+<span class="w">      </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config</span>
+<span class="w">          </span><span class="nt">configMap</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mongo-init&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="id10">
+<h3>영구 볼륨과 스테이트풀셋<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
+</section>
+<section id="id11">
+<h3>마지막 단계: 준비 프로브<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
+</section>
+</section>
+<section id="id12">
+<h2>요약<a class="headerlink" href="#id12" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="15-service_mesh.html" class="btn btn-neutral float-left" title="15장 서비스 메시" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="17-kubernetes_extension.html" class="btn btn-neutral float-right" title="17장. 쿠버네티스 확장" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, newbie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="rst-versions" role="note" style="padding: 1rem; font-weight: bold;">
+        <a href="https://github.com/study-zero/newbie"><span class="fa fa-link"> Github</span></a>
+    </div>
+
+</body>
+</html>

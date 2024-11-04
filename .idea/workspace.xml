@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="6ffc2fe3-9d92-4d89-8cdf-271ab044800c" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/docs/genindex.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/genindex.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/kuar/00-syllabus.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/kuar/00-syllabus.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/kuar/01-introduction.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/kuar/01-introduction.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/kuar/02-creating-and-running-containers.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/kuar/02-creating-and-running-containers.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/kuar/03-deploying-a-kubernets-cluster.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/kuar/03-deploying-a-kubernets-cluster.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/kuar/04-common-kubectl-commands.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/kuar/04-common-kubectl-commands.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/kuar/05-pods.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/kuar/05-pods.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/kuar/06-label-and-annotation.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/kuar/06-label-and-annotation.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/kuar/07-service-discovery.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/kuar/07-service-discovery.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/kuar/08-ingress.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/kuar/08-ingress.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/kuar/09-ReplicaSet.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/kuar/09-ReplicaSet.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/kuar/10-deployment.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/kuar/10-deployment.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/kuar/11-DaemonSet.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/kuar/11-DaemonSet.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/kuar/12-job.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/kuar/12-job.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/kuar/13-configmap-and-secret.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/kuar/13-configmap-and-secret.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/kuar/14-rbac.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/kuar/14-rbac.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/kuar/15-service_mesh.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/kuar/15-service_mesh.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/kuar/17-kubernetes_extension.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/kuar/17-kubernetes_extension.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/objects.inv" beforeDir="false" afterPath="$PROJECT_DIR$/docs/objects.inv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/search.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/search.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/searchindex.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/searchindex.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 6
+}]]></component>
+  <component name="ProjectId" id="2oNRfyWFDFcEBBEWbkAt7ou09Qg" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9f38398b9061-39b83d9b5494-intellij.indexing.shared.core-IU-241.18034.62" />
+        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-IU-241.18034.62" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="6ffc2fe3-9d92-4d89-8cdf-271ab044800c" name="Changes" comment="" />
+      <created>1730708153628</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1730708153628</updated>
+      <workItem from="1730708154927" duration="1000" />
+    </task>
+    <servers />
+  </component>
+</project>
