@@ -421,5 +421,34 @@ metadata:
 
 ### 영구 볼륨과 스테이트풀셋
 
+```yaml
+...
+volumeMounts:
+  - name: database
+    mountPath: /data/db
+```
+```yaml
+volumeClaimTemplates:
+  - metadata:
+    name: database
+    annotations:
+    volume.alpha.kubernetes.io/storage-class: anything
+    spec:
+    accessModes: [ "ReadWriteOnce" ]
+    resources:
+    requests:
+    storage: 100Gi
+```
 ### 마지막 단계: 준비 프로브
-## 요약
+
+```yaml
+...
+livenessProbe:
+  exec:
+    command:
+      - /usr/bin/mongo
+      - --eval
+      - db.serverStatus()
+  initialDelaySeconds: 10
+  timeoutSeconds: 10
+```

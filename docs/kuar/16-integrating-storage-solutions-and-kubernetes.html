@@ -82,7 +82,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#id11">마지막 단계: 준비 프로브</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#id12">요약</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="17-kubernetes_extension.html">17장.  쿠버네티스 확장</a></li>
@@ -518,13 +517,39 @@ NFS 서버용과 iSCSI 블록 저장소용 등 스토리지 클래스가 함께 
 </section>
 <section id="id10">
 <h3>영구 볼륨과 스테이트풀셋<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">...</span>
+<span class="nt">volumeMounts</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">database</span>
+<span class="w">    </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/data/db</span>
+</pre></div>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">volumeClaimTemplates</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">database</span>
+<span class="w">    </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">volume.alpha.kubernetes.io/storage-class</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">anything</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">accessModes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="w"> </span><span class="s">&quot;ReadWriteOnce&quot;</span><span class="w"> </span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">resources</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">requests</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">storage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100Gi</span>
+</pre></div>
+</div>
 </section>
 <section id="id11">
 <h3>마지막 단계: 준비 프로브<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">...</span>
+<span class="nt">livenessProbe</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">exec</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/usr/bin/mongo</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--eval</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">db.serverStatus()</span>
+<span class="w">  </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">  </span><span class="nt">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+</pre></div>
+</div>
 </section>
-</section>
-<section id="id12">
-<h2>요약<a class="headerlink" href="#id12" title="Link to this heading"></a></h2>
 </section>
 </section>
 
