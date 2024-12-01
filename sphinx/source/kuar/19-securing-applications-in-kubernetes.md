@@ -352,7 +352,7 @@ Error from server (Forbidden): error when creating "STDIN": pods "kuard" is forb
 실제로 해보니 warn, audit 로그가 남지 않아서 최신 쿠버네티스는 동작이 달라진 게 아닐지 추정
 
 ## 서비스 계정 관리
-**서비스 계정(service account)**는 파드 내부에서 실행되는 워크로드에 ID를 제공하는 쿠버네티스 리소스다.
+<strong>서비스 계정(service account)</strong>는 파드 내부에서 실행되는 워크로드에 ID를 제공하는 쿠버네티스 리소스다.
 
 RBAC를 서비스 계정에 적용해 쿠버네티스 API를 통해 ID가 접근할 수 있는 리소스를 제어할 수 있다(14장).
 
