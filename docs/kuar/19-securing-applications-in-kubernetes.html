@@ -1,0 +1,650 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ko" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>19장. 쿠버네티스에서 애플리케이션 보안 &mdash; newbie v0.0.1 문서</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+    <link rel="shortcut icon" href="../_static/kitty.png"/>
+    <link rel="canonical" href="/newbie/kuar/19-securing-applications-in-kubernetes.html" />
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f8b18680"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=afa94a99"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="색인" href="../genindex.html" />
+    <link rel="search" title="검색" href="../search.html" />
+    <link rel="prev" title="17장. 쿠버네티스 확장" href="17-kubernetes_extension.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            newbie
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">쿠버네티스 시작하기 3/e</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="00-syllabus.html">0장. 스터디 개요</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01-introduction.html">1장. 쿠버네티스 소개</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02-creating-and-running-containers.html">2장. 컨테이너 생성과 실행</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03-deploying-a-kubernets-cluster.html">3장. 쿠버네티스 클러스터 배포</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04-common-kubectl-commands.html">4장. 공통 kubectl 명령</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05-pods.html">5장. 파드</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06-label-and-annotation.html">6장. 라벨과 애노테이션</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07-service-discovery.html">7장. 서비스 탐색</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08-ingress.html">8장. 인그레스를 통한 HTTP 로드밸런싱</a></li>
+<li class="toctree-l1"><a class="reference internal" href="09-ReplicaSet.html">9장. 레플리카 셋</a></li>
+<li class="toctree-l1"><a class="reference internal" href="10-deployment.html">10장. 디플로이먼트</a></li>
+<li class="toctree-l1"><a class="reference internal" href="11-DaemonSet.html">11장. 데몬셋</a></li>
+<li class="toctree-l1"><a class="reference internal" href="12-job.html">12장 job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="13-configmap-and-secret.html">13장. 컨피그맵과 시크릿</a></li>
+<li class="toctree-l1"><a class="reference internal" href="14-rbac.html">14장.  쿠버네티스를 위한 역할 기반 접근 제어</a></li>
+<li class="toctree-l1"><a class="reference internal" href="15-service_mesh.html">15장 서비스 메시</a></li>
+<li class="toctree-l1"><a class="reference internal" href="16-integrating-storage-solutions-and-kubernetes.html">16장. 스토리지 솔루션과 쿠버네티스의 연계</a></li>
+<li class="toctree-l1"><a class="reference internal" href="17-kubernetes_extension.html">17장.  쿠버네티스 확장</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">19장. 쿠버네티스에서 애플리케이션 보안</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#securitycontext">SecurityContext 이해</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">SecurityContext 문제</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">파드 보안</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id4">파드 보안이란?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">파드 보안 표준 적용</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">서비스 계정 관리</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id7">역할 기반 접근 제어</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id8">런타임 클래스</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id9">네트워크 정책</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id10">서비스 메시</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id11">보안 벤치마크 도구</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id12">이미지 보안</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id13">요약</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">newbie</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">19장. 쿠버네티스에서 애플리케이션 보안</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/kuar/19-securing-applications-in-kubernetes.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>19장. 쿠버네티스에서 애플리케이션 보안<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
+<p>쿠버네티스는 다양한 보안 중심 API(Secury-focused API)를 제공한다.</p>
+<p>심층 방어와 최소 권한의 원칙의 개념을 이해하는 것이 파드의 보안을 강화할 때 중요하다.</p>
+<blockquote>
+<dl>
+<dt>심층 방어(DID, Defense In Depth)</dt>
+<dd>k8s를 포함하는 컴퓨팅 시스템에서 여러 계층에 걸쳐 보안 제어를 사용하는 개념</dd>
+<dt>최소 권한의 원칙(principle of least privilege)</dt>
+<dd>워크로드가 동작하는 데 필요한 리소스에만 접근할 수 있게 하는 것</dd>
+</dl>
+</blockquote>
+<br/>
+<section id="securitycontext">
+<h2>SecurityContext 이해<a class="headerlink" href="#securitycontext" title="Link to this heading"></a></h2>
+<p><strong>SecurityContext</strong>는 파드와 컨테이너에 적용될 수 있는 보안 중심 필드(security-focused field)의 집합이다.</p>
+<p>SeuciryContext에서 다루는 보안 제거의 예는 다음과 같다.</p>
+<ul class="simple">
+<li><p>사용자 권한 및 접근 제어</p></li>
+<li><p>읽기 전용 루트 파일 시스템</p></li>
+<li><p>권한 상승 허용</p></li>
+<li><p>Seccomp, AppArmor, SELinux 프로필과 라벨 할당</p></li>
+<li><p>특권(privileged) 또는 비권한(unprevileged)으로 실행</p></li>
+</ul>
+<p><a class="reference external" href="https://github.com/kubernetes-up-and-running/examples/blob/master/19-1-kuard-pod-securitycontext.yaml">19-1-kuard-pod-securitycontext.yaml</a></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">securityContext</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runAsNonRoot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">runAsUser</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">    </span><span class="nt">runAsGroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3000</span>
+<span class="w">    </span><span class="nt">fsGroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2000</span>
+<span class="w">  </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcr.io/kuar-demo/kuard-amd64:blue</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="w">      </span><span class="nt">securityContext</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">allowPrivilegeEscalation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">          </span><span class="nt">readOnlyRootFilesystem</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">          </span><span class="nt">privileged</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="w">          </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+</pre></div>
+</div>
+<blockquote>
+<dl>
+<dt>runAsRoot</dt>
+<dd>컨테이너가 루트 사용자로 실행되는지 여부를 지정<br/>
+설정이 true고 루트 사용자로 실행 중인 경우 컨테이너 구동이 실패</dd>
+<dt>runAsUser/runAsGroup</dt>
+<dd>컨테이너가 실행될 때 사용할 사용자 및 그룹 ID를 지정</dd>
+<dt>fsGroup</dt>
+<dd>파드가 마운트하는 볼륨의 파일 시스템 그룹 ID를 지정<br/>
+fsGroupChangePolicy를 사용해 정확한 동작 구성 가능</dd>
+<dt>allowPrivilegeEscalation</dt>
+<dd>컨테이너 프로세스가 상위 프로세스보다 더 많은 권한을 얻을 수 있는지 여부<br/>
+privieged: true인 경우 해당 설정도 trueㄹ로 설정됨</dd>
+<dt>privileged</dt>
+<dd>컨테이너를 호스트와 동일한 권한으로 상승시킨 상태로 실행</dd>
+<dt>readOnlyRootFilesystem</dt>
+<dd>컨테이너의 루트 파일 시스템을 읽기 전용으로 마운트</dd>
+</dl>
+</blockquote>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>k<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>kuard<span class="w"> </span>--<span class="w"> </span>ash
+<span class="go">// 참고:</span>
+<span class="go">// double dash (--)는 kubectl 명령의 인자와 컨테이너 내에서 실행할 명령을 구분하는 역할을 함</span>
+<span class="go">// https://kubernetes.io/docs/tasks/debug/debug-application/get-shell-running-container/</span>
+
+<span class="gp">$ </span>id
+<span class="go">uid=1000 gid=3000 groups=2000,3000</span>
+<span class="go">// uid(User IDentifier): 각 사용자를 고유하게 식별하는 숫자</span>
+<span class="go">// gid(Group IDentifier): 각 그룹을 고유하게 식별하는 숫자</span>
+<span class="go">// groups: 여러 사용자를 포함하는 실제 그룹 집합(gid는 groups를 식별하는데 사용하는 숫자)</span>
+
+<span class="gp">$ </span>ps
+<span class="go">PID   USER     TIME  COMMAND</span>
+<span class="go">    1 1000      0:00 {kuard} /mnt/rosetta /kuard</span>
+<span class="go">   29 1000      0:00 {ash} /mnt/rosetta /bin/ash</span>
+<span class="go">assertion failed [!result.is_error]: Failed to create temporary file (ThreadContextFcntl.cpp:84 create_tempfile)</span>
+<span class="go"> Trace/breakpoint trap (core dumped)</span>
+
+<span class="gp">$ </span>touch<span class="w"> </span>file
+<span class="go">touch: file: Read-only file system</span>
+</pre></div>
+</div>
+<p>SecurityContext에서 다루는 핵심 운영체제 제어 집합의 목록</p>
+<blockquote>
+<dl>
+<dt>Capabilities</dt>
+<dd>워크로드가 동작하는 데 필요할 수 있는 권한 그룹의 추가나 제거를 허용<br/>
+예를 들어 최소 권한의 원칙을 위해 파드에 루트 권한 부여 대신 NET_ADMIN를 허용하여 네트워킹 구성 권한을 부여할 수 있다.</dd>
+<dt>AppArmor</dt>
+<dd>프로세스가 접근할 수 있는 파일을 제어<br/>
+container.apparmor.security.beta.kubernetes.io/<container_name>:<profile_ref> 어노테이션을 통해 적용<br/>
+<profile_ref>의 종류는 runtime/default, localhost/<path to profile>, unconfined(기본값)</dd>
+<dt>Seccomp(Secure Computing)</dt>
+<dd>syscall에 대한 필터를 생성</dd>
+<dt>SELinux</dt>
+<dd>파일 및 프로세스에 대한 접근 제어<br/>
+기본적으로 각 컨테이너에 임의의 SELinux 콘텍스트가 할당됨</dd>
+</dl>
+</blockquote>
+<br/>
+<p>보안 제어 적용을 확인하기 위해 <a class="reference external" href="https://github.com/genuinetools/amicontained">amicontained</a>를 사용할 것이다.</p>
+<p><a class="reference external" href="https://github.com/kubernetes-up-and-running/examples/blob/master/19-2-amicontained-pod.yaml">19-2-amicontained-pod.yaml</a></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">amicontained</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jess/amicontained:v0.4.9</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">amicontained</span>
+<span class="w">      </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="w"> </span><span class="s">&quot;/bin/sh&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;-c&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--&quot;</span><span class="w"> </span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="w"> </span><span class="s">&quot;amicontained&quot;</span><span class="w"> </span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>k<span class="w"> </span>logs<span class="w"> </span>amicontained
+<span class="go">Container Runtime: not-found</span>
+<span class="go">Has Namespaces:</span>
+<span class="go">        pid: true</span>
+<span class="go">        user: true</span>
+<span class="go">User Namespace Mappings:</span>
+<span class="go">        Container -&gt; 0  Host -&gt; 501     Range -&gt; 1</span>
+<span class="go">        Container -&gt; 1  Host -&gt; 100000  Range -&gt; 1000000</span>
+<span class="go">AppArmor Profile: unconfined_u:unconfined_r:spc_t:s0</span>
+<span class="go">Capabilities:</span>
+<span class="go">        BOUNDING -&gt; chown dac_override fowner fsetid kill setgid setuid setpcap net_bind_service net_raw sys_chroot mknod audit_write setfcap</span>
+<span class="go">Seccomp: disabled</span>
+</pre></div>
+</div>
+<p><a class="reference external" href="https://github.com/kubernetes-up-and-running/examples/blob/master/19-3-amicontained-pod-securitycontext.yaml">19-3-amicontained-pod-securitycontext.yaml</a></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">amicontained</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">container.apparmor.security.beta.kubernetes.io/amicontained</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;runtime/default&quot;</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">securityContext</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runAsNonRoot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">runAsUser</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">    </span><span class="nt">runAsGroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3000</span>
+<span class="w">    </span><span class="nt">fsGroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2000</span>
+<span class="w">    </span><span class="nt">seccompProfile</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RuntimeDefault</span>
+<span class="w">  </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jess/amicontained:v0.4.9</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">amicontained</span>
+<span class="w">      </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="w"> </span><span class="s">&quot;/bin/sh&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;-c&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--&quot;</span><span class="w"> </span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="w"> </span><span class="s">&quot;amicontained&quot;</span><span class="w"> </span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">securityContext</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">capabilities</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">add</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;SYS_TIME&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">            </span><span class="nt">drop</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;NET_BIND_SERVICE&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">allowPrivilegeEscalation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">        </span><span class="nt">readOnlyRootFilesystem</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">privileged</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</pre></div>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>k<span class="w"> </span>logs<span class="w"> </span>amicontained
+<span class="go">Error from server (BadRequest): container &quot;amicontained&quot; in pod &quot;amicontained&quot; is not available</span>
+
+<span class="gp">$ </span>k<span class="w"> </span>get<span class="w"> </span>po
+<span class="go">NAME           READY   STATUS     RESTARTS   AGE</span>
+<span class="go">amicontained   0/1     AppArmor   0          55s</span>
+<span class="go">kuard          1/1     Running    0          31m</span>
+
+<span class="gp">$ </span>k<span class="w"> </span>describe<span class="w"> </span>po<span class="w"> </span>amicontained
+<span class="go">...</span>
+<span class="go">Events:</span>
+<span class="go">  Type     Reason     Age   From                 Message</span>
+<span class="go">  ----     ------     ----  ----                 -------</span>
+<span class="go">  Normal   Scheduled  80s   default-scheduler    Successfully assigned default/amicontained to clu-worker</span>
+<span class="go">  Warning  AppArmor   80s   kubelet, clu-worker  Cannot enforce AppArmor: AppArmor is not enabled on the host</span>
+
+<span class="go">// AppArmor 설정 제거 후 재배포</span>
+<span class="go">// sys_teim이 추가됨</span>
+<span class="gp">$ </span>k<span class="w"> </span>logs<span class="w"> </span>amicontained
+<span class="go">Container Runtime: not-found</span>
+<span class="go">Has Namespaces:</span>
+<span class="go">        pid: true</span>
+<span class="go">        user: true</span>
+<span class="go">User Namespace Mappings:</span>
+<span class="go">        Container -&gt; 0  Host -&gt; 501     Range -&gt; 1</span>
+<span class="go">        Container -&gt; 1  Host -&gt; 100000  Range -&gt; 1000000</span>
+<span class="go">AppArmor Profile: unconfined_u:unconfined_r:spc_t:s0</span>
+<span class="go">Capabilities:</span>
+<span class="go">        BOUNDING -&gt; chown dac_override fowner fsetid kill setgid setuid setpcap net_raw sys_chroot sys_time mknod audit_write setfcap</span>
+<span class="go">Seccomp: filtering</span>
+</pre></div>
+</div>
+<br/>
+<section id="id2">
+<h3>SecurityContext 문제<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<p>SecurityContext의 모든 필드를 직접 구성해 보안 제어의 베이스라인을 적용하는 것은 어렵다.</p>
+<p>AppArmor, seccomp, SELinux 프로파일과 콘텍스트의 생성 및 관리는 쉽지 않고 구성 중 오류 발생이 쉽다.</p>
+<p>에러가 발생하면 어플리케이션의 기능을 손상시킨다.</p>
+<p>이러한 문제를 해결하기 위해 Seccomp 프로파일을 쉽게 생성하고 관리할 수 있는 <a class="reference external" href="https://github.com/kubernetes-sigs/security-profiles-operator">Security Profiles Operator</a>라는 것이 있다.</p>
+<br/>
+</section>
+</section>
+<section id="id3">
+<h2>파드 보안<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<p>파드 보안(Pod Security)은 유효성 검사를 수행한다.</p>
+<p>유효성 검사는 SecurityContext가 적용되지 않은 리소스 생성을 허용하지 않는다.</p>
+<br/>
+<section id="id4">
+<h3>파드 보안이란?<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<p>파드 보안을 사용하면 파드에 대해 서로 다른 보안 프로파일을 선언할 수 있다.</p>
+<p>이는 파드 보안 표준(pod security standard)로 알려져 있으며 <strong>네임스페이스 수준</strong>에서 적용된다.</p>
+<p>파드 보안 표준은 SecurityContext와 같이 보안에 민감한 필드와 관련 값의 모음이다.</p>
+<p>파드 보안 표준은 Mode와 Level로 구성된다.</p>
+<p>Mode는 정책 위반 시 행동을 결정하고 Level은 권한을 결정한다.</p>
+<p>세 가지 파드 보안 표준(Level)은 다음과 같다.</p>
+<blockquote>
+<dl>
+<dt>baselines</dt>
+<dd>쉬운 온보딩이 가능하며 가장 일반적인 권한 상승을 제공</dd>
+<dt>restricted</dt>
+<dd>보안의 모범 사례가 될 수 있도록 고강도로 제한<br/>
+워크로드가 중단될 수 있음</dd>
+<dt>privileged</dt>
+<dd>개방적이며 제한이 없음</dd>
+</dl>
+</blockquote>
+<p>각 파드의 보안 표준은 파드 명세서의 필드 목록과 허용되는 값을 정의한다.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">spec.securityContext</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">spec.containers[*].securityContext</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">spec.containers[*].ports</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">spec.volumes[*].hostPath</span></code></p></li>
+<li><p>…</p></li>
+</ul>
+<p>전체 필드는 <a class="reference external" href="https://kubernetes.io/docs/concepts/security/pod-security-standards/">공식 문서</a>에서 확인할 수 있다.</p>
+<p>각 표준은 주어진 모드를 사용해 네임스페이스에 적용된다.</p>
+<p>세 가지 모드(Mode)는 다음과 같다.</p>
+<blockquote>
+<dl>
+<dt>Enforce</dt>
+<dd>정책을 위반하는 모든 파드를 거부</dd>
+<dt>Warn</dt>
+<dd>정책을 위반하는 파드를 허용하며 경고 메시지를 표시</dd>
+<dt>Audit</dt>
+<dd>정책을 위반하는 파드를 허용하며 감사 로그와 감사 메시지를 생성</dd>
+</dl>
+</blockquote>
+</section>
+<section id="id5">
+<h3>파드 보안 표준 적용<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<p>파드 보안 표준은 라벨을 사용해 네임스페이스에 적용된다.</p>
+<ul class="simple">
+<li><p>필수: <code class="docutils literal notranslate"><span class="pre">pod-security.kubernetes.io/&lt;MODE&gt;:</span> <span class="pre">&lt;LEVEL&gt;</span></code></p></li>
+<li><p>선택: <code class="docutils literal notranslate"><span class="pre">pod-security.kubernetes.io/&lt;MODE&gt;-version:</span> <span class="pre">&lt;VERSION&gt;</span></code></p></li>
+</ul>
+<p>여러 모드를 사용해 서로 다른 표준에 대한 행동을 다양하게 결정할 수 있다.</p>
+<p><a class="reference external" href="https://github.com/kubernetes-up-and-running/examples/blob/master/19-4-baseline-ns.yaml">19-4-baseline-ns.yaml</a></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Namespace</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">baseline-ns</span>
+<span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">pod-security.kubernetes.io/enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">baseline</span>
+<span class="w">    </span><span class="nt">pod-security.kubernetes.io/enforce-version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1.22</span>
+<span class="w">    </span><span class="nt">pod-security.kubernetes.io/audit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">restricted</span>
+<span class="w">    </span><span class="nt">pod-security.kubernetes.io/audit-version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1.22</span>
+<span class="w">    </span><span class="nt">pod-security.kubernetes.io/warn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">restricted</span>
+<span class="w">    </span><span class="nt">pod-security.kubernetes.io/warn-version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1.22</span>
+</pre></div>
+</div>
+<p>처음 정책을 배포하는 것은 어려운 작업이나<br/>
+dry-run 명령을 통해 파드 보안 표준을 위반하는 기존 워크로드를 쉽게 확인할 수 있다.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">// --dry-run=server 표현은 1.18 버전부터 deprecated됨</span>
+<span class="go">// --dry-run=true로 대체되었으며 동일한 표현</span>
+<span class="go">// https://github.com/kubernetes/enhancements/blob/master/keps/sig-api-machinery/576-dry-run/README.md#removing-a-deprecated-flag</span>
+<span class="gp">$ </span>k<span class="w"> </span>label<span class="w"> </span>--dry-run<span class="o">=</span><span class="nb">true</span><span class="w"> </span>--overwrite<span class="w"> </span>ns<span class="w"> </span><span class="se">\</span>
+--all<span class="w"> </span>pod-security.kubernets.io/enforce<span class="o">=</span>baseline
+</pre></div>
+</div>
+<p>baseline-ns를 만들고 아래 파드를 생성한다.</p>
+<p><a id="19-6-kuard-pod.yaml" href="https://github.com/kubernetes-up-and-running/examples/blob/master/19-6-kuard-pod.yaml">19-6-kuard-pod.yaml</a></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>k<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span>--namespace<span class="w"> </span>baseline-ns<span class="w"> </span>&lt;&lt;<span class="w"> </span>EOF
+<span class="go">apiVersion: v1</span>
+<span class="go">kind: Pod</span>
+<span class="go">metadata:</span>
+<span class="go">  name: kuard</span>
+<span class="go">  labels:</span>
+<span class="go">    app: kuard</span>
+<span class="go">spec:</span>
+<span class="go">  containers:</span>
+<span class="go">    - image: gcr.io/kuar-demo/kuard-amd64:blue</span>
+<span class="go">      name: kuard</span>
+<span class="go">      ports:</span>
+<span class="go">        - containerPort: 8080</span>
+<span class="go">          name: http</span>
+<span class="go">          protocol: TCP</span>
+<span class="go">      securityContext: # 추가해봄</span>
+<span class="go">          allowPrivilegeEscalation: true</span>
+<span class="go">          readOnlyRootFilesystem: false</span>
+<span class="go">          privileged: false # true일 경우 아래 메시지</span>
+<span class="go">EOF</span>
+<span class="go">// output</span>
+<span class="go">Error from server (Forbidden): error when creating &quot;STDIN&quot;: pods &quot;kuard&quot; is forbidden: violates PodSecurity &quot;baseline:v1.22&quot;: privileged (container &quot;kuard&quot; must not set securityContext.privileged=true)</span>
+</pre></div>
+</div>
+<p>실제로 해보니 warn, audit 로그가 남지 않아서 최신 쿠버네티스는 동작이 달라진 게 아닐지 추정</p>
+</section>
+</section>
+<section id="id6">
+<h2>서비스 계정 관리<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
+<p>**서비스 계정(service account)**는 파드 내부에서 실행되는 워크로드에 ID를 제공하는 쿠버네티스 리소스다.</p>
+<p>RBAC를 서비스 계정에 적용해 쿠버네티스 API를 통해 ID가 접근할 수 있는 리소스를 제어할 수 있다(14장).</p>
+<p>애플리케이션에서 쿠버네티스 API가 필요하지 않은 경우 최소 권한 원칙에 따라 접근을 비활성화 해야한다.</p>
+<p>쿠버네티스는 각 네임스페이스에 기본 서비스 계정을 생성한다.</p>
+<p>이 계정이 자동으로 모든 파드에 대한 서비스 계정으로 설정된다.</p>
+<p>이 서비스 계정에는 각 파드에 자동으로 마운트되고 쿠버네티스 API에 접근하는 데 사용되는 토큰이 포함돼 있다.</p>
+<p>이 동작을 비활성화 하려면 서비스 계정 컨피규레이션에 automountServiceAcountToken: false를 추가해야한다.</p>
+<p><a class="reference external" href="https://github.com/kubernetes-up-and-running/examples/blob/master/19-7-service-account.yaml">19-7-service-account.yaml</a></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceAccount</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="nt">automountServiceAccountToken</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</pre></div>
+</div>
+<br/>
+</section>
+<section id="id7">
+<h2>역할 기반 접근 제어<a class="headerlink" href="#id7" title="Link to this heading"></a></h2>
+<p>RBAC(14장)를 워크로드의 보안 상태(security posture)를 보완하는 데 적용할 수 있다.</p>
+<br/>
+</section>
+<section id="id8">
+<h2>런타임 클래스<a class="headerlink" href="#id8" title="Link to this heading"></a></h2>
+<p>쿠버네티스는 Container Runtime Interface(CRI)를 통해 노드 운영체제의 컨테이너 런타임과 상호작용한다.</p>
+<p>컨테이너 런타임은 구현 방식에 따라 더 강력한 보안을 보장하는 것을 포함해 다양한 수준의 격리를 제공할 수 있다.</p>
+<p>Kata container, Firecracker, gViosr와 같은 프로젝트의 경우 중첩 가상화에서 정교한 시스템콜 필터링에 이르기까지 다양한 격리 메커니즘을 기반으로 한다.</p>
+<p>쿠버네티스는 사용자가 워크로드 유형에 따라 컨테이너 런타임을 선택할 수 있는 유연함을 제공한다.</p>
+<p>RuntimeClass API는 컨테이너 런타임을 선택할 수 있도록 도입됐다.</p>
+<div class="admonition note">
+<p class="admonition-title">참고</p>
+<p>새로운 런타임 클래스는 클러스터 관리자에 의해 구성되어야 한다.
+워크로드가 올바른 노드에 스케쥴링되려면 nodeSelector나 <a class="reference external" href="https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/">toleration</a>이 필요할 수 있다.</p>
+</div>
+<p>파드 명세서에서 runtimeClassName을 지정해 런타임 클래스를 사용할 수 있다.</p>
+<figure class="align-default" id="id14">
+<a class="reference internal image-reference" href="../_images/figure9-1.png"><img alt="image" src="../_images/figure9-1.png" style="width: 360px;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Figure 19-1. RuntimeClass Flow Diagram</span><a class="headerlink" href="#id14" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p><a class="reference external" href="https://github.com/kubernetes-up-and-running/examples/blob/master/19-8-kuard-pod-runtimeclass.yaml">19-8-kuard-pod-runtimeclass.yaml</a></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">runtimeClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">firecracker</span>
+<span class="w">  </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcr.io/kuar-demo/kuard-amd64:blue</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="w">          </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+<span class="c1"># Error from server (Forbidden): error when creating &quot;STDIN&quot;: pods &quot;kuard&quot; is forbidden: pod rejected: RuntimeClass &quot;firecracker&quot; not found</span>
+<span class="c1"># </span>
+<span class="c1"># $ kubectl get runtimeclass</span>
+<span class="c1"># No resources found in default namespace.</span>
+</pre></div>
+</div>
+<p>런타임 클래스를 사용하면 워크로드가 민감한 정보를 처리하거나 신뢰할 수 없는 코드를 실행하는 경우 전박적인 보안 사항을 보완할 수 있다.</p>
+<br/>
+</section>
+<section id="id9">
+<h2>네트워크 정책<a class="headerlink" href="#id9" title="Link to this heading"></a></h2>
+<p>ingress 및 egress 네트워크 정책을 모두 생성할 수 있는 네트워크 정책 API가 있다.</p>
+<p>네트워크 정책은 파드를 선택할 수 있는 라벨을 사용해 구성된다.</p>
+<p>인그레스와 같은 네트워크 정책은 실제로 연결된 쿠버네티스 컨트롤러와 함께 제공되지 않으며<br/>
+네트워크 정책 리소스 생성 시 동작하는 컨트롤러를 설치하지 않은 경우 적용되지 않는다.</p>
+<p>네트워크 정책 리소스는 Calico, Cilium, Weave Net과 같은 네트워크 플러그인으로 구성된다.</p>
+<p><strong>NetworkPolicy</strong> 리소스는 podSelector(필수), policyTypes, ingress, egress 섹션으로 구성된다.</p>
+<p>podSelector 필드가 비어있는 경우 네임스페이스의 모든 파드에 매치된다.</p>
+<p>podSelector 필드에는 matchLabels 섹션도 포함될 수 있다.</p>
+<p>파드가 NetworkPolicy 리소스와 매치되는 경우 모든 ingress와 egress 커뮤니케이션에 대해 명시적으로 정의해야한다.</p>
+<p>그렇지 않은 경우 <strong>모든 통신은 차단</strong>될 것이다.</p>
+<p>파드가 여러 네트워크 정책 리소스와 매치되는 경우 정책이 추가된다.</p>
+<p>기본적으로 모든 트래픽을 차단하려고 하는 경우 예제 19-9와 같이 차단(deny) 룰을 만들 수 있다.</p>
+<p><a class="reference external" href="https://github.com/kubernetes-up-and-running/examples/blob/master/19-9-networkpolicy-default-deny.yaml">19-9-networkpolicy-default-deny.yaml</a></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NetworkPolicy</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default-deny-ingress</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
+<span class="w">  </span><span class="nt">policyTypes</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+</pre></div>
+</div>
+<p>네트워크 정책 집합의 예를 살펴보고 워크로드를 보호하는 방법을 소개하겠다.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>k<span class="w"> </span>create<span class="w"> </span>ns<span class="w"> </span>kuard-networkpolicy
+</pre></div>
+</div>
+<p><a href="#19-6-kuard-pod.yaml">19-6-kuard-pod.yaml</a>의 파드를 생성</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>k<span class="w"> </span>expose<span class="w"> </span>pod<span class="w"> </span>kuard<span class="w"> </span>--port<span class="o">=</span><span class="m">8080</span><span class="w"> </span>--target-port<span class="o">=</span><span class="m">8080</span><span class="w"> </span><span class="se">\</span>
+--namespace<span class="w"> </span>kuard-networkpolicy
+
+<span class="gp">$ </span>k<span class="w"> </span>run<span class="w"> </span>test-source<span class="w"> </span>--rm<span class="w"> </span>-ti<span class="w"> </span>--image<span class="w"> </span>busybox<span class="w"> </span>/bin/sh<span class="w"> </span><span class="se">\</span>
+--namespace<span class="w"> </span>kuard-networkpolicy
+
+<span class="gp"># </span>wget<span class="w"> </span>-q<span class="w"> </span>kuard:8080<span class="w"> </span>-O<span class="w"> </span>-
+<span class="go">&lt;!doctype html&gt;</span>
+<span class="go">...</span>
+
+<span class="gp">$ </span>k<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span>--namespace<span class="w"> </span>kuard-networkpolicy<span class="w"> </span>&lt;&lt;<span class="w"> </span>EOF
+<span class="go">heredoc&gt; apiVersion: networking.k8s.io/v1</span>
+<span class="go">kind: NetworkPolicy</span>
+<span class="go">metadata:</span>
+<span class="go">  name: default-deny-ingress</span>
+<span class="go">spec:</span>
+<span class="go">  podSelector: {}</span>
+<span class="go">  policyTypes:</span>
+<span class="go">  - Ingress</span>
+<span class="go">EOF</span>
+
+<span class="gp"># </span>wget<span class="w"> </span>-q<span class="w"> </span>--timeout<span class="o">=</span><span class="m">1</span><span class="w"> </span>kuard:8080<span class="w"> </span>-O<span class="w"> </span>-
+</pre></div>
+</div>
+<p>default-deny-ingress 적용 시 기본 적용된 차단 네트워크 정책으로 인해 테스트 출발지 파드에서 더 이상 kuard 파드에 접근할 수 없게 됐다.</p>
+<p>테스트 출발지에서 kuard 파드로 접근을 허용하는 네트워크 정책을 생성해보자.</p>
+<p><a class="reference external" href="https://github.com/kubernetes-up-and-running/examples/blob/master/19-12-networkpolicy-kuard-allow-test-source.yaml">19-12-networkpolicy-kuard-allow-test-source.yaml</a></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>k<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span>--namespace<span class="w"> </span>kuard-networkpolicy<span class="w"> </span>&lt;&lt;<span class="w"> </span>EOF
+<span class="go">kind: NetworkPolicy</span>
+<span class="go">apiVersion: networking.k8s.io/v1</span>
+<span class="go">metadata:</span>
+<span class="go">  name: access-kuard</span>
+<span class="go">spec:</span>
+<span class="go">  podSelector:</span>
+<span class="go">    matchLabels:</span>
+<span class="go">      app: kuard</span>
+<span class="go">  ingress:</span>
+<span class="go">    - from:</span>
+<span class="go">      - podSelector:</span>
+<span class="go">          matchLabels:</span>
+<span class="go">            run: test-source</span>
+<span class="go">EOF</span>
+
+<span class="gp">$ </span>k<span class="w"> </span>run<span class="w"> </span>test-source<span class="w"> </span>--rm<span class="w"> </span>-ti<span class="w"> </span>--image<span class="w"> </span>busybox<span class="w"> </span>/bin/sh<span class="w"> </span><span class="se">\</span>
+--namespace<span class="w"> </span>kuard-networkpolicy
+
+<span class="gp"># </span>wget<span class="w"> </span>-q<span class="w"> </span>kuard:8080<span class="w"> </span>-O<span class="w"> </span>-
+<span class="go">&lt;!doctype html&gt;</span>
+<span class="go">...</span>
+</pre></div>
+</div>
+<br/>
+</section>
+<section id="id10">
+<h2>서비스 메시<a class="headerlink" href="#id10" title="Link to this heading"></a></h2>
+<p>서비스 메시(15장)는 워크로드의 보안 상태를 높이는 데도 사용할 수 있다.</p>
+<p>서비스 메시는 서비스를 기반으로 하는 protocol-aware 정책 컨피규레이션을 허용하는 접근 정책을 제공한다.</p>
+<p>서비스 메시는 일반적으로 모든 서비스 간 통신에서 상호 TLS를 구현해서 통신이 암호화될 뿐만 아니라 서비스 ID도 확인한다.</p>
+<br/>
+</section>
+<section id="id11">
+<h2>보안 벤치마크 도구<a class="headerlink" href="#id11" title="Link to this heading"></a></h2>
+<p>쿠버네티스 클러스터에 대해 보안 벤치마크를 실행해 컨피규레이션이 baseline을 충족하는지 확인할 수 있는 몇 가지 도구가 있다.</p>
+<p>대표적인 도구가 <a class="reference external" href="https://github.com/aquasecurity/kube-bench">kube-bench</a>다.</p>
+<p>kube-bench를 <a class="reference external" href="https://www.cisecurity.org/benchmark/kubernetes">쿠버네티스용 CIS 벤치마크</a>를 실행할 수 있다.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>k<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>https://raw.githubusercontent.com/aquasecurity/kube-bench/refs/heads/main/job.yaml
+<span class="go">job.batch/kube-bench created</span>
+
+<span class="gp">$ </span>k<span class="w"> </span>logs<span class="w"> </span>job.batch/kube-bench
+<span class="go">[INFO] 4 Worker Node Security Configuration</span>
+<span class="go">[INFO] 4.1 Worker Node Configuration Files</span>
+<span class="go">[FAIL] 4.1.1 Ensure that the kubelet service file permissions are set to 600 or more restrictive (Automated)</span>
+<span class="go">...</span>
+</pre></div>
+</div>
+<br/>
+</section>
+<section id="id12">
+<h2>이미지 보안<a class="headerlink" href="#id12" title="Link to this heading"></a></h2>
+<p>파드 내의 코드와 애플리케이션을 안전하게 유지하는 것이 중요하다.</p>
+<p>컨테이너 이미지 보안의 기본 사항에는 컨테이너 이미지 레지스티리가 알려진 코드 취약점에 대해 정적 스캔을 수행하는지 확인하는 것이 포함돼 있다.</p>
+<p>또한 이미지가 실행된 이후에 취약점을 식별하고 침입과 같은 잠재적으로 악의적인 활동을 찾는 런타임 스캔을 수행하는 도구가 필요하다.</p>
+<p>보안 스캔 외에도 컨테이너 이미지의 내용을 최소화해 불필요한 의존성을 제거하는 도구도 있다.</p>
+<p>보안 취약점이 발견되면 이미지를 빠르게 수정하고 다시 배포할 수 있도록, 지속적으로 배포하는 시스템에 이미지 보안을 투자하는 것이 중요하다.</p>
+<br/>
+</section>
+<section id="id13">
+<h2>요약<a class="headerlink" href="#id13" title="Link to this heading"></a></h2>
+<p>다양한 보안 중심 API와 리소스를 다뤘다.</p>
+<p>SecurityContext를 이용한 심층 방어와 allowPrivilegeEscalation를 이용한 최소 권한의 원칙을 연습해보고 쿠버네티스의 기본 보안을 개선해볼 수 있었다.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="17-kubernetes_extension.html" class="btn btn-neutral float-left" title="17장. 쿠버네티스 확장" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, newbie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="rst-versions" role="note" style="padding: 1rem; font-weight: bold;">
+        <a href="https://github.com/study-zero/newbie"><span class="fa fa-link"> Github</span></a>
+    </div>
+
+</body>
+</html>

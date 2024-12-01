@@ -37,3 +37,9 @@ source_suffix = {
     '.rst': 'restructuredtext',
     '.md': 'markdown'
 }
+
+# pygments setting
+from pygments.lexers import get_lexer_by_name
+from sphinx.highlighting import lexers
+
+lexers['yml'] = get_lexer_by_name('yaml')

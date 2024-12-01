@@ -94,6 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="15-service_mesh.html">15장 서비스 메시</a></li>
 <li class="toctree-l1"><a class="reference internal" href="16-integrating-storage-solutions-and-kubernetes.html">16장. 스토리지 솔루션과 쿠버네티스의 연계</a></li>
 <li class="toctree-l1"><a class="reference internal" href="17-kubernetes_extension.html">17장.  쿠버네티스 확장</a></li>
+<li class="toctree-l1"><a class="reference internal" href="19-securing-applications-in-kubernetes.html">19장. 쿠버네티스에서 애플리케이션 보안</a></li>
 </ul>
 
         </div>
@@ -224,25 +225,25 @@ service<span class="w"> </span>nginx<span class="w"> </span>restart
 </pre></div>
 </div>
 <p>선언형 컨피규레이션 (<strong>상태</strong>를 정의 &amp; 어떻게 할 건지는 쿠버네티스가 알아서~)</p>
-<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: apps/v1
-kind: Deployment
-metadata: 
-  name: nginx-deployment 
-spec: 
-  replicas: 3 
-  selector: 
-    matchLabels: 
-      app: nginx 
-  template: 
-    metadata: 
-      labels: 
-        app: nginx 
-    spec: 
-      containers: 
-      - name: nginx 
-      image: nginx:1.14.2
-      ports: 
-      - containerPort: 80
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+<span class="nt">metadata</span><span class="p">:</span><span class="w"> </span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx-deployment</span><span class="w"> </span>
+<span class="nt">spec</span><span class="p">:</span><span class="w"> </span>
+<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w"> </span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span><span class="w"> </span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"> </span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span><span class="w"> </span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span>
+<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span><span class="w"> </span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span><span class="w"> </span>
+<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span><span class="w"> </span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"> </span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"> </span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span><span class="w"> </span>
+<span class="w">      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx:1.14.2</span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span><span class="w"> </span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
 </pre></div>
 </div>
 <ul class="simple">

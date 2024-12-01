@@ -87,6 +87,7 @@
 <li class="toctree-l1"><a class="reference internal" href="15-service_mesh.html">15장 서비스 메시</a></li>
 <li class="toctree-l1"><a class="reference internal" href="16-integrating-storage-solutions-and-kubernetes.html">16장. 스토리지 솔루션과 쿠버네티스의 연계</a></li>
 <li class="toctree-l1"><a class="reference internal" href="17-kubernetes_extension.html">17장.  쿠버네티스 확장</a></li>
+<li class="toctree-l1"><a class="reference internal" href="19-securing-applications-in-kubernetes.html">19장. 쿠버네티스에서 애플리케이션 보안</a></li>
 </ul>
 
         </div>
@@ -155,36 +156,36 @@
 <li><p>label만 맞으면 기존 만들어진 pod를 새로 만들어지는 RS를 통해 관리 가능
 기존 Pod</p></li>
 </ul>
-<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: v1
-kind: Pod
-metadata:
-  name: existing-pod
-  labels:
-    app: my-app
-spec:
-  containers:
-    - name: nginx
-      image: nginx
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">existing-pod</span>
+<span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-app</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
 </pre></div>
 </div>
 <p>이번에 만든 RS</p>
-<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: apps/v1
-kind: ReplicaSet
-metadata:
-  name: my-replicaset
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: my-app
-  template:
-    metadata:
-      labels:
-        app: my-app
-    spec:
-      containers:
-        - name: nginx
-          image: nginx
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ReplicaSet</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-replicaset</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-app</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-app</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
 </pre></div>
 </div>
 </section>
@@ -199,32 +200,32 @@ spec:
 </section>
 <section id="id6">
 <h2>레플리카 셋 명세<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
-<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: apps/v1
-kind: ReplicaSet 
-metadata:
-  labels:
-    app: kuard
-    version: &quot;2&quot;
-  name: kuard
-spec:
-  replicas: 1
-  selector:
-    matchLabels: #해당 RS가 어떠한 조건을 가진 pod를 관리하는지, and 조건
-      app: kuard
-      version: &quot;2&quot;
-  template: # 이 아래로 pod template
-    metadata:
-      labels:
-        app: kuard
-        version: &quot;2&quot;
-    spec:
-      containers:
-        - name: kuard
-          image: &quot;gcr.io/kuar-demo/kuard-amd64:green&quot;
-          resources:
-            requests:
-              cpu: &quot;500m&quot;
-              memory: &quot;128Mi&quot;
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ReplicaSet</span><span class="w"> </span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="w">    </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2&quot;</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span><span class="w"> </span><span class="c1">#해당 RS가 어떠한 조건을 가진 pod를 관리하는지, and 조건</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="w">      </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2&quot;</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="c1"># 이 아래로 pod template</span>
+<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="w">        </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2&quot;</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;gcr.io/kuar-demo/kuard-amd64:green&quot;</span>
+<span class="w">          </span><span class="nt">resources</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">requests</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;500m&quot;</span>
+<span class="w">              </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;128Mi&quot;</span>
 </pre></div>
 </div>
 </br>
@@ -343,18 +344,18 @@ kuard-xwx7r   1/1     Running   0          6s
 <ul>
 <li><p>CPU, 메모리와 같은 메트릭스를 모니터링하고, 설정된 임계값에 도달하면 자동으로 파드 수를 증가시키거나 감소</p></li>
 <li><p>이거 도달하면 일꾼 더 투입시켜</p>
-<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: autoscaling/v1
-kind: HorizontalPodAutoscaler
-metadata:
-name: my-hpa
-spec:
-scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: my-deployment   # 타겟으로 설정할 디플로이먼트 이름
-minReplicas: 1          # 최소 파드 수
-maxReplicas: 10         # 최대 파드 수
-targetCPUUtilizationPercentage: 50  # CPU 사용률 기준
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">autoscaling/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HorizontalPodAutoscaler</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-hpa</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="nt">scaleTargetRef</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
+<span class="w">    </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-deployment</span><span class="w">   </span><span class="c1"># 타겟으로 설정할 디플로이먼트 이름</span>
+<span class="nt">minReplicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w">          </span><span class="c1"># 최소 파드 수</span>
+<span class="nt">maxReplicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w">         </span><span class="c1"># 최대 파드 수</span>
+<span class="nt">targetCPUUtilizationPercentage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w">  </span><span class="c1"># CPU 사용률 기준</span>
 </pre></div>
 </div>
 </li>
@@ -364,26 +365,26 @@ targetCPUUtilizationPercentage: 50  # CPU 사용률 기준
 <ul>
 <li><p>파드의 리소스를 수직으로 확장하여 애플리케이션이 요구하는 리소스를 더 효과적으로 관리</p></li>
 <li><p>이거 도달하면 각 파드에 자원 더 넣어줘</p>
-<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: autoscaling.k8s.io/v1
-kind: VerticalPodAutoscaler
-metadata:
-name: my-vpa
-spec:
-targetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: my-deployment   # 타겟으로 설정할 디플로이먼트 이름
-updatePolicy:
-    updateMode: &quot;Auto&quot;    # 자동으로 리소스 조정 (권장값: Auto)
-resourcePolicy:
-    containerPolicies:
-    - containerName: &quot;*&quot;
-        minAllowed:
-        cpu: 200m      # 최소 CPU 리소스
-        memory: 256Mi  # 최소 메모리 리소스
-        maxAllowed:
-        cpu: 1         # 최대 CPU 리소스
-        memory: 1Gi    # 최대 메모리 리소스
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">autoscaling.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VerticalPodAutoscaler</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-vpa</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="nt">targetRef</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
+<span class="w">    </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-deployment</span><span class="w">   </span><span class="c1"># 타겟으로 설정할 디플로이먼트 이름</span>
+<span class="nt">updatePolicy</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">updateMode</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Auto&quot;</span><span class="w">    </span><span class="c1"># 자동으로 리소스 조정 (권장값: Auto)</span>
+<span class="nt">resourcePolicy</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">containerPolicies</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerName</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
+<span class="w">        </span><span class="nt">minAllowed</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">200m</span><span class="w">      </span><span class="c1"># 최소 CPU 리소스</span>
+<span class="w">        </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">256Mi</span><span class="w">  </span><span class="c1"># 최소 메모리 리소스</span>
+<span class="w">        </span><span class="nt">maxAllowed</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w">         </span><span class="c1"># 최대 CPU 리소스</span>
+<span class="w">        </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1Gi</span><span class="w">    </span><span class="c1"># 최대 메모리 리소스</span>
 </pre></div>
 </div>
 </li>

@@ -79,6 +79,7 @@
 <li class="toctree-l1"><a class="reference internal" href="15-service_mesh.html">15장 서비스 메시</a></li>
 <li class="toctree-l1"><a class="reference internal" href="16-integrating-storage-solutions-and-kubernetes.html">16장. 스토리지 솔루션과 쿠버네티스의 연계</a></li>
 <li class="toctree-l1"><a class="reference internal" href="17-kubernetes_extension.html">17장.  쿠버네티스 확장</a></li>
+<li class="toctree-l1"><a class="reference internal" href="19-securing-applications-in-kubernetes.html">19장. 쿠버네티스에서 애플리케이션 보안</a></li>
 </ul>
 
         </div>
@@ -122,24 +123,24 @@
 <li><p>잡 명세 템플릿에 정의된 파드를 생성 및 관리</p></li>
 <li><p>잡이 종료코드 0으로 끝나지 않는 경우 파드 템를릿을 기반으로 새로운 pod 생성</p></li>
 </ul>
-<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: batch/v1
-kind: Job
-metadata:
-  name: oneshot
-spec:
-  template:
-    spec:
-      containers:
-      - name: kuard
-        image: gcr.io/kuar-demo/kuard-amd64:blue
-        imagePullPolicy: Always
-        command:
-        - &quot;/kuard&quot;
-        args:
-        - &quot;--keygen-enable&quot; 
-        - &quot;--keygen-exit-on-complete&quot; # 성공시 종료
-        - &quot;--keygen-num-to-gen=10&quot; 
-      restartPolicy: OnFailure # 실패시 job 객체 생성
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">batch/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Job</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oneshot</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcr.io/kuar-demo/kuard-amd64:blue</span>
+<span class="w">        </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
+<span class="w">        </span><span class="nt">command</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;/kuard&quot;</span>
+<span class="w">        </span><span class="nt">args</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;--keygen-enable&quot;</span><span class="w"> </span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;--keygen-exit-on-complete&quot;</span><span class="w"> </span><span class="c1"># 성공시 종료</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;--keygen-num-to-gen=10&quot;</span><span class="w"> </span>
+<span class="w">      </span><span class="nt">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OnFailure</span><span class="w"> </span><span class="c1"># 실패시 job 객체 생성</span>
 </pre></div>
 </div>
 </br>
@@ -161,24 +162,24 @@ spec:
 </section>
 <section id="id3">
 <h2>원 샷<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
-<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: batch/v1
-kind: Job
-metadata:
-  name: oneshot
-spec:
-  template:
-    spec:
-      containers:
-      - name: kuard
-        image: gcr.io/kuar-demo/kuard-amd64:blue
-        imagePullPolicy: Always
-        command:
-        - &quot;/kuard&quot;
-        args:
-        - &quot;--keygen-enable&quot;
-        - &quot;--keygen-exit-on-complete&quot;
-        - &quot;--keygen-num-to-gen=10&quot;
-      restartPolicy: OnFailure
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">batch/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Job</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oneshot</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcr.io/kuar-demo/kuard-amd64:blue</span>
+<span class="w">        </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
+<span class="w">        </span><span class="nt">command</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;/kuard&quot;</span>
+<span class="w">        </span><span class="nt">args</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;--keygen-enable&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;--keygen-exit-on-complete&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;--keygen-num-to-gen=10&quot;</span>
+<span class="w">      </span><span class="nt">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OnFailure</span>
 </pre></div>
 </div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Name:<span class="w">           </span>oneshot
@@ -239,31 +240,31 @@ The<span class="w"> </span>Job<span class="w"> </span><span class="s2">&quot;one
 <li><p>completions: 끝내야 하는 일의 횟수</p></li>
 <li><p>parallelism: 동시에 뜰 수 있는 pods의 수</p></li>
 </ul>
-<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: batch/v1
-kind: Job
-metadata:
-  name: parallel
-  labels:
-    chapter: jobs
-spec:
-  parallelism: 5
-  completions: 10
-  template:
-    metadata:
-      labels:
-        chapter: jobs
-    spec:
-      containers:
-      - name: kuard
-        image: gcr.io/kuar-demo/kuard-amd64:blue
-        imagePullPolicy: Always
-        command:
-        - &quot;/kuard&quot;
-        args:
-        - &quot;--keygen-enable&quot;
-        - &quot;--keygen-exit-on-complete&quot;
-        - &quot;--keygen-num-to-gen=10&quot;
-      restartPolicy: OnFailure
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">batch/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Job</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">parallel</span>
+<span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">chapter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jobs</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">parallelism</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">  </span><span class="nt">completions</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">chapter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jobs</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcr.io/kuar-demo/kuard-amd64:blue</span>
+<span class="w">        </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
+<span class="w">        </span><span class="nt">command</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;/kuard&quot;</span>
+<span class="w">        </span><span class="nt">args</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;--keygen-enable&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;--keygen-exit-on-complete&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;--keygen-num-to-gen=10&quot;</span>
+<span class="w">      </span><span class="nt">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OnFailure</span>
 </pre></div>
 </div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>➜<span class="w">  </span>newbie<span class="w"> </span>git:<span class="o">(</span>main<span class="o">)</span><span class="w"> </span>✗<span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w">   </span>
@@ -292,53 +293,53 @@ parallel-zz5kw<span class="w">   </span><span class="m">0</span>/1<span class="w
 <h3>준비물<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
 <ul>
 <li><p>queue 역할을 할 Pod</p>
-<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: apps/v1
-kind: ReplicaSet
-metadata:
-  labels:
-    app: work-queue
-    component: queue
-    chapter: jobs
-  name: queue
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: work-queue
-      component: queue
-      chapter: jobs
-  template:
-    metadata:
-      labels:
-        app: work-queue
-        component: queue
-        chapter: jobs
-    spec:
-      containers:
-      - name: queue
-        image: &quot;gcr.io/kuar-demo/kuard-amd64:blue&quot;
-        imagePullPolicy: Always
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ReplicaSet</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">work-queue</span>
+<span class="w">    </span><span class="nt">component</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">queue</span>
+<span class="w">    </span><span class="nt">chapter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jobs</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">queue</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">work-queue</span>
+<span class="w">      </span><span class="nt">component</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">queue</span>
+<span class="w">      </span><span class="nt">chapter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jobs</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">work-queue</span>
+<span class="w">        </span><span class="nt">component</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">queue</span>
+<span class="w">        </span><span class="nt">chapter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jobs</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">queue</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;gcr.io/kuar-demo/kuard-amd64:blue&quot;</span>
+<span class="w">        </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
 </pre></div>
 </div>
 <p><img alt="image" src="../_images/memQ-server.png" /></p>
 </li>
 <li><p>해당 pod를 서비스를 사용해 공개</p>
-<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app: work-queue
-    component: queue
-    chapter: jobs
-  name: queue
-spec:
-  ports:
-  - port: 8080
-    protocol: TCP
-    targetPort: 8080
-  selector:
-    app: work-queue
-    component: queue
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">work-queue</span>
+<span class="w">    </span><span class="nt">component</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">queue</span>
+<span class="w">    </span><span class="nt">chapter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jobs</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">queue</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<span class="w">    </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+<span class="w">    </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">work-queue</span>
+<span class="w">    </span><span class="nt">component</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">queue</span>
 </pre></div>
 </div>
 </li>
@@ -356,35 +357,35 @@ curl<span class="w"> </span>-X<span class="w"> </span>PUT<span class="w"> </span
 <li><p>내용 확인
 <img alt="image" src="../_images/memQ-server-after-input.png" /></p></li>
 <li><p>소비 방법 지정(소비자 잡 생성)</p>
-<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span>apiVersion: batch/v1
-kind: Job
-metadata:
-  labels:
-    app: message-queue
-    component: consumer
-    chapter: jobs
-  name: consumers
-spec:
-  parallelism: 5
-  template:
-    metadata:
-      labels:
-        app: message-queue
-        component: consumer
-        chapter: jobs
-    spec:
-      containers:
-      - name: worker
-        image: &quot;gcr.io/kuar-demo/kuard-amd64:blue&quot;
-        imagePullPolicy: Always
-        command:
-        - &quot;/kuard&quot;
-        args:
-        - &quot;--keygen-enable&quot;
-        - &quot;--keygen-exit-on-complete&quot;
-        - &quot;--keygen-memq-server=http://queue:8080/memq/server&quot;
-        - &quot;--keygen-memq-queue=keygen&quot;
-      restartPolicy: OnFailure
+<div class="highlight-yml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">batch/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Job</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">message-queue</span>
+<span class="w">    </span><span class="nt">component</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">consumer</span>
+<span class="w">    </span><span class="nt">chapter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jobs</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">consumers</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">parallelism</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">message-queue</span>
+<span class="w">        </span><span class="nt">component</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">consumer</span>
+<span class="w">        </span><span class="nt">chapter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jobs</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">worker</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;gcr.io/kuar-demo/kuard-amd64:blue&quot;</span>
+<span class="w">        </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
+<span class="w">        </span><span class="nt">command</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;/kuard&quot;</span>
+<span class="w">        </span><span class="nt">args</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;--keygen-enable&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;--keygen-exit-on-complete&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;--keygen-memq-server=http://queue:8080/memq/server&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;--keygen-memq-queue=keygen&quot;</span>
+<span class="w">      </span><span class="nt">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OnFailure</span>
 </pre></div>
 </div>
 </li>
