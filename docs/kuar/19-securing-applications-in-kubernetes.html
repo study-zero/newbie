@@ -274,6 +274,61 @@ container.apparmor.security.beta.kubernetes.io/<container_name>:<profile_ref> �
 <span class="w">        </span><span class="nt">privileged</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 </pre></div>
 </div>
+<!-- 
+```console
+$ k run test-gcc --rm -ti --image gcc:latest /bin/bash
+# apt update
+# apt install vim
+# echo "
+#include <iostream>
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
+#include <time.h>  // time.h에서 시스템 시간 관련 상수 사용
+
+int main() {
+    // sys_time 호출을 통해 현재 시간을 가져옵니다.
+    struct timespec ts;
+    int SYS_time = 13;
+    long res = syscall(SYS_time, &ts);
+
+    if (res == -1) {
+        std::cerr << \"sys_time 호출 실패\" << std::endl;
+        return 1;
+    }
+
+    // timespec 구조체에서 반환된 시간 출력
+    std::cout << \"현재 시간: \" << ts.tv_sec << \"초, \" << ts.tv_nsec << \"나노초\" << std::endl;
+    
+    return 0;
+}
+" > sys_time_example.cpp
+# g++ -o sys_time_example sys_time_example.cpp
+# ./sys_time_example
+```
+
+```
+$ k apply -f - << EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-gcc
+spec:
+  containers:
+    - image: gcc:latest
+      name: test-gcc
+      command: [ "/bin/sh", "-c", "tail -f /dev/null" ]
+      securityContext:
+        capabilities:
+            add: ["SYS_TIME"]
+EOF
+pod/test-gcc created
+
+$ k exec -it test-gcc /bin/bash
+
+```
+
+-->
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>k<span class="w"> </span>logs<span class="w"> </span>amicontained
 <span class="go">Error from server (BadRequest): container &quot;amicontained&quot; in pod &quot;amicontained&quot; is not available</span>
 
@@ -424,7 +479,7 @@ dry-run 명령을 통해 파드 보안 표준을 위반하는 기존 워크로�
 </section>
 <section id="id6">
 <h2>서비스 계정 관리<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
-<p><strong>서비스 계정(service account)</strong>는 파드 내부에서 실행되는 워크로드에 ID를 제공하는 쿠버네티스 리소스다.</p>
+<p><strong>서비스 계정(service account)</strong>은 파드 내부에서 실행되는 워크로드에 ID를 제공하는 쿠버네티스 리소스다.</p>
 <p>RBAC를 서비스 계정에 적용해 쿠버네티스 API를 통해 ID가 접근할 수 있는 리소스를 제어할 수 있다(14장).</p>
 <p>애플리케이션에서 쿠버네티스 API가 필요하지 않은 경우 최소 권한 원칙에 따라 접근을 비활성화 해야한다.</p>
 <p>쿠버네티스는 각 네임스페이스에 기본 서비스 계정을 생성한다.</p>

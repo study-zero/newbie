@@ -184,6 +184,62 @@ spec:
         privileged: false
 ```
 
+<!-- 
+```console
+$ k run test-gcc --rm -ti --image gcc:latest /bin/bash
+# apt update
+# apt install vim
+# echo "
+#include <iostream>
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
+#include <time.h>  // time.h에서 시스템 시간 관련 상수 사용
+
+int main() {
+    // sys_time 호출을 통해 현재 시간을 가져옵니다.
+    struct timespec ts;
+    int SYS_time = 13;
+    long res = syscall(SYS_time, &ts);
+
+    if (res == -1) {
+        std::cerr << \"sys_time 호출 실패\" << std::endl;
+        return 1;
+    }
+
+    // timespec 구조체에서 반환된 시간 출력
+    std::cout << \"현재 시간: \" << ts.tv_sec << \"초, \" << ts.tv_nsec << \"나노초\" << std::endl;
+    
+    return 0;
+}
+" > sys_time_example.cpp
+# g++ -o sys_time_example sys_time_example.cpp
+# ./sys_time_example
+```
+
+```
+$ k apply -f - << EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-gcc
+spec:
+  containers:
+    - image: gcc:latest
+      name: test-gcc
+      command: [ "/bin/sh", "-c", "tail -f /dev/null" ]
+      securityContext:
+        capabilities:
+            add: ["SYS_TIME"]
+EOF
+pod/test-gcc created
+
+$ k exec -it test-gcc /bin/bash
+
+```
+
+-->
+
 ```console
 $ k logs amicontained
 Error from server (BadRequest): container "amicontained" in pod "amicontained" is not available
@@ -352,7 +408,7 @@ Error from server (Forbidden): error when creating "STDIN": pods "kuard" is forb
 실제로 해보니 warn, audit 로그가 남지 않아서 최신 쿠버네티스는 동작이 달라진 게 아닐지 추정
 
 ## 서비스 계정 관리
-<strong>서비스 계정(service account)</strong>는 파드 내부에서 실행되는 워크로드에 ID를 제공하는 쿠버네티스 리소스다.
+<strong>서비스 계정(service account)</strong>은 파드 내부에서 실행되는 워크로드에 ID를 제공하는 쿠버네티스 리소스다.
 
 RBAC를 서비스 계정에 적용해 쿠버네티스 API를 통해 ID가 접근할 수 있는 리소스를 제어할 수 있다(14장).
 
