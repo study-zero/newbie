@@ -19,7 +19,7 @@
 
 **SecurityContext**는 파드와 컨테이너에 적용될 수 있는 보안 중심 필드(security-focused field)의 집합이다.
 
-SeuciryContext에서 다루는 보안 제거의 예는 다음과 같다.
+SeuciryContext에서 다루는 보안 제어의 예는 다음과 같다.
 
 - 사용자 권한 및 접근 제어
 - 읽기 전용 루트 파일 시스템

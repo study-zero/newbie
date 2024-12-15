@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ko" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>20장. 쿠버네티스 클러스터에 대한 정책과 거버넌스 &mdash; newbie v0.0.1 문서</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../_static/kitty.png"/>
+    <link rel="canonical" href="/newbie/kuar/20-kubernetes-policy-and-governance.html" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=f8b18680"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/translations.js?v=e33e7ba0"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="색인" href="../genindex.html" />
+    <link rel="search" title="검색" href="../search.html" />
+    <link rel="prev" title="19장. 쿠버네티스에서 애플리케이션 보안" href="19-securing-applications-in-kubernetes.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            newbie
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">쿠버네티스 시작하기 3/e</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="00-syllabus.html">0장. 스터디 개요</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01-introduction.html">1장. 쿠버네티스 소개</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02-creating-and-running-containers.html">2장. 컨테이너 생성과 실행</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03-deploying-a-kubernets-cluster.html">3장. 쿠버네티스 클러스터 배포</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04-common-kubectl-commands.html">4장. 공통 kubectl 명령</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05-pods.html">5장. 파드</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06-label-and-annotation.html">6장. 라벨과 애노테이션</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07-service-discovery.html">7장. 서비스 탐색</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08-ingress.html">8장. 인그레스를 통한 HTTP 로드밸런싱</a></li>
+<li class="toctree-l1"><a class="reference internal" href="09-ReplicaSet.html">9장. 레플리카 셋</a></li>
+<li class="toctree-l1"><a class="reference internal" href="10-deployment.html">10장. 디플로이먼트</a></li>
+<li class="toctree-l1"><a class="reference internal" href="11-DaemonSet.html">11장. 데몬셋</a></li>
+<li class="toctree-l1"><a class="reference internal" href="12-job.html">12장 job</a></li>
+<li class="toctree-l1"><a class="reference internal" href="13-configmap-and-secret.html">13장. 컨피그맵과 시크릿</a></li>
+<li class="toctree-l1"><a class="reference internal" href="14-rbac.html">14장.  쿠버네티스를 위한 역할 기반 접근 제어</a></li>
+<li class="toctree-l1"><a class="reference internal" href="15-service_mesh.html">15장 서비스 메시</a></li>
+<li class="toctree-l1"><a class="reference internal" href="16-integrating-storage-solutions-and-kubernetes.html">16장. 스토리지 솔루션과 쿠버네티스의 연계</a></li>
+<li class="toctree-l1"><a class="reference internal" href="17-kubernetes_extension.html">17장.  쿠버네티스 확장</a></li>
+<li class="toctree-l1"><a class="reference internal" href="19-securing-applications-in-kubernetes.html">19장. 쿠버네티스에서 애플리케이션 보안</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">20장. 쿠버네티스 클러스터에 대한 정책과 거버넌스</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">승인 흐름</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">게이트키퍼를 통한 정책과 거버넌스</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id4">개방형 정책 에이전트란?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">게이트키퍼 설치</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">정책 구성 - 컨테이너 이미지는 특정 레지스트리에서만 가져올 수 있게</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">변형</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id8">데이터 복제</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id9">메트릭</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id10">정책 라이브러리</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">newbie</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">20장. 쿠버네티스 클러스터에 대한 정책과 거버넌스</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/kuar/20-kubernetes-policy-and-governance.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>20장. 쿠버네티스 클러스터에 대한 정책과 거버넌스<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
+<p>정책 : 쿠버네티스 리소스를 구성할 수 있는 방법에 대한 조건 및 제약의 집합
+거버넌스 : 쿠버네티스 리소스에 대한 조직적 정책을 확인하고 강제화하는 과정</p>
+<p>쿠버네티스에는 NetworkPolicy, PodSecurityPolicy 와 같은 다양한 타입의 정책이 존재</p>
+<p>하지만 다음과 같이 쿠버네티스 리소스가 생성되기 전에 이러한 정책을 시행하려면, 내장 정책 리소스로는 한계가 존재</p>
+<ul class="simple">
+<li><p>모든 컨테이너를 특정 컨테이너 레지스트리에서만 가져와야 한다.</p></li>
+<li><p>모든 파드에는 부서 이름과 연락처 정보가 표시돼 있어야 한다.</p></li>
+<li><p>모든 인그레스 호스트이름은 클러스터에서 고유해야 한다.</p></li>
+</ul>
+<p>쿠버네티스의 <code class="docutils literal notranslate"><span class="pre">코어</span> <span class="pre">확장성</span> <span class="pre">컴포넌트</span></code>를 활용해 정책과 거버넌스를 달성할 수 있다.</p>
+<blockquote>
+<div><p>코어 확장성 컴포넌트
+쿠버네티스 클러스터의 기능을 확장 및 커스터마이징할 수 있도록 돕는 컴포넌트
+ex. CRD(Custom Resource Definition), Controller</p>
+</div></blockquote>
+<section id="id2">
+<h2>승인 흐름<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<p><img alt="image" src="https://github.com/user-attachments/assets/77f8b012-c24c-44a4-8336-22888ca69e23" />
+&lt;쿠버네티스 API 서버를 통한 API 요청 흐름&gt;</p>
+<p><code class="docutils literal notranslate"><span class="pre">MutatingWebhookConfiguration</span></code> 리소스 생성을 통해 API 서버가 <strong>승인 변경</strong> 평가를 보낼 수 있는 웹훅의 엔드포인트를 구성할 수 있음</p>
+<p>마찬가지로 <code class="docutils literal notranslate"><span class="pre">ValidatingWebhookConfiguration</span></code> 리소스 생성을 통해 API 서버가 승인 검증 평가를 보낼 수 있는 웹훅의 엔드포인트를 설정할 수 있음</p>
+<blockquote>
+<div><p>etcd</p>
+<ul class="simple">
+<li><p>쿠버네티스 클러스터 내 모든 리소스의 상태 및 메타데이터를 저장하는 key-value 저장소</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="id3">
+<h2>게이트키퍼를 통한 정책과 거버넌스<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<p>쿠버네티스 자체적으로는 정책과 거버넌스 활성화를 위한 컨트롤러를 제공하지 않음</p>
+<p><a class="reference external" href="https://open-policy-agent.github.io/gatekeeper/website/docs/">게이트키퍼</a> : 정의된 정책을 기반으로 리소스를 평가하고 쿠버네티스 리소스에 대해 생성이나 수정을 허용할지 여부를 결정하는 쿠버네티스 네이티브 정책 컨트롤러 (오픈소스 솔루션)</p>
+<p>게이트키퍼는 CRD 를 사용해 구성과 관련된 새로운 쿠버네티스 자원 집합을 정의
+</br>
+-&gt; kubectl 과 같은 친숙한 도구로 동작 가능</p>
+<p>게이트키퍼는 자원에 대한 변경과 감사를 수행</p>
+<section id="id4">
+<h3>개방형 정책 에이전트란?<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<p><a class="reference external" href="https://www.openpolicyagent.org/">개방형 정책 에이전트(OPA)</a> : 쿠버네티스 클러스터에서 정책을 정의하는 도구로, Rego 라는 언어를 사용하여 정책을 작성</p>
+<p>게이트키퍼는 이 OPA 를 쿠버네티스 클러스터에 통합할 수 있는 컨트롤러</p>
+</section>
+<section id="id5">
+<h3>게이트키퍼 설치<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<p><strong>helm 패키지 매니저를 통해 게이트키퍼 설치</strong></p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>gatekeeper<span class="w"> </span>https://open-policy-agent.github.io/gatekeeper/charts
+helm<span class="w"> </span>install<span class="w"> </span>gatekeeper/gatekeeper<span class="w"> </span>--name-template<span class="o">=</span>gatekeeper<span class="w"> </span>--namespace<span class="w"> </span>gatekeeper-system<span class="w"> </span>--create-namespace
+</pre></div>
+</div>
+<p><strong>게이트키퍼 컴포넌트는 gatekeeper-system 네임스페이스 내에서 파드 형태로 실행되며, 승인 컨트롤러를 구성함을 확인</strong></p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>gatekeeper-system
+
+NAME<span class="w">                                             </span>READY<span class="w">   </span>STATUS<span class="w">    </span>RESTARTS
+gatekeeper-audit-6bbc9cc955-g4ppg<span class="w">                </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span>
+gatekeeper-controller-manager-7d7f66bf68-8ts8c<span class="w">   </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span>
+gatekeeper-controller-manager-7d7f66bf68-ltm4j<span class="w">   </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span>
+gatekeeper-controller-manager-7d7f66bf68-x2fdw<span class="w">   </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span>
+</pre></div>
+</div>
+<p><strong>웹훅 구성 방식 검토 ( <code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">get</span> <span class="pre">validatingwebhookconfiguration</span> <span class="pre">-o</span> <span class="pre">yaml</span></code> )</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">admissionregistration.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ValidatingWebhookConfiguration</span>
+<span class="nn">...</span>
+<span class="nt">webhooks</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">clientConfig</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="c1"># (1)</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gatekeeper-webhook-service</span>
+<span class="w">      </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gatekeeper-system</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/v1/admit</span>
+<span class="w">  </span><span class="nt">failurePolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ignore</span><span class="w"> </span><span class="c1"># (3)</span>
+<span class="w">  </span><span class="nt">namespaceSelector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchExpressions</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">admission.gatekeeper.sh/ignore</span><span class="w"> </span><span class="c1"># (2)</span>
+<span class="w">      </span><span class="nt">operator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DoesNotExist</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">apiGroups</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&#39;*&#39;</span>
+<span class="w">    </span><span class="nt">apiVersions</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&#39;*&#39;</span>
+<span class="w">    </span><span class="nt">operations</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CREATE</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UPDATE</span>
+<span class="w">    </span><span class="nt">resources</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&#39;*&#39;</span>
+</pre></div>
+</div>
+<p>(1) rules 에 해당하는 모든 리소스가 gatekeeper-system 네임스페이스에서 <code class="docutils literal notranslate"><span class="pre">gatekeeper-webhook-service</span></code> 라는 서비스로 실행되는 웹훅으로 전송된다.
+<img width="657" alt="image" src="https://github.com/user-attachments/assets/dd967bb0-dc91-424f-bc82-c553e9a5951b" />
+</br></p>
+<p>(2) <code class="docutils literal notranslate"><span class="pre">admission.gatekeeper.sh/ignore</span></code> 라벨이 지정된 네임스페이스의 리소스는 정책을 적용하지 않는다.
+</br></p>
+<p>(3) 웹훅 (gatekeeper-webhook-service 서비스) 호출 실패 시, 쿠버네티스가 해당 요청을 무시하고 계속 처리하도록 한다.</p>
+</section>
+<section id="id6">
+<h3>정책 구성 - 컨테이너 이미지는 특정 레지스트리에서만 가져올 수 있게<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<p><strong>클러스터 관리자가 정책을 생성하는 방법</strong></p>
+<p>1️⃣ 제약 조건 템플릿(게이트키퍼에서 정책을 만들기 위한 템플릿) 생성</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># allowedrepos-constraint-template.yaml</span>
+
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">templates.gatekeeper.sh/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ConstraintTemplate</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8sallowedrepos</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Requires container images to begin with a repo string from a</span><span class="w"> </span>
+<span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">specified list.</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">crd</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">names</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">K8sAllowedRepos</span><span class="w"> </span><span class="c1"># ... (1)</span>
+<span class="w">      </span><span class="nt">validation</span><span class="p">:</span>
+<span class="w">        </span><span class="c1"># Schema for the `parameters` field</span>
+<span class="w">        </span><span class="nt">openAPIV3Schema</span><span class="p">:</span><span class="w"> </span><span class="c1"># ... (2)</span>
+<span class="w">          </span><span class="nt">properties</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">repos</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">array</span>
+<span class="w">              </span><span class="nt">items</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span>
+<span class="w">  </span><span class="nt">targets</span><span class="p">:</span><span class="w"> </span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">admission.k8s.gatekeeper.sh</span><span class="w"> </span><span class="c1"># ... (3)</span>
+<span class="w">      </span><span class="nt">rego</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span><span class="w"> </span><span class="c1"># ... (4)</span>
+<span class="w">        </span><span class="no">package k8sallowedrepos</span>
+
+<span class="w">        </span><span class="no">violation[{&quot;msg&quot;: msg}] {</span>
+<span class="w">          </span><span class="no">container := input.review.object.spec.containers[_]</span>
+<span class="w">          </span><span class="no">not strings.any_prefix_match(container.image, input.parameters.repos)</span>
+<span class="w">          </span><span class="no">msg := sprintf(&quot;container &lt;%v&gt; has an invalid image repo &lt;%v&gt;, allowed repos are %v&quot;, [container.name, container.image, input.parameters.repos])</span>
+<span class="w">        </span><span class="no">}</span>
+
+<span class="w">        </span><span class="no">violation[{&quot;msg&quot;: msg}] {</span>
+<span class="w">          </span><span class="no">container := input.review.object.spec.initContainers[_]</span>
+<span class="w">          </span><span class="no">not strings.any_prefix_match(container.image, input.parameters.repos)</span>
+<span class="w">          </span><span class="no">msg := sprintf(&quot;initContainer &lt;%v&gt; has an invalid image repo &lt;%v&gt;, allowed repos are %v&quot;, [container.name, container.image, input.parameters.repos])</span>
+<span class="w">        </span><span class="no">}</span>
+
+<span class="w">        </span><span class="no">violation[{&quot;msg&quot;: msg}] {</span>
+<span class="w">          </span><span class="no">container := input.review.object.spec.ephemeralContainers[_]</span>
+<span class="w">          </span><span class="no">not strings.any_prefix_match(container.image, input.parameters.repos)</span>
+<span class="w">          </span><span class="no">msg := sprintf(&quot;ephemeralContainer &lt;%v&gt; has an invalid image repo &lt;%v&gt;, allowed repos are %v&quot;, [container.name, container.image, input.parameters.repos])</span>
+<span class="w">        </span><span class="no">}</span>
+</pre></div>
+</div>
+<p>(1) K8sAllowedRepos 라는 CRD (여기서는 정책)를 정의한다.
+</br></p>
+<p>(2) K8sAllowedRepos 정책을 생성할 때, 매개변수로 컨테이너 리포지토리 목록을 전달해야 한다.
+</br></p>
+<p>(3) <code class="docutils literal notranslate"><span class="pre">admission.k8s.gatekeeper.sh</span></code> 라는 승인 컨트롤러가 정책을 실행한다.
+</br></p>
+<p>(4) 정책의 실제 로직 / 쿠버네티스 리소스의 <code class="docutils literal notranslate"><span class="pre">spec.containers</span></code>, <code class="docutils literal notranslate"><span class="pre">spec.initContainers</span></code>, <code class="docutils literal notranslate"><span class="pre">spec.ephemeralContainers</span></code> 에 있는 컨테이너 이미지가 repos 리스트에 있는 레포지토리로 시작하는지 확인</p>
+<p>2️⃣ 정책을 적용하고자 제약 조건 리소스를 생성</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># allowedrepos-constraint.yaml</span>
+
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">constraints.gatekeeper.sh/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">K8sAllowedRepos</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">repo-is-kuar-demo</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enforcementAction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">deny</span><span class="w"> </span><span class="c1"># ... (1)</span>
+<span class="w">  </span><span class="nt">match</span><span class="p">:</span><span class="w"> </span><span class="c1"># ... (2)</span>
+<span class="w">    </span><span class="nt">kinds</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">apiGroups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">kinds</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;Pod&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">namespaces</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;default&quot;</span>
+<span class="w">  </span><span class="nt">parameters</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">repos</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;gcr.io/kuar-demo/&quot;</span>
+</pre></div>
+</div>
+<p>(1) 규정을 준수하지 않는 리소스의 경우 거부된다.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">dryrun</span></code> : 정책을 실행하되, 정책 위반 리소스 목록 확인 가능</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">warn</span></code> : 경고 메시지만 보낸다.
+</br></p></li>
+</ul>
+<p>(2) 이 제약 조건의 범위를 기본 네임스페이스의 모든 파드로 제한한다.</p>
+<p><strong>규정을 준수하는 리소스</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># compliant-pod.yaml</span>
+
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcr.io/kuar-demo/kuard-amd64:blue</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kuard</span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="w">          </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+
+<span class="c1"># pod/kuard created</span>
+</pre></div>
+</div>
+<p><strong>규정 미준수 리소스</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># noncompliant-pod.yaml</span>
+
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx-noncompliant</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+
+<span class="c1"># Error from server (Forbidden): error when creating &quot;STDIN&quot;: admission webhook &quot;validation.gatekeeper.sh&quot; denied the request</span>
+</pre></div>
+</div>
+<p><strong>감사</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">enforcementAction:</span> <span class="pre">dryrun</span></code></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># allowedrepos-constraint-dryrun.yaml</span>
+
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">constraints.gatekeeper.sh/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">K8sAllowedRepos</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">repo-is-kuar-demo</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enforcementAction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dryrun</span>
+<span class="w">  </span><span class="nt">match</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">kinds</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">apiGroups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">kinds</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;Pod&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">namespaces</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;default&quot;</span>
+<span class="w">  </span><span class="nt">parameters</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">repos</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;gcr.io/kuar-demo/&quot;</span>
+</pre></div>
+</div>
+<p><strong>규정 미 준수 pod 생성 후, 주어진 제약 조건에 대해 규정을 준수하지 않은 리소스 목록 확인</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">kubectl</span> <span class="pre">get</span> <span class="pre">constraint</span> <span class="pre">repo-is-kuar-demo</span> <span class="pre">-o</span> <span class="pre">yaml</span></code></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">constraints.gatekeeper.sh/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">K8sAllowedRepos</span>
+<span class="nn">...</span>
+<span class="nt">status</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">auditTimestamp</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2021-07-14T20:05:38Z&quot;</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">  </span><span class="nt">totalViolations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">violations</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">enforcementAction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dryrun</span>
+<span class="w">    </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span>
+<span class="w">    </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">container &lt;nginx&gt; has an invalid ..</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx-noncompliant</span>
+<span class="w">    </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+</pre></div>
+</div>
+</section>
+<section id="id7">
+<h3>변형<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<p>리소스가 규정을 준수하는지 확인하는 방법 말고, 규정을 준수하도록 리소스를 수정하는 방법은 없을까?</p>
+<p>기본적으로 게이트키퍼는 검증 승인 웹훅으로 배포되지만, 변형 승인 웹훅으로 동작하도록 구성 가능</p>
+<p><strong>변형 할당 리소스 생성</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># imagepullpolicyalways-mutation.yaml</span>
+
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mutations.gatekeeper.sh/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Assign</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo-image-pull-policy</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">applyTo</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">groups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">kinds</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;Pod&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">versions</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;v1&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">match</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Namespaced</span>
+<span class="w">    </span><span class="nt">kinds</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">apiGroups</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;*&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">kinds</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;Pod&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">excludedNamespaces</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;system&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">location</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;spec.containers[name:*].imagePullPolicy&quot;</span>
+<span class="w">  </span><span class="nt">parameters</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">assign</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>모든 파드의 imagePullPolicy 를 Always 로 설정</p></li>
+<li><p>system 네임스페이스는 제외</p></li>
+</ul>
+</section>
+<section id="id8">
+<h3>데이터 복제<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<p>생성하고자 하는 리소스의 특정 필드의 값을 다른 리소스의 필드 값과 비교하려는 니즈</p>
+<p>ex. 인그레스의 호스트네임이 클러스터 전체에서 고유한지 확인</p>
+<p>-&gt; 게이트키퍼는 특정 리소스를 OPA 에 캐시해 리소스 간에 비교가 가능하도록 구성할 수 있음</p>
+<p><strong>게이트키퍼 설정</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># config-sync.yaml</span>
+
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config.gatekeeper.sh/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Config</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;gatekeeper-system&quot;</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sync</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">syncOnly</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;networking.k8s.io&quot;</span>
+<span class="w">        </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;v1&quot;</span>
+<span class="w">        </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Ingress&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>인그레스 리소스를 캐시</p></li>
+<li><p>⚠️ 정책에 대한 평가를 수행하는 데 필요한 리소스만을 캐시해야 한다.</p></li>
+</ul>
+<p><strong>제약 조건 템플릿 생성</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># uniqueingresshost-constraint-template.yaml</span>
+
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">templates.gatekeeper.sh/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ConstraintTemplate</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8suniqueingresshost</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Requires all Ingress hosts to be unique.</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">crd</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">names</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">K8sUniqueIngressHost</span>
+<span class="w">  </span><span class="nt">targets</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">admission.k8s.gatekeeper.sh</span>
+<span class="w">      </span><span class="nt">rego</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">        </span><span class="no">package k8suniqueingresshost</span>
+
+<span class="w">        </span><span class="no">identical(obj, review) {</span>
+<span class="w">          </span><span class="no">obj.metadata.namespace == review.object.metadata.namespace</span>
+<span class="w">          </span><span class="no">obj.metadata.name == review.object.metadata.name</span>
+<span class="w">        </span><span class="no">}</span>
+
+<span class="w">        </span><span class="no">violation[{&quot;msg&quot;: msg}] {</span>
+<span class="w">          </span><span class="no">input.review.kind.kind == &quot;Ingress&quot;</span>
+<span class="w">          </span><span class="no">regex.match(&quot;^(extensions|networking.k8s.io)$&quot;, input.review.kind.group)</span>
+<span class="w">          </span><span class="no">host := input.review.object.spec.rules[_].host</span>
+<span class="w">          </span><span class="no">other := data.inventory.namespace[_][otherapiversion][&quot;Ingress&quot;][name]</span>
+<span class="w">          </span><span class="no">regex.match(&quot;^(extensions|networking.k8s.io)/.+$&quot;, otherapiversion)</span>
+<span class="w">          </span><span class="no">other.spec.rules[_].host == host</span>
+<span class="w">          </span><span class="no">not identical(other, input.review)</span>
+<span class="w">          </span><span class="no">msg := sprintf(&quot;ingress host conflicts with an existing ingress &lt;%v&gt;&quot;, [host])</span>
+<span class="w">        </span><span class="no">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Rego</span></code> 섹션 - <code class="docutils literal notranslate"><span class="pre">data.inventory</span></code> 는 캐시 리소스를 의미하는 것으로, 새로운 인그레스의 host 값이 이미 존재하는(캐시에 존재하는) 다른 인그레스 리소스와 충돌하는지 검증하는 로직</p></li>
+</ul>
+</section>
+<section id="id9">
+<h3>메트릭<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<p>게이트키퍼는 지속적인 리소스 컴플라이언스 모니터링을 가능하게 하고자 프로메테우스 포맷으로 메트릭을 내보낸다.</p>
+</section>
+<section id="id10">
+<h3>정책 라이브러리<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
+<p>게이트키퍼 프로젝트의 핵심 신조 중 하나는 재사용 가능한 정책 라이브러리를 만드는 것</p>
+<p>정책 라이브러리를 통해 정책을 공유하여 보일러플레이트 정책 작성 시간을 줄일 수 있음</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="19-securing-applications-in-kubernetes.html" class="btn btn-neutral float-left" title="19장. 쿠버네티스에서 애플리케이션 보안" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, newbie.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <div class="rst-versions" role="note" style="padding: 1rem; font-weight: bold;">
+        <a href="https://github.com/study-zero/newbie"><span class="fa fa-link"> Github</span></a>
+    </div>
+
+</body>
+</html>
