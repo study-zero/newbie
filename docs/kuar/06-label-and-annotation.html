@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="ko" data-content_root="../">
 <head>
@@ -6,21 +8,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>6장. 라벨과 애노테이션 &mdash; newbie v0.0.1 문서</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
     <link rel="shortcut icon" href="../_static/kitty.png"/>
     <link rel="canonical" href="/newbie/kuar/06-label-and-annotation.html" />
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=f8b18680"></script>
-        <script src="../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../_static/translations.js?v=e33e7ba0"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f8b18680"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=afa94a99"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="색인" href="../genindex.html" />
     <link rel="search" title="검색" href="../search.html" />
@@ -115,7 +113,8 @@
 라벨의 키는 두 부분으로 나눌 수 있는데, <strong>선택적 접두사</strong>와 <strong>이름</strong>이며 슬래시(/)로 구분된다.
 접두사가 지정된 경우, 반드시 DNS 하위 도메인이어야 한다.</p>
 <figure class="align-default">
-<a class="reference internal image-reference" href="../_images/label.png"><img alt="image" src="../_images/label.png" style="width: 540px;" /></a>
+<a class="reference internal image-reference" href="../_images/label.png"><img alt="image" src="../_images/label.png" style="width: 540px;" />
+</a>
 </figure>
 <section id="id3">
 <h3>라벨 적용<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
@@ -143,7 +142,8 @@ kubectl<span class="w"> </span>label<span class="w"> </span>deployments<span cla
 </div>
 <p><strong>&lt;라벨 기반의 벤다이어그램&gt;</strong></p>
 <figure class="align-default">
-<a class="reference internal image-reference" href="../_images/diagram.png"><img alt="image" src="../_images/diagram.png" style="width: 540px;" /></a>
+<a class="reference internal image-reference" href="../_images/diagram.png"><img alt="image" src="../_images/diagram.png" style="width: 540px;" />
+</a>
 </figure>
 <ul class="simple">
 <li><p>app, env, ver 별 그룹핑 가능</p></li>
@@ -172,7 +172,8 @@ kubectl<span class="w"> </span>label<span class="w"> </span>deployments<span cla
 </pre></div>
 </div>
 <figure class="align-default">
-<a class="reference internal image-reference" href="../_images/show-labels.png"><img alt="image" src="../_images/show-labels.png" style="width: 540px;" /></a>
+<a class="reference internal image-reference" href="../_images/show-labels.png"><img alt="image" src="../_images/show-labels.png" style="width: 540px;" />
+</a>
 </figure>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">pod-template-hash</span></code>: 디플로이먼트에 적용되는 라벨로, 특정 파드가 어떤 템플릿 버전에서 생성됐는지 추적할 수 있음</p></li>
@@ -195,7 +196,8 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> <
 </div>
 <p><strong>셀렉터 연산자</strong></p>
 <figure class="align-default">
-<a class="reference internal image-reference" href="../_images/label-selector.png"><img alt="image" src="../_images/label-selector.png" style="width: 540px;" /></a>
+<a class="reference internal image-reference" href="../_images/label-selector.png"><img alt="image" src="../_images/label-selector.png" style="width: 540px;" />
+</a>
 </figure>
 </section>
 <section id="api">

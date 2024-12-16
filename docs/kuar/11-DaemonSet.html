@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="ko" data-content_root="../">
 <head>
@@ -6,21 +8,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>11장. 데몬셋 &mdash; newbie v0.0.1 문서</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
     <link rel="shortcut icon" href="../_static/kitty.png"/>
     <link rel="canonical" href="/newbie/kuar/11-DaemonSet.html" />
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=f8b18680"></script>
-        <script src="../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../_static/translations.js?v=e33e7ba0"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=f8b18680"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=afa94a99"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="색인" href="../genindex.html" />
     <link rel="search" title="검색" href="../search.html" />
@@ -114,7 +112,8 @@
 <p><strong>노드 셀렉터</strong>를 사용하면, 일치하는 라벨 집합을 갖는 노드로 범위를 제한함</p>
 <p>새로운 노드가 클러스터에 추가될 경우, <strong>데몬셋 컨트롤러</strong>는 파드가 없음을 확인하고 새로운 노드에 파드를 추가함</p>
 <figure class="align-default">
-<a class="reference internal image-reference" href="../_images/k8s-cluster.png"><img alt="image" src="../_images/k8s-cluster.png" style="width: 720px;" /></a>
+<a class="reference internal image-reference" href="../_images/k8s-cluster.png"><img alt="image" src="../_images/k8s-cluster.png" style="width: 720px;" />
+</a>
 </figure>
 <ul class="simple">
 <li><p><strong>데몬셋 컨트롤러</strong>는 Controller Manager 중 하나</p>
@@ -175,7 +174,8 @@
 </ul>
 <p><strong><code class="docutils literal notranslate"><span class="pre">$</span> <span class="pre">kubectl</span> <span class="pre">describe</span> <span class="pre">daemonset</span> <span class="pre">fluentd</span></code></strong></p>
 <figure class="align-default">
-<a class="reference internal image-reference" href="../_images/describe-daemonset.png"><img alt="image" src="../_images/describe-daemonset.png" style="width: 540px;" /></a>
+<a class="reference internal image-reference" href="../_images/describe-daemonset.png"><img alt="image" src="../_images/describe-daemonset.png" style="width: 540px;" />
+</a>
 </figure>
 <ul class="simple">
 <li><p>클러스터에 새 노드가 추가되면, fluentd 파드가 해당 노드에 자동으로 배포됨!</p></li>
@@ -192,7 +192,8 @@
 </div>
 <p><strong><code class="docutils literal notranslate"><span class="pre">$</span> <span class="pre">kubectl</span> <span class="pre">describe</span> <span class="pre">daemonset</span> <span class="pre">fluentd</span></code></strong></p>
 <figure class="align-default">
-<a class="reference internal image-reference" href="../_images/describe-daemonset-with-selector.png"><img alt="image" src="../_images/describe-daemonset-with-selector.png" style="width: 540px;" /></a>
+<a class="reference internal image-reference" href="../_images/describe-daemonset-with-selector.png"><img alt="image" src="../_images/describe-daemonset-with-selector.png" style="width: 540px;" />
+</a>
 </figure>
 </section>
 <section id="id5">
